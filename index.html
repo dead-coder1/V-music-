@@ -3,25 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>V-Music by deadvishaal</title>
+    <title>Apple Music UI - Full Songs Fixed</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* Exact Apple Typography & Reset */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: #000; color: #fff; overflow: hidden; }
-
-        /* --- SPLASH SCREEN (deadvishaal) --- */
-        #splash-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9999; display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
-        #splash-screen.hidden { opacity: 0; transform: scale(1.05); pointer-events: none; }
-        .splash-icon { font-size: 60px; color: #fff; margin-bottom: 20px; animation: pulse 1.5s infinite alternate; }
-        .splash-text { color: #8e8e93; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; font-weight: 600; margin-bottom: 5px; }
-        .splash-author { color: #fff; font-size: 26px; font-weight: 800; letter-spacing: 1px; }
-        @keyframes pulse { from { transform: scale(1); opacity: 0.8;} to { transform: scale(1.05); opacity: 1;} }
 
         /* --- SEARCH SCREEN --- */
         .search-screen { padding: 40px 20px 100px; height: 100vh; overflow-y: auto; }
@@ -40,7 +27,7 @@
         .song-item-info p { font-size: 14px; color: #8e8e93; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* --- MINI PLAYER --- */
-        .mini-player { position: fixed; bottom: 10px; left: 10px; right: 10px; height: 64px; background: rgba(30,30,30,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 14px; display: none; align-items: center; padding: 0 15px; z-index: 50; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .mini-player { position: fixed; bottom: 10px; left: 10px; right: 10px; height: 64px; background: rgba(30,30,30,0.85); backdrop-filter: blur(20px); border-radius: 14px; display: none; align-items: center; padding: 0 15px; z-index: 50; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .mini-player img { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; margin-right: 12px; }
         .mini-info { flex: 1; overflow: hidden; }
         .mini-info h4 { font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -77,16 +64,19 @@
         .lyrics-btn { cursor: pointer; transition: 0.2s; }
         .lyrics-btn.active { color: #fff; }
 
-        /* --- LYRICS UI --- */
+        /* --- LYRICS UI (Word-by-Word Engine) --- */
         .lyrics-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; background: rgba(0,0,0,0.4); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); }
         .lyrics-screen.active { opacity: 1; pointer-events: auto; }
+        
         .lyrics-content { flex: 1; overflow-y: auto; padding: 100px 20px 150px; scroll-behavior: smooth; }
         .lyrics-content::-webkit-scrollbar { display: none; }
         
         .lyric-line { 
-            font-size: 28px; font-weight: 700; background: rgba(255,255,255,0.3); 
-            -webkit-background-clip: text; color: transparent; margin-bottom: 25px; 
-            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); line-height: 1.3; transform-origin: left; 
+            font-size: 28px; font-weight: 700; 
+            background: rgba(255,255,255,0.3); 
+            -webkit-background-clip: text; 
+            color: transparent; 
+            margin-bottom: 25px; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); line-height: 1.3; transform-origin: left; 
         }
         .lyric-line.active { transform: scale(1.05); text-shadow: 0 4px 20px rgba(255,255,255,0.1); }
 
@@ -95,21 +85,13 @@
 </head>
 <body>
 
-    <!-- Professional Splash Screen -->
-    <div id="splash-screen">
-        <i class="fas fa-music splash-icon"></i>
-        <div class="splash-text">Developed By</div>
-        <div class="splash-author">deadvishaal</div>
-    </div>
-
-    <!-- App Content -->
     <div class="search-screen">
         <h1>Search</h1>
         <div class="search-bar">
             <i class="fas fa-search"></i>
             <input type="text" id="searchInput" placeholder="Artists, Songs, Lyrics">
         </div>
-        <div id="loading"><i class="fas fa-spinner fa-spin"></i> Searching Globally...</div>
+        <div id="loading"><i class="fas fa-spinner fa-spin"></i> Fetching Full Songs...</div>
         <div class="search-results" id="resultsList"></div>
     </div>
 
@@ -156,15 +138,6 @@
     <audio id="audio" src=""></audio>
 
     <script>
-        // Splash Screen Logic (Removes after 2.5s)
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const splash = document.getElementById('splash-screen');
-                splash.classList.add('hidden');
-                setTimeout(() => splash.style.display = 'none', 600);
-            }, 2500);
-        });
-
         const audio = document.getElementById('audio');
         const searchInput = document.getElementById('searchInput');
         const resultsList = document.getElementById('resultsList');
@@ -181,80 +154,57 @@
         let isPlaying = false;
         let parsedLyrics = [];
 
-        // --- MASTER API ENGINE (JioSaavn + iTunes Parallel Search) ---
+        // --- FETCH FULL SONGS (CRASH-PROOF LOGIC) ---
         async function fetchSongs(query) {
             loading.style.display = 'block'; resultsList.innerHTML = '';
-            
-            let saavnUrl = `https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}&limit=15`;
-            let itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&limit=15&media=music`;
-
             try {
-                // Fetching from BOTH servers at the same exact time for massive results
-                let [saavnRes, itunesRes] = await Promise.allSettled([
-                    fetch(saavnUrl).then(r => r.json()),
-                    fetch(itunesUrl).then(r => r.json())
-                ]);
+                let res = await fetch(`https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}`);
+                let data = await res.json();
+                
+                if (data.success && data.data.results.length > 0) {
+                    
+                    // Naya Smart Filter
+                    let tempSongs = data.data.results.map(track => {
+                        let highResImg = 'https://via.placeholder.com/500';
+                        if (track.image && track.image.length > 0) {
+                            highResImg = track.image.find(i => i.quality === '500x500')?.url || track.image[track.image.length - 1].url;
+                        }
 
-                let mergedSongs = [];
+                        let fullAudio = '';
+                        if (track.downloadUrl && track.downloadUrl.length > 0) {
+                            fullAudio = track.downloadUrl.find(a => a.quality === '320kbps')?.url || track.downloadUrl[track.downloadUrl.length - 1].url;
+                        }
 
-                // 1. Process Saavn Data (Indian + Global Full Songs)
-                if (saavnRes.status === 'fulfilled' && saavnRes.value.success) {
-                    let sData = saavnRes.value.data.results.map(track => {
-                        let highResImg = track.image.find(i => i.quality === '500x500')?.url || track.image[track.image.length - 1].url;
-                        let fullAudio = track.downloadUrl.find(a => a.quality === '320kbps')?.url || track.downloadUrl[0].url;
                         let artistName = track.artists.primary ? track.artists.primary.map(a=>a.name).join(', ') : "Unknown Artist";
                         return { name: track.name.replace(/&quot;/g, '"'), artist: artistName, img: highResImg, src: fullAudio };
                     });
-                    mergedSongs.push(...sData);
-                }
 
-                // 2. Process Apple iTunes Data (Worldwide Database Guarantee)
-                if (itunesRes.status === 'fulfilled' && itunesRes.value.results) {
-                    let iData = itunesRes.value.results.map(track => {
-                        return { 
-                            name: track.trackName, 
-                            artist: track.artistName, 
-                            img: track.artworkUrl100.replace('100x100bb', '600x600bb'), 
-                            src: track.previewUrl 
-                        };
-                    });
-                    mergedSongs.push(...iData);
-                }
+                    // Sirf wahi gaane rakho jinka full audio valid hai
+                    songs = tempSongs.filter(song => song.src && song.src !== '');
 
-                // 3. Remove duplicates & Display
-                if (mergedSongs.length > 0) {
-                    let uniqueSongs = [];
-                    let seen = new Set();
-                    mergedSongs.forEach(s => {
-                        let key = s.name.toLowerCase().trim();
-                        if (!seen.has(key)) {
-                            seen.add(key);
-                            uniqueSongs.push(s);
-                        }
-                    });
-                    
-                    songs = uniqueSongs;
-                    displayResults();
+                    if (songs.length === 0) {
+                        resultsList.innerHTML = '<p style="color:#ff3b30; text-align:center;">Full versions not available for this search.</p>';
+                    } else {
+                        resultsList.innerHTML = '';
+                        songs.forEach((song, i) => {
+                            let div = document.createElement('div'); div.className = 'song-item';
+                            div.innerHTML = `<img src="${song.img}"><div class="song-item-info"><h4>${song.name}</h4><p>${song.artist}</p></div>`;
+                            div.onclick = () => { songIndex = i; loadSong(songs[songIndex]); playSong(); miniPlayer.style.display = 'flex'; };
+                            resultsList.appendChild(div);
+                        });
+                    }
+
                 } else {
                     resultsList.innerHTML = '<p style="color:#ff3b30; text-align:center;">No results found.</p>';
                 }
             } catch (e) {
-                resultsList.innerHTML = '<p style="color:#ff3b30; text-align:center;">Network error.</p>';
+                // Agar JioSaavn completely down ho, tabhi error aayega
+                resultsList.innerHTML = '<p style="color:#ff3b30; text-align:center;">Server is busy. Try searching again.</p>';
             }
             loading.style.display = 'none';
         }
         
-        function displayResults() {
-            resultsList.innerHTML = '';
-            songs.forEach((song, i) => {
-                let div = document.createElement('div'); div.className = 'song-item';
-                div.innerHTML = `<img src="${song.img}"><div class="song-item-info"><h4>${song.name}</h4><p>${song.artist}</p></div>`;
-                div.onclick = () => { songIndex = i; loadSong(songs[songIndex]); playSong(); miniPlayer.style.display = 'flex'; };
-                resultsList.appendChild(div);
-            });
-        }
-
-        searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') fetchSongs(searchInput.value); });
+        searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && searchInput.value.trim() !== '') fetchSongs(searchInput.value); });
 
         // --- FETCH LYRICS (LRCLIB) ---
         async function fetchLyrics(songName, artistName) {
@@ -330,6 +280,7 @@
                     let activeEl = document.getElementById(`line-${activeIndex}`);
                     
                     if(activeEl) {
+                        // Reset other lines
                         document.querySelectorAll('.lyric-line').forEach((el, idx) => {
                             if(idx !== activeIndex) {
                                 el.classList.remove('active');
@@ -343,6 +294,7 @@
                             lyricsContent.scrollTo({ top: activeEl.offsetTop - (lyricsContent.clientHeight/2) + 50, behavior: 'smooth' });
                         }
 
+                        // Gradient Fill Logic
                         let currentLineTime = parsedLyrics[activeIndex].time;
                         let nextLineTime = parsedLyrics[activeIndex + 1] ? parsedLyrics[activeIndex + 1].time : currentLineTime + 4;
                         let lineDuration = nextLineTime - currentLineTime;
@@ -359,6 +311,7 @@
         document.getElementById('progressBar').onclick = (e) => { if(audio.src) audio.currentTime = (e.offsetX/document.getElementById('progressBar').clientWidth)*audio.duration; };
         audio.onended = () => document.getElementById('nextBtn').click();
 
+        // UI Interactions
         document.getElementById('openFullPlayer').onclick = () => fullPlayer.classList.add('active');
         document.getElementById('closeFullPlayer').onclick = () => { fullPlayer.classList.remove('active'); lyricsScreen.classList.remove('active'); document.getElementById('lyricsToggle').classList.remove('active'); };
         document.getElementById('lyricsToggle').onclick = () => { lyricsScreen.classList.toggle('active'); document.getElementById('lyricsToggle').classList.toggle('active'); };
