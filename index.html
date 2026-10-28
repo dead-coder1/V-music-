@@ -3,333 +3,404 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>V-Music Pro - Auto Server Fix</title>
+    <title>V-Music Pro | Advanced Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Apple Typography & Reset */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: #000; color: #fff; overflow: hidden; }
+        /* Modern CSS Variables & Reset */
+        :root { --primary-blur: blur(60px); --easing: cubic-bezier(0.25, 0.8, 0.25, 1); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #000; color: #fff; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
 
-        /* --- SEARCH SCREEN --- */
-        .search-screen { padding: 40px 20px 100px; height: 100vh; overflow-y: auto; }
-        .search-screen h1 { font-size: 34px; font-weight: 800; margin-bottom: 20px; letter-spacing: -0.5px; }
-        .search-bar { background: #1c1c1e; border-radius: 10px; padding: 10px 15px; display: flex; align-items: center; margin-bottom: 20px; }
-        .search-bar i { color: #8e8e93; font-size: 16px; }
+        /* UI Views */
+        .view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transition: transform 0.5s var(--easing), opacity 0.4s ease; z-index: 1; }
+        
+        /* 1. Search View */
+        #searchView { padding: 40px 20px 100px; overflow-y: auto; z-index: 10; background: #000; }
+        .header-title { font-size: 34px; font-weight: 800; margin-bottom: 20px; }
+        .search-bar { background: #1c1c1e; border-radius: 12px; padding: 12px 15px; display: flex; align-items: center; margin-bottom: 20px; }
         .search-bar input { flex: 1; background: transparent; border: none; color: #fff; font-size: 17px; margin-left: 10px; outline: none; }
-        .search-bar input::placeholder { color: #8e8e93; }
-
-        .search-results { display: flex; flex-direction: column; }
-        .song-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 0.5px solid #2c2c2e; cursor: pointer; }
-        .song-item img { width: 50px; height: 50px; border-radius: 6px; margin-right: 15px; object-fit: cover; }
-        .song-item-info { flex: 1; overflow: hidden; }
-        .song-item-info h4 { font-size: 16px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
-        .song-item-info p { font-size: 14px; color: #8e8e93; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* --- MINI PLAYER --- */
-        .mini-player { position: fixed; bottom: 10px; left: 10px; right: 10px; height: 64px; background: rgba(30,30,30,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 14px; display: none; align-items: center; padding: 0 15px; z-index: 50; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .mini-player img { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; margin-right: 12px; }
-        .mini-info { flex: 1; overflow: hidden; }
-        .mini-info h4 { font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .mini-play-btn { color: #fff; font-size: 24px; padding: 10px; }
-
-        /* --- FULL PLAYER --- */
-        .full-player { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #000; z-index: 100; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; overflow: hidden; }
-        .full-player.active { transform: translateY(0); }
-        .player-bg { position: absolute; top: -20%; left: -20%; width: 140%; height: 140%; background-size: cover; background-position: center; filter: blur(60px) brightness(0.4); z-index: -1; transition: background-image 0.5s ease; }
         
-        .player-header { padding: 30px 20px 10px; display: flex; justify-content: center; position: relative; z-index: 5; }
-        .close-player { width: 35px; height: 5px; background: rgba(255,255,255,0.4); border-radius: 5px; cursor: pointer; }
+        .song-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .song-item img { width: 52px; height: 52px; border-radius: 8px; margin-right: 15px; object-fit: cover; }
+        .song-info { flex: 1; overflow: hidden; }
+        .song-info h4 { font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .song-info p { font-size: 14px; color: #8e8e93; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .album-art-large { width: 100%; aspect-ratio: 1/1; max-width: 350px; margin: 30px auto; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.6); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 5;}
-        .album-art-large.playing { transform: scale(1.05); }
-        .album-art-large img { width: 100%; height: 100%; object-fit: cover; }
-
-        .player-controls-wrap { padding: 0 30px; margin-top: auto; margin-bottom: 50px; z-index: 5; }
-        .player-song-info { margin-bottom: 25px; }
-        .player-text h2 { font-size: 22px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
-        .player-text p { font-size: 18px; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* 2. Mini Player */
+        #miniPlayer { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 64px; background: rgba(40,40,40,0.85); backdrop-filter: blur(25px); border-radius: 16px; display: flex; align-items: center; padding: 0 15px; z-index: 50; box-shadow: 0 8px 32px rgba(0,0,0,0.4); transform: translateY(150%); transition: transform 0.4s var(--easing); cursor: pointer; }
+        #miniPlayer.active { transform: translateY(0); }
+        #miniCover { width: 44px; height: 44px; border-radius: 8px; margin-right: 12px; object-fit: cover; }
         
-        .progress-container { margin-bottom: 30px; }
-        .progress-bar { width: 100%; height: 4px; background: rgba(255,255,255,0.2); border-radius: 4px; position: relative; }
-        .progress { width: 0%; height: 100%; background: #fff; border-radius: 4px; position: relative; }
-        .time { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 8px; font-weight: 500; }
-
-        .playback-controls { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 40px; }
-        .playback-controls i { font-size: 28px; color: #fff; cursor: pointer;}
-        .playback-controls .play-pause { font-size: 42px; }
-
-        .bottom-actions { display: flex; justify-content: center; color: rgba(255,255,255,0.5); font-size: 20px; }
-        .lyrics-btn { cursor: pointer; transition: 0.2s; }
-        .lyrics-btn.active { color: #fff; }
-
-        /* --- LYRICS UI --- */
-        .lyrics-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; background: rgba(0,0,0,0.4); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); }
-        .lyrics-screen.active { opacity: 1; pointer-events: auto; }
-        .lyrics-content { flex: 1; overflow-y: auto; padding: 100px 20px 150px; scroll-behavior: smooth; }
-        .lyrics-content::-webkit-scrollbar { display: none; }
+        /* 3. Full Player View */
+        #fullPlayer { z-index: 100; transform: translateY(100%); display: flex; flex-direction: column; }
+        #fullPlayer.active { transform: translateY(0); }
         
-        .lyric-line { 
-            font-size: 28px; font-weight: 700; 
-            background: rgba(255,255,255,0.3); 
-            -webkit-background-clip: text; color: transparent; 
-            margin-bottom: 25px; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); line-height: 1.3; transform-origin: left; 
+        .player-bg { position: absolute; top: -20%; left: -20%; width: 140%; height: 140%; background-size: cover; background-position: center; filter: var(--primary-blur) brightness(0.4); z-index: -1; transition: background-image 0.6s ease; }
+        
+        .drag-handle { width: 40px; height: 5px; background: rgba(255,255,255,0.3); border-radius: 5px; margin: 20px auto; cursor: pointer; }
+        
+        .art-container { width: 100%; max-width: 340px; aspect-ratio: 1/1; margin: 30px auto; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow: hidden; transition: transform 0.5s var(--easing); }
+        .art-container.playing { transform: scale(1.04); }
+        .art-container img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .controls-wrapper { padding: 0 30px; margin-top: auto; margin-bottom: 60px; }
+        .track-titles h2 { font-size: 24px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-titles p { font-size: 18px; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        /* Advanced Progress Bar */
+        .progress-area { margin: 30px 0; }
+        .bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 6px; position: relative; overflow: hidden; }
+        .bar-fill { width: 0%; height: 100%; background: #fff; border-radius: 6px; will-change: width; }
+        .time-stamps { display: flex; justify-content: space-between; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.5); margin-top: 10px; }
+
+        .play-controls { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 30px; }
+        .play-controls i { font-size: 32px; color: #fff; cursor: pointer; transition: 0.2s; }
+        .play-controls i:active { transform: scale(0.8); }
+        .play-controls .btn-play { font-size: 48px; }
+
+        /* 4. Advanced Word-by-Word Lyrics View */
+        #lyricsView { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 110; background: rgba(0,0,0,0.5); backdrop-filter: blur(50px); -webkit-backdrop-filter: blur(50px); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+        #lyricsView.active { opacity: 1; pointer-events: auto; }
+        
+        #lyricsContainer { flex: 1; overflow-y: auto; padding: 120px 20px 50vh; scroll-behavior: smooth; }
+        #lyricsContainer::-webkit-scrollbar { display: none; }
+        
+        /* CSS Custom Property for 60FPS Gradient Fill */
+        .lyric-line {
+            font-size: 32px; font-weight: 700; margin-bottom: 30px; line-height: 1.3;
+            transform-origin: left; transition: transform 0.4s var(--easing);
+            /* Advanced Gradient Setup */
+            --fill: 0%;
+            background: linear-gradient(90deg, #fff var(--fill), rgba(255,255,255,0.25) var(--fill));
+            -webkit-background-clip: text;
+            color: transparent;
+            will-change: background;
         }
-        .lyric-line.active { transform: scale(1.05); text-shadow: 0 4px 20px rgba(255,255,255,0.1); }
+        .lyric-line.active { transform: scale(1.05); }
 
-        #loading { text-align: center; color: #6c5ce7; font-size: 14px; margin-top: 30px; display: none; font-weight: bold;}
+        .loader { text-align: center; color: #8e8e93; font-weight: 500; margin-top: 30px; display: none; }
     </style>
 </head>
 <body>
 
-    <div class="search-screen">
-        <h1>Search</h1>
+    <!-- SEARCH VIEW -->
+    <div id="searchView" class="view">
+        <h1 class="header-title">Search</h1>
         <div class="search-bar">
             <i class="fas fa-search"></i>
-            <input type="text" id="searchInput" placeholder="Artists, Songs...">
+            <input type="text" id="inputSearch" placeholder="Find advanced tracks...">
         </div>
-        <div id="loading"><i class="fas fa-spinner fa-spin"></i> Finding full songs...</div>
-        <div class="search-results" id="resultsList"></div>
+        <div id="loader" class="loader"><i class="fas fa-circle-notch fa-spin"></i> Initializing Advanced API...</div>
+        <div id="resultList"></div>
     </div>
 
-    <div class="mini-player" id="miniPlayer">
-        <img id="miniCover" src="">
-        <div class="mini-info" id="openFullPlayer"><h4 id="miniTitle">Song Title</h4></div>
-        <i class="fas fa-play mini-play-btn" id="miniPlayBtn"></i>
+    <!-- MINI PLAYER -->
+    <div id="miniPlayer">
+        <img id="mCover" src="">
+        <div class="song-info" id="openFull" style="margin-right: 15px;">
+            <h4 id="mTitle">Title</h4>
+        </div>
+        <i class="fas fa-play" id="mPlay" style="font-size: 22px;"></i>
     </div>
 
-    <div class="full-player" id="fullPlayer">
-        <div class="player-bg" id="playerBg"></div>
-        <div class="player-header"><div class="close-player" id="closeFullPlayer"></div></div>
+    <!-- FULL PLAYER -->
+    <div id="fullPlayer" class="view">
+        <div class="player-bg" id="pBg"></div>
+        <div class="drag-handle" id="closeFull"></div>
         
-        <div class="lyrics-screen" id="lyricsScreen">
-            <div class="lyrics-content" id="lyricsContent">
-                <div style="text-align: center; color: rgba(255,255,255,0.5); font-size: 18px; margin-top: 50vh;">Search a song to view lyrics</div>
-            </div>
+        <div id="lyricsView">
+            <div class="drag-handle" id="closeLyrics" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 120;"></div>
+            <div id="lyricsContainer"><div style="text-align:center; color:#8e8e93; margin-top:30vh;">Awaiting Track...</div></div>
         </div>
 
-        <div class="album-art-large" id="largeCoverContainer"><img id="largeCover" src=""></div>
+        <div class="art-container" id="artBox"><img id="fCover" src=""></div>
 
-        <div class="player-controls-wrap">
-            <div class="player-song-info">
-                <div class="player-text">
-                    <h2 id="fullTitle">Title</h2>
-                    <p id="fullArtist">Artist</p>
-                </div>
+        <div class="controls-wrapper">
+            <div class="track-titles">
+                <h2 id="fTitle">Title</h2>
+                <p id="fArtist">Artist</p>
             </div>
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar"><div class="progress" id="progress"></div></div>
-                <div class="time"><span id="currentTime">0:00</span><span id="durationTime">0:00</span></div>
+            
+            <div class="progress-area" id="progressBar">
+                <div class="bar-bg"><div class="bar-fill" id="barFill"></div></div>
+                <div class="time-stamps"><span id="tCurr">0:00</span><span id="tDur">0:00</span></div>
             </div>
-            <div class="playback-controls">
-                <i class="fas fa-backward-step" id="prevBtn"></i>
-                <i class="fas fa-play play-pause" id="mainPlayBtn"></i>
-                <i class="fas fa-forward-step" id="nextBtn"></i>
+
+            <div class="play-controls">
+                <i class="fas fa-backward-step" id="btnPrev"></i>
+                <i class="fas fa-play btn-play" id="btnPlay"></i>
+                <i class="fas fa-forward-step" id="btnNext"></i>
             </div>
-            <div class="bottom-actions"><i class="fas fa-quote-left lyrics-btn" id="lyricsToggle"></i></div>
+            
+            <div style="text-align:center;">
+                <i class="fas fa-quote-left" id="btnLyrics" style="font-size: 22px; color: rgba(255,255,255,0.5); cursor:pointer;"></i>
+            </div>
         </div>
     </div>
-
-    <audio id="audio" src=""></audio>
 
     <script>
-        const audio = document.getElementById('audio');
-        const searchInput = document.getElementById('searchInput');
-        const resultsList = document.getElementById('resultsList');
-        const loading = document.getElementById('loading');
-        
-        const miniPlayer = document.getElementById('miniPlayer');
-        const fullPlayer = document.getElementById('fullPlayer');
-        const lyricsScreen = document.getElementById('lyricsScreen');
-        const lyricsContent = document.getElementById('lyricsContent');
-        const progress = document.getElementById('progress');
+        /**
+         * ==========================================
+         * ADVANCED OOP APPLE MUSIC ENGINE
+         * ==========================================
+         */
+        class AppleMusicEngine {
+            constructor() {
+                this.audio = new Audio();
+                this.tracks = [];
+                this.currentIndex = 0;
+                this.isPlaying = false;
+                this.lyricsData = [];
+                this.animationFrameId = null;
 
-        let songs = [];
-        let songIndex = 0;
-        let isPlaying = false;
-        let parsedLyrics = [];
-
-        // --- MULTI-SERVER SMART FETCH LOGIC ---
-        async function fetchSongs(query) {
-            loading.style.display = 'block'; 
-            resultsList.innerHTML = '';
-            
-            // Hum 2 servers try karenge. Agar ek fail hua, toh doosra chalega.
-            const endpoints = [
-                `https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}`,
-                `https://jiosaavn-api-v3.vercel.app/search/songs?query=${encodeURIComponent(query)}`
-            ];
-
-            let rawResults = null;
-
-            for (let i = 0; i < endpoints.length; i++) {
-                try {
-                    loading.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Checking Server ${i+1}...`;
-                    let res = await fetch(endpoints[i]);
-                    let data = await res.json();
+                // DOM Elements Binding
+                this.DOM = {
+                    input: document.getElementById('inputSearch'),
+                    results: document.getElementById('resultList'),
+                    loader: document.getElementById('loader'),
                     
-                    if (data.success && data.data && data.data.results) { rawResults = data.data.results; break; }
-                    else if (data.status === "SUCCESS" && data.data && data.data.results) { rawResults = data.data.results; break; }
-                    else if (data.results) { rawResults = data.results; break; }
-                } catch (e) { console.log(`Server ${i+1} failed.`); }
+                    miniPlayer: document.getElementById('miniPlayer'),
+                    mPlay: document.getElementById('mPlay'),
+                    
+                    fullPlayer: document.getElementById('fullPlayer'),
+                    btnPlay: document.getElementById('btnPlay'),
+                    artBox: document.getElementById('artBox'),
+                    pBg: document.getElementById('pBg'),
+                    barFill: document.getElementById('barFill'),
+                    tCurr: document.getElementById('tCurr'),
+                    tDur: document.getElementById('tDur'),
+                    
+                    lyricsView: document.getElementById('lyricsView'),
+                    lyricsContainer: document.getElementById('lyricsContainer')
+                };
+
+                this.initEventListeners();
+                this.startRenderLoop(); // 60FPS UI Loop
             }
 
-            if (rawResults && rawResults.length > 0) {
-                // Parse the messy data safely
-                songs = rawResults.map(track => {
-                    // Image Extractor
-                    let img = 'https://via.placeholder.com/500';
-                    if (Array.isArray(track.image) && track.image.length > 0) img = track.image[track.image.length - 1].url || track.image[track.image.length - 1].link;
-                    else if (typeof track.image === 'string') img = track.image;
-
-                    // Audio Extractor (Gets the highest quality automatically without failing)
-                    let fullAudio = '';
-                    if (Array.isArray(track.downloadUrl) && track.downloadUrl.length > 0) {
-                        let hq = track.downloadUrl[track.downloadUrl.length - 1]; // Pick last (usually best)
-                        fullAudio = hq.url || hq.link;
-                    } else if (typeof track.downloadUrl === 'string') {
-                        fullAudio = track.downloadUrl;
-                    } else if (track.media_url) {
-                        fullAudio = track.media_url;
+            initEventListeners() {
+                this.DOM.input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && this.DOM.input.value.trim()) {
+                        this.fetchDataRacing(this.DOM.input.value.trim());
                     }
+                });
 
-                    // Fix preview links if JioSaavn tries to trick us
-                    if(fullAudio && fullAudio.includes('preview.saavncdn.com')) {
-                        fullAudio = fullAudio.replace('preview.saavncdn.com', 'aac.saavncdn.com').replace('_96_p.mp4', '_320.mp4');
-                    }
-
-                    // Artist Extractor
-                    let artist = "Unknown Artist";
-                    if (track.artists && track.artists.primary) artist = track.artists.primary.map(a=>a.name).join(', ');
-                    else if (typeof track.primary_artists === 'string') artist = track.primary_artists;
-
-                    return { name: (track.name || track.title || "Song").replace(/&quot;/g, '"'), artist: artist, img: img, src: fullAudio };
-                }).filter(s => s.src && s.src.trim() !== ''); // Sirf wo gaane rakho jinka valid full link mila
-
-                if (songs.length > 0) {
-                    displayResults();
-                } else {
-                    resultsList.innerHTML = '<p style="color:#ff3b30; text-align:center;">Full versions not available right now.</p>';
-                }
-            } else {
-                resultsList.innerHTML = '<p style="color:#ff3b30; text-align:center;">All servers are busy. Please try again.</p>';
-            }
-            loading.style.display = 'none';
-        }
-
-        function displayResults() {
-            resultsList.innerHTML = '';
-            songs.forEach((song, i) => {
-                let div = document.createElement('div'); div.className = 'song-item';
-                div.innerHTML = `<img src="${song.img}"><div class="song-item-info"><h4>${song.name}</h4><p>${song.artist}</p></div>`;
-                div.onclick = () => { songIndex = i; loadSong(songs[songIndex]); playSong(); miniPlayer.style.display = 'flex'; };
-                resultsList.appendChild(div);
-            });
-        }
-        
-        searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && searchInput.value.trim() !== '') fetchSongs(searchInput.value); });
-
-        // --- FETCH LYRICS (LRCLIB) ---
-        async function fetchLyrics(songName, artistName) {
-            parsedLyrics = []; lyricsContent.innerHTML = `<div style="text-align:center; color:#8e8e93; margin-top:50vh;">Loading Lyrics...</div>`;
-            try {
-                let cleanArtist = artistName.split(',')[0];
-                let res = await fetch(`https://lrclib.net/api/search?track_name=${encodeURIComponent(songName)}&artist_name=${encodeURIComponent(cleanArtist)}`);
-                let data = await res.json();
-                if(data && data.length > 0 && data[0].syncedLyrics) parseLRC(data[0].syncedLyrics);
-                else lyricsContent.innerHTML = `<div style="text-align:center; color:#8e8e93; margin-top:50vh;">Lyrics not available</div>`;
-            } catch(e) { lyricsContent.innerHTML = `<div style="text-align:center; color:#8e8e93; margin-top:50vh;">Error loading lyrics</div>`; }
-        }
-
-        function parseLRC(lrcText) {
-            const lines = lrcText.split('\n'); lyricsContent.innerHTML = '';
-            lines.forEach((line) => {
-                const match = line.match(/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/);
-                if (match) {
-                    let min = parseInt(match[1]); let sec = parseInt(match[2]); let ms = parseInt(match[3]); let text = match[4].trim();
-                    let timeInSec = (min * 60) + sec + (ms / (ms.toString().length === 3 ? 1000 : 100));
-                    if(text !== "") {
-                        parsedLyrics.push({ time: timeInSec, text: text });
-                        let p = document.createElement('p'); p.className = 'lyric-line'; p.id = `line-${parsedLyrics.length - 1}`; p.innerText = text;
-                        lyricsContent.appendChild(p);
-                    }
-                }
-            });
-            let spacer = document.createElement('div'); spacer.style.height = "50vh"; lyricsContent.appendChild(spacer);
-        }
-
-        // --- PLAYER CONTROLS ---
-        function loadSong(song) {
-            document.getElementById('miniTitle').innerText = song.name; document.getElementById('miniCover').src = song.img;
-            document.getElementById('fullTitle').innerText = song.name; document.getElementById('fullArtist').innerText = song.artist;
-            document.getElementById('largeCover').src = song.img; audio.src = song.src;
-            document.getElementById('playerBg').style.backgroundImage = `url('${song.img}')`;
-            fetchLyrics(song.name, song.artist);
-        }
-
-        function togglePlay() { isPlaying ? pauseSong() : playSong(); }
-        function playSong() { 
-            isPlaying = true; 
-            document.getElementById('miniPlayBtn').className = 'fas fa-pause mini-play-btn'; 
-            document.getElementById('mainPlayBtn').className = 'fas fa-pause play-pause'; 
-            document.getElementById('largeCoverContainer').classList.add('playing'); 
-            audio.play(); 
-        }
-        function pauseSong() { 
-            isPlaying = false; 
-            document.getElementById('miniPlayBtn').className = 'fas fa-play mini-play-btn'; 
-            document.getElementById('mainPlayBtn').className = 'fas fa-play play-pause'; 
-            document.getElementById('largeCoverContainer').classList.remove('playing'); 
-            audio.pause(); 
-        }
-
-        document.getElementById('miniPlayBtn').onclick = (e) => { e.stopPropagation(); togglePlay(); };
-        document.getElementById('mainPlayBtn').onclick = togglePlay;
-        document.getElementById('prevBtn').onclick = () => { songIndex = (songIndex-1+songs.length)%songs.length; loadSong(songs[songIndex]); if(isPlaying)playSong(); };
-        document.getElementById('nextBtn').onclick = () => { songIndex = (songIndex+1)%songs.length; loadSong(songs[songIndex]); if(isPlaying)playSong(); };
-
-        // --- WORD BY WORD LYRICS ENGINE ---
-        audio.addEventListener('timeupdate', (e) => {
-            const { duration, currentTime } = e.target;
-            if(duration) progress.style.width = `${(currentTime/duration)*100}%`;
-            let min = Math.floor(currentTime/60); let sec = Math.floor(currentTime%60); document.getElementById('currentTime').innerText = `${min}:${sec<10?'0'+sec:sec}`;
-            if(duration) { let dMin = Math.floor(duration/60); let dSec = Math.floor(duration%60); document.getElementById('durationTime').innerText = `${dMin}:${dSec<10?'0'+dSec:dSec}`; }
-
-            if(document.getElementById('lyricsScreen').classList.contains('active') && parsedLyrics.length > 0) {
-                let activeIndex = -1;
-                for(let i=0; i<parsedLyrics.length; i++) { if(currentTime >= parsedLyrics[i].time - 0.2) activeIndex = i; else break; }
+                const toggle = (e) => { e.stopPropagation(); this.togglePlayback(); };
+                this.DOM.mPlay.onclick = toggle;
+                this.DOM.btnPlay.onclick = toggle;
                 
-                if(activeIndex !== -1) {
-                    let activeEl = document.getElementById(`line-${activeIndex}`);
-                    if(activeEl) {
-                        document.querySelectorAll('.lyric-line').forEach((el, idx) => {
-                            if(idx !== activeIndex) {
-                                el.classList.remove('active'); el.style.background = 'rgba(255,255,255,0.3)'; el.style.webkitBackgroundClip = 'text';
+                document.getElementById('btnPrev').onclick = () => this.playNextPrev(-1);
+                document.getElementById('btnNext').onclick = () => this.playNextPrev(1);
+                this.audio.onended = () => this.playNextPrev(1);
+
+                document.getElementById('openFull').onclick = () => this.DOM.fullPlayer.classList.add('active');
+                document.getElementById('closeFull').onclick = () => this.DOM.fullPlayer.classList.remove('active');
+                document.getElementById('btnLyrics').onclick = () => this.DOM.lyricsView.classList.add('active');
+                document.getElementById('closeLyrics').onclick = () => this.DOM.lyricsView.classList.remove('active');
+                
+                document.getElementById('progressBar').onclick = (e) => {
+                    if(this.audio.src) {
+                        const rect = document.getElementById('progressBar').getBoundingClientRect();
+                        this.audio.currentTime = ((e.clientX - rect.left) / rect.width) * this.audio.duration;
+                    }
+                };
+            }
+
+            // 1. API RACING: Fetch from multiple servers concurrently. Fastest valid response wins.
+            async fetchDataRacing(query) {
+                this.DOM.loader.style.display = 'block';
+                this.DOM.results.innerHTML = '';
+                
+                const endpoints = [
+                    `https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}`,
+                    `https://jiosaavn-api-v3.vercel.app/search/songs?query=${encodeURIComponent(query)}`
+                ];
+
+                try {
+                    // Advanced Promise.any approach
+                    const data = await Promise.any(endpoints.map(async url => {
+                        const res = await fetch(url);
+                        const json = await res.json();
+                        if (json.success && json.data?.results?.length > 0) return json.data.results;
+                        if (json.status === "SUCCESS" && json.data?.results?.length > 0) return json.data.results;
+                        throw new Error("Invalid format");
+                    }));
+
+                    this.parseAdvancedData(data);
+                } catch (error) {
+                    this.DOM.results.innerHTML = '<p style="color:#ff453a; text-align:center;">Servers busy. Try again.</p>';
+                }
+                this.DOM.loader.style.display = 'none';
+            }
+
+            // 2. REGEX URL DECRYPTOR: Forcefully converts broken/preview links to 320kbps HD
+            parseAdvancedData(results) {
+                this.tracks = results.map(t => {
+                    const getRes = (arr, prop) => Array.isArray(arr) && arr.length ? (arr[arr.length-1].url || arr[arr.length-1].link) : '';
+                    let img = getRes(t.image) || t.image || 'https://via.placeholder.com/500';
+                    let audioUrl = getRes(t.downloadUrl) || t.media_url || '';
+                    
+                    // The Magic Regex Fixer for JioSaavn CDN
+                    if (audioUrl) {
+                        audioUrl = audioUrl.replace(/preview\.saavncdn\.com/g, 'aac.saavncdn.com')
+                                         .replace(/_96_p\.mp4|_160_p\.mp4/g, '_320.mp4');
+                    }
+                    
+                    let artist = t.artists?.primary ? t.artists.primary.map(a=>a.name).join(', ') : t.primary_artists || "Unknown";
+                    return { name: (t.name || t.title).replace(/&quot;/g, '"'), artist, img, src: audioUrl };
+                }).filter(t => t.src); // Strictly remove unplayable tracks
+
+                if(this.tracks.length) this.renderList();
+                else this.DOM.results.innerHTML = '<p style="color:#ff453a; text-align:center;">No HD audio found.</p>';
+            }
+
+            renderList() {
+                this.DOM.results.innerHTML = this.tracks.map((t, i) => `
+                    <div class="song-item" onclick="player.loadTrack(${i})">
+                        <img src="${t.img}">
+                        <div class="song-info"><h4>${t.name}</h4><p>${t.artist}</p></div>
+                    </div>
+                `).join('');
+            }
+
+            loadTrack(index) {
+                this.currentIndex = index;
+                const track = this.tracks[index];
+                
+                // Update UI DOM Data
+                document.getElementById('mTitle').innerText = track.name;
+                document.getElementById('fTitle').innerText = track.name;
+                document.getElementById('fArtist').innerText = track.artist;
+                document.getElementById('mCover').src = track.img;
+                document.getElementById('fCover').src = track.img;
+                this.DOM.pBg.style.backgroundImage = `url('${track.img}')`;
+                
+                this.DOM.miniPlayer.classList.add('active');
+                
+                this.audio.src = track.src;
+                this.audio.load();
+                this.setPlayState(true);
+                
+                this.fetchLyricsAPI(track.name, track.artist);
+            }
+
+            togglePlayback() { this.setPlayState(!this.isPlaying); }
+            
+            setPlayState(state) {
+                this.isPlaying = state;
+                const icon = this.isPlaying ? 'fa-pause' : 'fa-play';
+                this.DOM.mPlay.className = `fas ${icon}`;
+                this.DOM.btnPlay.className = `fas ${icon} btn-play`;
+                
+                if (this.isPlaying) {
+                    this.audio.play();
+                    this.DOM.artBox.classList.add('playing');
+                } else {
+                    this.audio.pause();
+                    this.DOM.artBox.classList.remove('playing');
+                }
+            }
+
+            playNextPrev(step) {
+                if(!this.tracks.length) return;
+                this.currentIndex = (this.currentIndex + step + this.tracks.length) % this.tracks.length;
+                this.loadTrack(this.currentIndex);
+            }
+
+            // 3. LYRICS PARSER
+            async fetchLyricsAPI(name, artist) {
+                this.lyricsData = [];
+                this.DOM.lyricsContainer.innerHTML = '<div class="loader" style="display:block;">Syncing...</div>';
+                try {
+                    const res = await fetch(`https://lrclib.net/api/search?track_name=${encodeURIComponent(name)}&artist_name=${encodeURIComponent(artist.split(',')[0])}`);
+                    const data = await res.json();
+                    
+                    if(data?.[0]?.syncedLyrics) {
+                        const lines = data[0].syncedLyrics.split('\n');
+                        lines.forEach(line => {
+                            const m = line.match(/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/);
+                            if(m && m[4].trim()) {
+                                let time = parseInt(m[1])*60 + parseInt(m[2]) + parseInt(m[3])/(m[3].length===3?1000:100);
+                                this.lyricsData.push({ time, text: m[4].trim(), el: null });
                             }
                         });
-
-                        if(!activeEl.classList.contains('active')) {
-                            activeEl.classList.add('active');
-                            lyricsContent.scrollTo({ top: activeEl.offsetTop - (lyricsContent.clientHeight/2) + 50, behavior: 'smooth' });
-                        }
-
-                        let currentLineTime = parsedLyrics[activeIndex].time;
-                        let nextLineTime = parsedLyrics[activeIndex + 1] ? parsedLyrics[activeIndex + 1].time : currentLineTime + 4;
-                        let lineDuration = nextLineTime - currentLineTime;
-                        let percentage = Math.max(0, Math.min(100, ((currentTime - currentLineTime) / lineDuration) * 100));
-                        
-                        activeEl.style.background = `linear-gradient(90deg, #fff ${percentage}%, rgba(255,255,255,0.3) ${percentage}%)`;
-                        activeEl.style.webkitBackgroundClip = 'text';
+                        this.renderLyrics();
+                    } else {
+                        this.DOM.lyricsContainer.innerHTML = '<div class="loader" style="display:block;">Instrumental / No Lyrics</div>';
                     }
-                }
+                } catch(e) { this.DOM.lyricsContainer.innerHTML = '<div class="loader" style="display:block;">Lyrics Engine Offline</div>'; }
             }
-        });
 
-        document.getElementById('progressBar').onclick = (e) => { if(audio.src) audio.currentTime = (e.offsetX/document.getElementById('progressBar').clientWidth)*audio.duration; };
-        audio.onended = () => document.getElementById('nextBtn').click();
+            renderLyrics() {
+                this.DOM.lyricsContainer.innerHTML = '';
+                this.lyricsData.forEach((l, i) => {
+                    let div = document.createElement('div');
+                    div.className = 'lyric-line';
+                    div.innerText = l.text;
+                    l.el = div;
+                    this.DOM.lyricsContainer.appendChild(div);
+                });
+                let spacer = document.createElement('div'); spacer.style.height = "50vh";
+                this.DOM.lyricsContainer.appendChild(spacer);
+            }
 
-        document.getElementById('openFullPlayer').onclick = () => document.getElementById('fullPlayer').classList.add('active');
-        document.getElementById('closeFullPlayer').onclick = () => { document.getElementById('fullPlayer').classList.remove('active'); document.getElementById('lyricsScreen').classList.remove('active'); document.getElementById('lyricsToggle').classList.remove('active'); };
-        document.getElementById('lyricsToggle').onclick = () => { document.getElementById('lyricsScreen').classList.toggle('active'); document.getElementById('lyricsToggle').classList.toggle('active'); };
+            // 4. 60FPS RENDER LOOP (The absolute core of Apple Music fluid feel)
+            startRenderLoop() {
+                const formatTime = (time) => {
+                    let m = Math.floor(time / 60), s = Math.floor(time % 60);
+                    return `${m}:${s < 10 ? '0'+s : s}`;
+                };
+
+                const loop = () => {
+                    // Update Progress Bar
+                    if (this.audio.duration) {
+                        const curr = this.audio.currentTime;
+                        this.DOM.barFill.style.width = `${(curr / this.audio.duration) * 100}%`;
+                        this.DOM.tCurr.innerText = formatTime(curr);
+                        this.DOM.tDur.innerText = formatTime(this.audio.duration);
+
+                        // Advanced Lyrics Interpolation (Gradient Fill)
+                        if (this.lyricsData.length > 0 && this.DOM.lyricsView.classList.contains('active')) {
+                            let activeIdx = this.lyricsData.findIndex((l, i, arr) => curr >= l.time - 0.2 && (!arr[i+1] || curr < arr[i+1].time - 0.2));
+                            
+                            if (activeIdx !== -1) {
+                                let activeData = this.lyricsData[activeIdx];
+                                
+                                // Reset others
+                                this.lyricsData.forEach((l, i) => {
+                                    if(i !== activeIdx && l.el.classList.contains('active')) {
+                                        l.el.classList.remove('active');
+                                        l.el.style.setProperty('--fill', '0%');
+                                    }
+                                });
+
+                                // Process Active Line
+                                if (!activeData.el.classList.contains('active')) {
+                                    activeData.el.classList.add('active');
+                                    // Smooth auto-scroll
+                                    this.DOM.lyricsContainer.scrollTo({
+                                        top: activeData.el.offsetTop - (this.DOM.lyricsContainer.clientHeight / 2) + 50,
+                                        behavior: 'smooth'
+                                    });
+                                }
+
+                                // CSS Variable Update for smooth gradient
+                                let nextTime = this.lyricsData[activeIdx + 1] ? this.lyricsData[activeIdx + 1].time : activeData.time + 3;
+                                let duration = nextTime - activeData.time;
+                                let percentage = Math.max(0, Math.min(100, ((curr - activeData.time) / duration) * 100));
+                                
+                                activeData.el.style.setProperty('--fill', `${percentage}%`);
+                            }
+                        }
+                    }
+                    this.animationFrameId = requestAnimationFrame(loop);
+                };
+                this.animationFrameId = requestAnimationFrame(loop);
+            }
+        }
+
+        // Initialize Engine
+        const player = new AppleMusicEngine();
     </script>
 </body>
 </html>
