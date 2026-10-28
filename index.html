@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>V-Music Pro | Advanced Edition</title>
+    <title>V-Music | Ultimate Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Modern CSS Variables & Reset */
         :root { --primary-blur: blur(60px); --easing: cubic-bezier(0.25, 0.8, 0.25, 1); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: #000; color: #fff; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
@@ -36,7 +35,6 @@
         #fullPlayer.active { transform: translateY(0); }
         
         .player-bg { position: absolute; top: -20%; left: -20%; width: 140%; height: 140%; background-size: cover; background-position: center; filter: var(--primary-blur) brightness(0.4); z-index: -1; transition: background-image 0.6s ease; }
-        
         .drag-handle { width: 40px; height: 5px; background: rgba(255,255,255,0.3); border-radius: 5px; margin: 20px auto; cursor: pointer; }
         
         .art-container { width: 100%; max-width: 340px; aspect-ratio: 1/1; margin: 30px auto; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow: hidden; transition: transform 0.5s var(--easing); }
@@ -61,23 +59,18 @@
         /* 4. Advanced Word-by-Word Lyrics View */
         #lyricsView { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 110; background: rgba(0,0,0,0.5); backdrop-filter: blur(50px); -webkit-backdrop-filter: blur(50px); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
         #lyricsView.active { opacity: 1; pointer-events: auto; }
-        
         #lyricsContainer { flex: 1; overflow-y: auto; padding: 120px 20px 50vh; scroll-behavior: smooth; }
         #lyricsContainer::-webkit-scrollbar { display: none; }
         
-        /* CSS Custom Property for 60FPS Gradient Fill */
+        /* CSS Trick for Word-by-Word fill */
         .lyric-line {
             font-size: 32px; font-weight: 700; margin-bottom: 30px; line-height: 1.3;
             transform-origin: left; transition: transform 0.4s var(--easing);
-            /* Advanced Gradient Setup */
             --fill: 0%;
             background: linear-gradient(90deg, #fff var(--fill), rgba(255,255,255,0.25) var(--fill));
-            -webkit-background-clip: text;
-            color: transparent;
-            will-change: background;
+            -webkit-background-clip: text; color: transparent; will-change: background;
         }
         .lyric-line.active { transform: scale(1.05); }
-
         .loader { text-align: center; color: #8e8e93; font-weight: 500; margin-top: 30px; display: none; }
     </style>
 </head>
@@ -88,9 +81,9 @@
         <h1 class="header-title">Search</h1>
         <div class="search-bar">
             <i class="fas fa-search"></i>
-            <input type="text" id="inputSearch" placeholder="Find advanced tracks...">
+            <input type="text" id="inputSearch" placeholder="Find global tracks...">
         </div>
-        <div id="loader" class="loader"><i class="fas fa-circle-notch fa-spin"></i> Initializing Advanced API...</div>
+        <div id="loader" class="loader"><i class="fas fa-circle-notch fa-spin"></i> Hacking YouTube Music Server...</div>
         <div id="resultList"></div>
     </div>
 
@@ -108,6 +101,7 @@
         <div class="player-bg" id="pBg"></div>
         <div class="drag-handle" id="closeFull"></div>
         
+        <!-- LYRICS SCREEN -->
         <div id="lyricsView">
             <div class="drag-handle" id="closeLyrics" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 120;"></div>
             <div id="lyricsContainer"><div style="text-align:center; color:#8e8e93; margin-top:30vh;">Awaiting Track...</div></div>
@@ -141,27 +135,29 @@
     <script>
         /**
          * ==========================================
-         * ADVANCED OOP APPLE MUSIC ENGINE
+         * ULTIMATE ENGINE: YOUTUBE MUSIC BACKEND
          * ==========================================
          */
-        class AppleMusicEngine {
+        class UltimateEngine {
             constructor() {
                 this.audio = new Audio();
                 this.tracks = [];
                 this.currentIndex = 0;
                 this.isPlaying = false;
                 this.lyricsData = [];
-                this.animationFrameId = null;
+                
+                // Advanced decentralized Piped APIs (YouTube Music endpoints)
+                this.apiServers = [
+                    'https://pipedapi.kavin.rocks',
+                    'https://pipedapi.smnz.de'
+                ];
 
-                // DOM Elements Binding
                 this.DOM = {
                     input: document.getElementById('inputSearch'),
                     results: document.getElementById('resultList'),
                     loader: document.getElementById('loader'),
-                    
                     miniPlayer: document.getElementById('miniPlayer'),
                     mPlay: document.getElementById('mPlay'),
-                    
                     fullPlayer: document.getElementById('fullPlayer'),
                     btnPlay: document.getElementById('btnPlay'),
                     artBox: document.getElementById('artBox'),
@@ -169,29 +165,28 @@
                     barFill: document.getElementById('barFill'),
                     tCurr: document.getElementById('tCurr'),
                     tDur: document.getElementById('tDur'),
-                    
                     lyricsView: document.getElementById('lyricsView'),
                     lyricsContainer: document.getElementById('lyricsContainer')
                 };
 
-                this.initEventListeners();
-                this.startRenderLoop(); // 60FPS UI Loop
+                this.initListeners();
+                this.start60FPSLoop();
             }
 
-            initEventListeners() {
+            initListeners() {
                 this.DOM.input.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter' && this.DOM.input.value.trim()) {
-                        this.fetchDataRacing(this.DOM.input.value.trim());
+                        this.searchYouTubeMusic(this.DOM.input.value.trim());
                     }
                 });
 
-                const toggle = (e) => { e.stopPropagation(); this.togglePlayback(); };
+                const toggle = (e) => { e.stopPropagation(); this.togglePlay(); };
                 this.DOM.mPlay.onclick = toggle;
                 this.DOM.btnPlay.onclick = toggle;
                 
-                document.getElementById('btnPrev').onclick = () => this.playNextPrev(-1);
-                document.getElementById('btnNext').onclick = () => this.playNextPrev(1);
-                this.audio.onended = () => this.playNextPrev(1);
+                document.getElementById('btnPrev').onclick = () => this.nextPrev(-1);
+                document.getElementById('btnNext').onclick = () => this.nextPrev(1);
+                this.audio.onended = () => this.nextPrev(1);
 
                 document.getElementById('openFull').onclick = () => this.DOM.fullPlayer.classList.add('active');
                 document.getElementById('closeFull').onclick = () => this.DOM.fullPlayer.classList.remove('active');
@@ -206,87 +201,89 @@
                 };
             }
 
-            // 1. API RACING: Fetch from multiple servers concurrently. Fastest valid response wins.
-            async fetchDataRacing(query) {
+            // --- 1. SEARCH YOUTUBE MUSIC ---
+            async searchYouTubeMusic(query) {
                 this.DOM.loader.style.display = 'block';
                 this.DOM.results.innerHTML = '';
-                
-                const endpoints = [
-                    `https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}`,
-                    `https://jiosaavn-api-v3.vercel.app/search/songs?query=${encodeURIComponent(query)}`
-                ];
-
                 try {
-                    // Advanced Promise.any approach
-                    const data = await Promise.any(endpoints.map(async url => {
-                        const res = await fetch(url);
-                        const json = await res.json();
-                        if (json.success && json.data?.results?.length > 0) return json.data.results;
-                        if (json.status === "SUCCESS" && json.data?.results?.length > 0) return json.data.results;
-                        throw new Error("Invalid format");
-                    }));
+                    // Using Piped API filter=music_songs to get official audio tracks
+                    let res = await fetch(`${this.apiServers[0]}/search?q=${encodeURIComponent(query)}&filter=music_songs`);
+                    let data = await res.json();
+                    
+                    if(data.items && data.items.length > 0) {
+                        this.tracks = data.items.map(item => {
+                            let videoId = item.url.split('?v=')[1];
+                            
+                            // Regex to clean YouTube garbage names for better Lyrics searching
+                            let cleanName = item.title.replace(/\(Official.*\)|\(Lyric.*\)|\[.*\]|Video|Lyrical|Audio/gi, '').trim();
+                            let cleanArtist = item.uploaderName.replace(/ - Topic|VEVO/gi, '').trim();
 
-                    this.parseAdvancedData(data);
-                } catch (error) {
-                    this.DOM.results.innerHTML = '<p style="color:#ff453a; text-align:center;">Servers busy. Try again.</p>';
+                            return { 
+                                id: videoId, 
+                                name: cleanName, 
+                                artist: cleanArtist, 
+                                img: item.thumbnail 
+                            };
+                        });
+                        this.renderList();
+                    } else {
+                        this.DOM.results.innerHTML = '<p style="color:#ff453a; text-align:center;">No tracks found.</p>';
+                    }
+                } catch(e) {
+                    this.DOM.results.innerHTML = '<p style="color:#ff453a; text-align:center;">API Blocked. Refresh page.</p>';
                 }
                 this.DOM.loader.style.display = 'none';
             }
 
-            // 2. REGEX URL DECRYPTOR: Forcefully converts broken/preview links to 320kbps HD
-            parseAdvancedData(results) {
-                this.tracks = results.map(t => {
-                    const getRes = (arr, prop) => Array.isArray(arr) && arr.length ? (arr[arr.length-1].url || arr[arr.length-1].link) : '';
-                    let img = getRes(t.image) || t.image || 'https://via.placeholder.com/500';
-                    let audioUrl = getRes(t.downloadUrl) || t.media_url || '';
-                    
-                    // The Magic Regex Fixer for JioSaavn CDN
-                    if (audioUrl) {
-                        audioUrl = audioUrl.replace(/preview\.saavncdn\.com/g, 'aac.saavncdn.com')
-                                         .replace(/_96_p\.mp4|_160_p\.mp4/g, '_320.mp4');
-                    }
-                    
-                    let artist = t.artists?.primary ? t.artists.primary.map(a=>a.name).join(', ') : t.primary_artists || "Unknown";
-                    return { name: (t.name || t.title).replace(/&quot;/g, '"'), artist, img, src: audioUrl };
-                }).filter(t => t.src); // Strictly remove unplayable tracks
-
-                if(this.tracks.length) this.renderList();
-                else this.DOM.results.innerHTML = '<p style="color:#ff453a; text-align:center;">No HD audio found.</p>';
-            }
-
             renderList() {
                 this.DOM.results.innerHTML = this.tracks.map((t, i) => `
-                    <div class="song-item" onclick="player.loadTrack(${i})">
+                    <div class="song-item" onclick="engine.extractAndPlay(${i})">
                         <img src="${t.img}">
                         <div class="song-info"><h4>${t.name}</h4><p>${t.artist}</p></div>
                     </div>
                 `).join('');
             }
 
-            loadTrack(index) {
+            // --- 2. EXTRACT 100% FULL AUDIO STREAM ---
+            async extractAndPlay(index) {
                 this.currentIndex = index;
                 const track = this.tracks[index];
                 
-                // Update UI DOM Data
-                document.getElementById('mTitle').innerText = track.name;
+                // Show loading on UI
+                document.getElementById('mTitle').innerText = "Extracting Audio...";
                 document.getElementById('fTitle').innerText = track.name;
                 document.getElementById('fArtist').innerText = track.artist;
                 document.getElementById('mCover').src = track.img;
                 document.getElementById('fCover').src = track.img;
                 this.DOM.pBg.style.backgroundImage = `url('${track.img}')`;
-                
                 this.DOM.miniPlayer.classList.add('active');
                 
-                this.audio.src = track.src;
-                this.audio.load();
-                this.setPlayState(true);
-                
-                this.fetchLyricsAPI(track.name, track.artist);
+                try {
+                    // Extracting the pure Googlevideo audio stream URL (CORS Free)
+                    let res = await fetch(`${this.apiServers[0]}/streams/${track.id}`);
+                    let data = await res.json();
+                    
+                    // Filter highest quality audio format (m4a or webm)
+                    let audioStreams = data.audioStreams;
+                    if(audioStreams && audioStreams.length > 0) {
+                        let bestAudio = audioStreams.sort((a,b) => b.bitrate - a.bitrate)[0];
+                        
+                        document.getElementById('mTitle').innerText = track.name;
+                        
+                        this.audio.src = bestAudio.url;
+                        this.audio.load();
+                        this.setPlay(true);
+                        
+                        this.fetchLyrics(track.name, track.artist);
+                    }
+                } catch(e) {
+                    document.getElementById('mTitle').innerText = "Stream Error!";
+                }
             }
 
-            togglePlayback() { this.setPlayState(!this.isPlaying); }
+            togglePlay() { this.setPlay(!this.isPlaying); }
             
-            setPlayState(state) {
+            setPlay(state) {
                 this.isPlaying = state;
                 const icon = this.isPlaying ? 'fa-pause' : 'fa-play';
                 this.DOM.mPlay.className = `fas ${icon}`;
@@ -301,21 +298,21 @@
                 }
             }
 
-            playNextPrev(step) {
+            nextPrev(step) {
                 if(!this.tracks.length) return;
                 this.currentIndex = (this.currentIndex + step + this.tracks.length) % this.tracks.length;
-                this.loadTrack(this.currentIndex);
+                this.extractAndPlay(this.currentIndex);
             }
 
-            // 3. LYRICS PARSER
-            async fetchLyricsAPI(name, artist) {
+            // --- 3. FETCH SYNCED LYRICS ---
+            async fetchLyrics(name, artist) {
                 this.lyricsData = [];
-                this.DOM.lyricsContainer.innerHTML = '<div class="loader" style="display:block;">Syncing...</div>';
+                this.DOM.lyricsContainer.innerHTML = '<div class="loader" style="display:block;">Finding Sync Lyrics...</div>';
                 try {
-                    const res = await fetch(`https://lrclib.net/api/search?track_name=${encodeURIComponent(name)}&artist_name=${encodeURIComponent(artist.split(',')[0])}`);
+                    const res = await fetch(`https://lrclib.net/api/search?track_name=${encodeURIComponent(name)}&artist_name=${encodeURIComponent(artist)}`);
                     const data = await res.json();
                     
-                    if(data?.[0]?.syncedLyrics) {
+                    if(data && data.length > 0 && data[0].syncedLyrics) {
                         const lines = data[0].syncedLyrics.split('\n');
                         lines.forEach(line => {
                             const m = line.match(/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/);
@@ -326,14 +323,14 @@
                         });
                         this.renderLyrics();
                     } else {
-                        this.DOM.lyricsContainer.innerHTML = '<div class="loader" style="display:block;">Instrumental / No Lyrics</div>';
+                        this.DOM.lyricsContainer.innerHTML = '<div class="loader" style="display:block;">Lyrics not found in database.</div>';
                     }
-                } catch(e) { this.DOM.lyricsContainer.innerHTML = '<div class="loader" style="display:block;">Lyrics Engine Offline</div>'; }
+                } catch(e) { this.DOM.lyricsContainer.innerHTML = '<div class="loader" style="display:block;">Lyrics Error</div>'; }
             }
 
             renderLyrics() {
                 this.DOM.lyricsContainer.innerHTML = '';
-                this.lyricsData.forEach((l, i) => {
+                this.lyricsData.forEach((l) => {
                     let div = document.createElement('div');
                     div.className = 'lyric-line';
                     div.innerText = l.text;
@@ -344,29 +341,26 @@
                 this.DOM.lyricsContainer.appendChild(spacer);
             }
 
-            // 4. 60FPS RENDER LOOP (The absolute core of Apple Music fluid feel)
-            startRenderLoop() {
+            // --- 4. 60FPS WORD-BY-WORD RENDER ENGINE ---
+            start60FPSLoop() {
                 const formatTime = (time) => {
                     let m = Math.floor(time / 60), s = Math.floor(time % 60);
                     return `${m}:${s < 10 ? '0'+s : s}`;
                 };
 
                 const loop = () => {
-                    // Update Progress Bar
                     if (this.audio.duration) {
                         const curr = this.audio.currentTime;
                         this.DOM.barFill.style.width = `${(curr / this.audio.duration) * 100}%`;
                         this.DOM.tCurr.innerText = formatTime(curr);
                         this.DOM.tDur.innerText = formatTime(this.audio.duration);
 
-                        // Advanced Lyrics Interpolation (Gradient Fill)
                         if (this.lyricsData.length > 0 && this.DOM.lyricsView.classList.contains('active')) {
                             let activeIdx = this.lyricsData.findIndex((l, i, arr) => curr >= l.time - 0.2 && (!arr[i+1] || curr < arr[i+1].time - 0.2));
                             
                             if (activeIdx !== -1) {
                                 let activeData = this.lyricsData[activeIdx];
                                 
-                                // Reset others
                                 this.lyricsData.forEach((l, i) => {
                                     if(i !== activeIdx && l.el.classList.contains('active')) {
                                         l.el.classList.remove('active');
@@ -374,17 +368,14 @@
                                     }
                                 });
 
-                                // Process Active Line
                                 if (!activeData.el.classList.contains('active')) {
                                     activeData.el.classList.add('active');
-                                    // Smooth auto-scroll
                                     this.DOM.lyricsContainer.scrollTo({
                                         top: activeData.el.offsetTop - (this.DOM.lyricsContainer.clientHeight / 2) + 50,
                                         behavior: 'smooth'
                                     });
                                 }
 
-                                // CSS Variable Update for smooth gradient
                                 let nextTime = this.lyricsData[activeIdx + 1] ? this.lyricsData[activeIdx + 1].time : activeData.time + 3;
                                 let duration = nextTime - activeData.time;
                                 let percentage = Math.max(0, Math.min(100, ((curr - activeData.time) / duration) * 100));
@@ -393,14 +384,14 @@
                             }
                         }
                     }
-                    this.animationFrameId = requestAnimationFrame(loop);
+                    requestAnimationFrame(loop);
                 };
-                this.animationFrameId = requestAnimationFrame(loop);
+                requestAnimationFrame(loop);
             }
         }
 
         // Initialize Engine
-        const player = new AppleMusicEngine();
+        const engine = new UltimateEngine();
     </script>
 </body>
 </html>
