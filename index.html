@@ -3,117 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>V-Music | Bypass Proxy Edition</title>
+    <title>V-Music Pro | Full-Stack Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary-blur: blur(60px); --easing: cubic-bezier(0.25, 0.8, 0.25, 1); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: #000; color: #fff; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
 
-        /* UI Views */
         .view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transition: transform 0.5s var(--easing), opacity 0.4s ease; z-index: 1; }
         
         /* 1. Search View */
         #searchView { padding: 40px 20px 100px; overflow-y: auto; z-index: 10; background: #000; }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .header-title { font-size: 34px; font-weight: 800; }
-        .settings-btn { font-size: 24px; color: #8e8e93; cursor: pointer; }
+        .settings-btn { font-size: 22px; color: #ff2d55; cursor: pointer; background: rgba(255,45,85,0.15); padding: 10px; border-radius: 50%; }
         
         .search-bar { background: #1c1c1e; border-radius: 12px; padding: 12px 15px; display: flex; align-items: center; margin-bottom: 20px; }
         .search-bar input { flex: 1; background: transparent; border: none; color: #fff; font-size: 17px; margin-left: 10px; outline: none; }
         
-        .song-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .song-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); cursor: pointer; }
         .song-item img { width: 52px; height: 52px; border-radius: 8px; margin-right: 15px; object-fit: cover; }
         .song-info { flex: 1; overflow: hidden; }
-        .song-info h4 { font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .song-info h4 { font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
         .song-info p { font-size: 14px; color: #8e8e93; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* 2. Settings Overlay (Bypass VPN) */
-        #settingsView { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; background: rgba(0,0,0,0.8); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 40px 20px; }
+        /* 2. Backend Config Modal */
+        #settingsView { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 200; background: rgba(0,0,0,0.85); backdrop-filter: blur(30px); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 40px 20px; }
         #settingsView.active { opacity: 1; pointer-events: auto; }
         .settings-card { background: #1c1c1e; border-radius: 16px; padding: 20px; margin-top: 20px; }
-        .settings-card h3 { margin-bottom: 15px; font-size: 18px; color: #ff3b30; }
-        .server-option { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 16px; }
-        .server-option:last-child { border-bottom: none; }
-        .server-option input[type="radio"] { transform: scale(1.3); accent-color: #ff3b30; }
-        .close-settings { margin-top: 30px; background: #fff; color: #000; padding: 15px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .settings-card h3 { margin-bottom: 10px; font-size: 16px; color: #ff2d55; }
+        .backend-input { width: 100%; background: #2c2c2e; border: 1px solid #3a3a3c; color: #fff; padding: 12px; border-radius: 10px; font-size: 15px; outline: none; margin-top: 8px; }
+        .save-btn { margin-top: 25px; background: #ff2d55; color: #fff; padding: 15px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 16px; cursor: pointer; }
 
         /* 3. Mini Player */
-        #miniPlayer { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 64px; background: rgba(40,40,40,0.85); backdrop-filter: blur(25px); border-radius: 16px; display: flex; align-items: center; padding: 0 15px; z-index: 50; transform: translateY(150%); transition: transform 0.4s var(--easing); cursor: pointer; }
+        #miniPlayer { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 64px; background: rgba(35,35,35,0.9); backdrop-filter: blur(25px); border-radius: 16px; display: flex; align-items: center; padding: 0 15px; z-index: 50; transform: translateY(150%); transition: transform 0.4s var(--easing); cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
         #miniPlayer.active { transform: translateY(0); }
-        #miniCover { width: 44px; height: 44px; border-radius: 8px; margin-right: 12px; object-fit: cover; }
+        #mCover { width: 44px; height: 44px; border-radius: 8px; margin-right: 12px; object-fit: cover; }
         
         /* 4. Full Player View */
-        #fullPlayer { z-index: 100; transform: translateY(100%); display: flex; flex-direction: column; }
+        #fullPlayer { z-index: 100; transform: translateY(100%); display: flex; flex-direction: column; background: #000; }
         #fullPlayer.active { transform: translateY(0); }
-        .player-bg { position: absolute; top: -20%; left: -20%; width: 140%; height: 140%; background-size: cover; filter: var(--primary-blur) brightness(0.4); z-index: -1; transition: background-image 0.6s ease; }
-        .drag-handle { width: 40px; height: 5px; background: rgba(255,255,255,0.3); border-radius: 5px; margin: 20px auto; cursor: pointer; }
+        .player-bg { position: absolute; top: -20%; left: -20%; width: 140%; height: 140%; background-size: cover; background-position: center; filter: var(--primary-blur) brightness(0.4); z-index: -1; transition: background-image 0.6s ease; }
+        .drag-handle { width: 40px; height: 5px; background: rgba(255,255,255,0.35); border-radius: 5px; margin: 20px auto; cursor: pointer; }
         
-        .art-container { width: 100%; max-width: 340px; aspect-ratio: 1/1; margin: 30px auto; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow: hidden; transition: transform 0.5s var(--easing); }
+        .art-container { width: 82%; max-width: 330px; aspect-ratio: 1/1; margin: 25px auto; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); overflow: hidden; transition: transform 0.5s var(--easing); }
         .art-container.playing { transform: scale(1.04); }
         .art-container img { width: 100%; height: 100%; object-fit: cover; }
         
-        .controls-wrapper { padding: 0 30px; margin-top: auto; margin-bottom: 60px; }
-        .track-titles h2 { font-size: 24px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .track-titles p { font-size: 18px; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .controls-wrapper { padding: 0 30px; margin-top: auto; margin-bottom: 50px; }
+        .track-titles h2 { font-size: 23px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-titles p { font-size: 17px; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        .progress-area { margin: 30px 0; }
-        .bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 6px; position: relative; }
+        .progress-area { margin: 25px 0; py: 5px; cursor: pointer; }
+        .bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 6px; position: relative; overflow: hidden; }
         .bar-fill { width: 0%; height: 100%; background: #fff; border-radius: 6px; }
-        .time-stamps { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 10px; }
+        .time-stamps { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 8px; font-weight: 500; }
 
         .play-controls { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 30px; }
         .play-controls i { font-size: 32px; color: #fff; cursor: pointer; }
-        .play-controls .btn-play { font-size: 48px; }
+        .play-controls .btn-play { font-size: 46px; }
 
-        /* 5. Lyrics View */
-        #lyricsView { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 110; background: rgba(0,0,0,0.5); backdrop-filter: blur(50px); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+        /* 5. Word-by-Word Lyrics View */
+        #lyricsView { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 110; background: rgba(0,0,0,0.6); backdrop-filter: blur(50px); -webkit-backdrop-filter: blur(50px); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
         #lyricsView.active { opacity: 1; pointer-events: auto; }
-        #lyricsContainer { flex: 1; overflow-y: auto; padding: 120px 20px 50vh; scroll-behavior: smooth; }
+        #lyricsContainer { flex: 1; overflow-y: auto; padding: 110px 24px 50vh; scroll-behavior: smooth; }
         #lyricsContainer::-webkit-scrollbar { display: none; }
         
-        .lyric-line { font-size: 32px; font-weight: 700; margin-bottom: 30px; line-height: 1.3; transform-origin: left; transition: transform 0.4s var(--easing); --fill: 0%; background: linear-gradient(90deg, #fff var(--fill), rgba(255,255,255,0.25) var(--fill)); -webkit-background-clip: text; color: transparent; will-change: background; }
-        .lyric-line.active { transform: scale(1.05); }
+        .lyric-line {
+            font-size: 29px; font-weight: 800; margin-bottom: 28px; line-height: 1.3;
+            transform-origin: left; transition: transform 0.35s var(--easing), filter 0.35s ease;
+            filter: blur(0.8px);
+        }
+        .lyric-line.active { transform: scale(1.04); filter: blur(0px); }
+        .lyric-word {
+            display: inline-block; margin-right: 7px;
+            --wfill: 0%;
+            background: linear-gradient(90deg, #fff var(--wfill), rgba(255,255,255,0.28) var(--wfill));
+            -webkit-background-clip: text; color: transparent;
+            will-change: background, transform;
+        }
+        .lyric-word.sung { transform: translateY(-1px); }
 
         .loader { text-align: center; color: #8e8e93; font-weight: 500; margin-top: 30px; display: none; }
     </style>
 </head>
 <body>
 
-    <!-- BYPASS SETTINGS OVERLAY -->
+    <!-- BACKEND SERVER CONFIG MODAL -->
     <div id="settingsView">
-        <h2 style="font-size: 28px; font-weight: 800;">Network Setup</h2>
-        <p style="color: #8e8e93; margin-top: 5px;">Configure bypass proxy if songs fail to load.</p>
+        <h2 style="font-size: 28px; font-weight: 800;">Backend Server</h2>
+        <p style="color: #8e8e93; margin-top: 5px;">Apna Vercel server link yahan daalo:</p>
         
         <div class="settings-card">
-            <h3>Audio Proxy Server</h3>
-            <label class="server-option">
-                Direct (No Bypass)
-                <input type="radio" name="proxy" value="direct" checked>
-            </label>
-            <label class="server-option">
-                Bypass Server 1 (CORSProxy)
-                <input type="radio" name="proxy" value="corsproxy">
-            </label>
-            <label class="server-option">
-                Bypass Server 2 (CodeTabs)
-                <input type="radio" name="proxy" value="codetabs">
-            </label>
+            <h3>Vercel API URL</h3>
+            <input type="text" id="backendUrlInput" class="backend-input" placeholder="https://v-music-api.vercel.app">
+            <p style="font-size: 12px; color: #8e8e93; margin-top: 10px;">Note: Link ke aakhir mein '/' mat lagana.</p>
         </div>
-        <div class="close-settings" id="closeSettingsBtn">Save & Close</div>
+        <div class="save-btn" id="saveSettingsBtn">Save & Connect Server</div>
     </div>
 
     <!-- SEARCH VIEW -->
     <div id="searchView" class="view">
         <div class="header-top">
-            <h1 class="header-title">Search</h1>
-            <i class="fas fa-cog settings-btn" id="openSettingsBtn"></i>
+            <h1 class="header-title">Apple Music</h1>
+            <i class="fas fa-server settings-btn" id="openSettingsBtn"></i>
         </div>
         <div class="search-bar">
-            <i class="fas fa-search"></i>
-            <input type="text" id="inputSearch" placeholder="Search songs...">
+            <i class="fas fa-search" style="color:#8e8e93;"></i>
+            <input type="text" id="inputSearch" placeholder="Search Full 320kbps Songs...">
         </div>
-        <div id="loader" class="loader"><i class="fas fa-circle-notch fa-spin"></i> Fetching from Servers...</div>
+        <div id="loader" class="loader"><i class="fas fa-circle-notch fa-spin"></i> Connecting to Custom Backend...</div>
         <div id="resultList"></div>
     </div>
 
@@ -121,9 +120,9 @@
     <div id="miniPlayer">
         <img id="mCover" src="">
         <div class="song-info" id="openFull" style="margin-right: 15px;">
-            <h4 id="mTitle">Title</h4>
+            <h4 id="mTitle">Not Playing</h4>
         </div>
-        <i class="fas fa-play" id="mPlay" style="font-size: 22px;"></i>
+        <i class="fas fa-play" id="mPlay" style="font-size: 22px; padding: 10px;"></i>
     </div>
 
     <!-- FULL PLAYER -->
@@ -132,8 +131,8 @@
         <div class="drag-handle" id="closeFull"></div>
         
         <div id="lyricsView">
-            <div class="drag-handle" id="closeLyrics" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 120;"></div>
-            <div id="lyricsContainer"><div style="text-align:center; color:#8e8e93; margin-top:30vh;">Awaiting Track...</div></div>
+            <div class="drag-handle" id="closeLyrics" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 120;"></div>
+            <div id="lyricsContainer"><div style="text-align:center; color:#8e8e93; margin-top:30vh;">Play a song for live word sync</div></div>
         </div>
 
         <div class="art-container" id="artBox"><img id="fCover" src=""></div>
@@ -156,20 +155,26 @@
             </div>
             
             <div style="text-align:center;">
-                <i class="fas fa-quote-left" id="btnLyrics" style="font-size: 22px; color: rgba(255,255,255,0.5); cursor:pointer;"></i>
+                <i class="fas fa-quote-left" id="btnLyrics" style="font-size: 22px; color: rgba(255,255,255,0.6); cursor:pointer; padding: 10px;"></i>
             </div>
         </div>
     </div>
 
     <script>
-        class BypassMusicEngine {
+        // Yahan apna Vercel URL default mein bhi daal sakte ho:
+        const DEFAULT_BACKEND = "https://v-music-api.vercel.app";
+
+        class FullStackMusicEngine {
             constructor() {
                 this.audio = new Audio();
+                this.audio.crossOrigin = "anonymous";
                 this.tracks = [];
                 this.currentIndex = 0;
                 this.isPlaying = false;
                 this.lyricsData = [];
-                this.activeProxy = 'direct'; // Default network setting
+                
+                this.backendUrl = (localStorage.getItem('vmusic_backend') || DEFAULT_BACKEND).replace(/\/$/, "");
+                document.getElementById('backendUrlInput').value = this.backendUrl;
 
                 this.DOM = {
                     input: document.getElementById('inputSearch'),
@@ -190,14 +195,17 @@
                 };
 
                 this.initListeners();
-                this.startRenderLoop();
+                this.start60FPSWordEngine();
             }
 
             initListeners() {
-                // Settings UI Logic
                 document.getElementById('openSettingsBtn').onclick = () => this.DOM.settingsView.classList.add('active');
-                document.getElementById('closeSettingsBtn').onclick = () => {
-                    this.activeProxy = document.querySelector('input[name="proxy"]:checked').value;
+                document.getElementById('saveSettingsBtn').onclick = () => {
+                    let val = document.getElementById('backendUrlInput').value.trim().replace(/\/$/, "");
+                    if (val) {
+                        this.backendUrl = val;
+                        localStorage.setItem('vmusic_backend', val);
+                    }
                     this.DOM.settingsView.classList.remove('active');
                 };
 
@@ -221,59 +229,29 @@
                 document.getElementById('closeLyrics').onclick = () => this.DOM.lyricsView.classList.remove('active');
                 
                 document.getElementById('progressBar').onclick = (e) => {
-                    if(this.audio.src) {
+                    if (this.audio.duration) {
                         const rect = document.getElementById('progressBar').getBoundingClientRect();
                         this.audio.currentTime = ((e.clientX - rect.left) / rect.width) * this.audio.duration;
                     }
                 };
             }
 
-            // Proxy URL Formatter
-            getProxiedUrl(url) {
-                if (!url) return '';
-                if (this.activeProxy === 'corsproxy') return `https://corsproxy.io/?${encodeURIComponent(url)}`;
-                if (this.activeProxy === 'codetabs') return `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`;
-                return url; // Direct
-            }
-
             async searchSongs(query) {
                 this.DOM.loader.style.display = 'block';
                 this.DOM.results.innerHTML = '';
-                
-                // Advanced JioSaavn Endpoint API
-                const apiUrl = `https://jiosaavn-api-v3.vercel.app/search/songs?query=${encodeURIComponent(query)}`;
-                const requestUrl = this.activeProxy !== 'direct' ? this.getProxiedUrl(apiUrl) : apiUrl;
 
                 try {
-                    const res = await fetch(requestUrl);
-                    const json = await res.json();
-                    
-                    let rawResults = [];
-                    if (json.status === "SUCCESS" && json.data?.results) rawResults = json.data.results;
-                    else if (json.success && json.data?.results) rawResults = json.data.results;
+                    const res = await fetch(`${this.backendUrl}/api/search?q=${encodeURIComponent(query)}`);
+                    const data = await res.json();
 
-                    if (rawResults.length > 0) {
-                        this.tracks = rawResults.map(t => {
-                            let img = t.image && t.image.length ? t.image[t.image.length-1].url || t.image[t.image.length-1].link : 'https://via.placeholder.com/500';
-                            let audioUrl = t.downloadUrl && t.downloadUrl.length ? t.downloadUrl[t.downloadUrl.length-1].url || t.downloadUrl[t.downloadUrl.length-1].link : '';
-                            
-                            // Audio Decryption & HD Upgrade
-                            if (audioUrl) {
-                                audioUrl = audioUrl.replace(/preview\.saavncdn\.com/g, 'aac.saavncdn.com')
-                                                 .replace(/_96_p\.mp4|_160_p\.mp4/g, '_320.mp4');
-                            }
-                            
-                            let artist = t.primary_artists || (t.artists?.primary ? t.artists.primary.map(a=>a.name).join(', ') : "Unknown");
-                            return { name: (t.name || t.title).replace(/&quot;/g, '"'), artist, img, src: audioUrl };
-                        }).filter(t => t.src); 
-
-                        if(this.tracks.length) this.renderList();
-                        else this.DOM.results.innerHTML = '<p style="color:#ff3b30; text-align:center;">No valid audio found.</p>';
+                    if (data.success && data.results.length > 0) {
+                        this.tracks = data.results;
+                        this.renderList();
                     } else {
-                        this.DOM.results.innerHTML = '<p style="color:#ff3b30; text-align:center;">No results found.</p>';
+                        this.DOM.results.innerHTML = '<p style="color:#ff453a; text-align:center;">No songs found.</p>';
                     }
-                } catch (error) {
-                    this.DOM.results.innerHTML = '<p style="color:#ff3b30; text-align:center;">Server Blocked. Open Settings ⚙️ and change Bypass Server.</p>';
+                } catch (err) {
+                    this.DOM.results.innerHTML = '<p style="color:#ff453a; text-align:center; padding: 20px;">Backend Server Connect Nahi Hua!<br><br>Upar Pink Server Icon par click karke apna Vercel URL check karo.</p>';
                 }
                 this.DOM.loader.style.display = 'none';
             }
@@ -297,13 +275,20 @@
                 document.getElementById('mCover').src = track.img;
                 document.getElementById('fCover').src = track.img;
                 this.DOM.pBg.style.backgroundImage = `url('${track.img}')`;
-                
                 this.DOM.miniPlayer.classList.add('active');
                 
-                // Applying Proxy to the Audio Source
-                this.audio.src = this.getProxiedUrl(track.src);
+                // Stream audio directly through YOUR Vercel Server Pipe!
+                this.audio.src = `${this.backendUrl}/api/stream?url=${encodeURIComponent(track.src)}`;
                 this.audio.load();
                 this.setPlayState(true);
+                
+                // Fallback: If Vercel stream times out, try direct decrypted link
+                this.audio.onerror = () => {
+                    if (this.audio.src.includes('/api/stream')) {
+                        this.audio.src = track.src;
+                        this.audio.play();
+                    }
+                };
                 
                 this.fetchLyricsAPI(track.name, track.artist);
             }
@@ -317,7 +302,7 @@
                 this.DOM.btnPlay.className = `fas ${icon} btn-play`;
                 
                 if (this.isPlaying) {
-                    this.audio.play();
+                    this.audio.play().catch(e => console.log(e));
                     this.DOM.artBox.classList.add('playing');
                 } else {
                     this.audio.pause();
@@ -326,55 +311,64 @@
             }
 
             playNextPrev(step) {
-                if(!this.tracks.length) return;
+                if (!this.tracks.length) return;
                 this.currentIndex = (this.currentIndex + step + this.tracks.length) % this.tracks.length;
                 this.loadTrack(this.currentIndex);
             }
 
-            // LYRICS
+            // TRUE WORD-BY-WORD LYRICS PARSER
             async fetchLyricsAPI(name, artist) {
                 this.lyricsData = [];
-                this.DOM.lyricsContainer.innerHTML = '<div class="loader" style="display:block;">Syncing...</div>';
+                this.DOM.lyricsContainer.innerHTML = '<div class="loader" style="display:block;">Syncing Word-by-Word Lyrics...</div>';
                 try {
-                    let cleanArtist = artist.split(',')[0];
-                    let url = `https://lrclib.net/api/search?track_name=${encodeURIComponent(name)}&artist_name=${encodeURIComponent(cleanArtist)}`;
-                    
-                    const res = await fetch(this.getProxiedUrl(url));
+                    let cleanArtist = artist.split(',')[0].trim();
+                    let cleanName = name.replace(/\(.*\)|\[.*\]/g, '').trim();
+                    const res = await fetch(`${this.backendUrl}/api/lyrics?track=${encodeURIComponent(cleanName)}&artist=${encodeURIComponent(cleanArtist)}`);
                     const data = await res.json();
                     
-                    if(data && data.length > 0 && data[0].syncedLyrics) {
+                    if (data && data.length > 0 && data[0].syncedLyrics) {
                         const lines = data[0].syncedLyrics.split('\n');
                         lines.forEach(line => {
                             const m = line.match(/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/);
-                            if(m && m[4].trim()) {
+                            if (m && m[4].trim()) {
                                 let time = parseInt(m[1])*60 + parseInt(m[2]) + parseInt(m[3])/(m[3].length===3?1000:100);
-                                this.lyricsData.push({ time, text: m[4].trim(), el: null });
+                                this.lyricsData.push({ time, text: m[4].trim(), el: null, wordEls: [] });
                             }
                         });
-                        this.renderLyrics();
+                        this.renderWordByWordDOM();
                     } else {
-                        this.DOM.lyricsContainer.innerHTML = '<div class="loader" style="display:block;">Lyrics not found</div>';
+                        this.DOM.lyricsContainer.innerHTML = '<div class="loader" style="display:block;">Synced Lyrics Not Available</div>';
                     }
-                } catch(e) { this.DOM.lyricsContainer.innerHTML = '<div class="loader" style="display:block;">Lyrics Engine Blocked. Use Bypass Server.</div>'; }
+                } catch (e) {
+                    this.DOM.lyricsContainer.innerHTML = '<div class="loader" style="display:block;">Lyrics Error</div>';
+                }
             }
 
-            renderLyrics() {
+            // Har word ko alag <span> mein todna taaki exact word-by-word highlight ho
+            renderWordByWordDOM() {
                 this.DOM.lyricsContainer.innerHTML = '';
-                this.lyricsData.forEach((l) => {
-                    let div = document.createElement('div');
-                    div.className = 'lyric-line';
-                    div.innerText = l.text;
-                    l.el = div;
-                    this.DOM.lyricsContainer.appendChild(div);
+                this.lyricsData.forEach((lineObj) => {
+                    let lineDiv = document.createElement('div');
+                    lineDiv.className = 'lyric-line';
+                    
+                    let words = lineObj.text.split(/\s+/);
+                    lineObj.wordEls = words.map(w => {
+                        let span = document.createElement('span');
+                        span.className = 'lyric-word';
+                        span.innerText = w;
+                        lineDiv.appendChild(span);
+                        return span;
+                    });
+
+                    lineObj.el = lineDiv;
+                    this.DOM.lyricsContainer.appendChild(lineDiv);
                 });
-                let spacer = document.createElement('div'); spacer.style.height = "50vh";
-                this.DOM.lyricsContainer.appendChild(spacer);
             }
 
-            // ENGINE LOOP
-            startRenderLoop() {
-                const formatTime = (time) => {
-                    let m = Math.floor(time / 60), s = Math.floor(time % 60);
+            // 60FPS TRUE WORD-BY-WORD INTERPOLATION ENGINE
+            start60FPSWordEngine() {
+                const formatTime = (t) => {
+                    let m = Math.floor(t / 60), s = Math.floor(t % 60);
                     return `${m}:${s < 10 ? '0'+s : s}`;
                 };
 
@@ -386,31 +380,48 @@
                         this.DOM.tDur.innerText = formatTime(this.audio.duration);
 
                         if (this.lyricsData.length > 0 && this.DOM.lyricsView.classList.contains('active')) {
-                            let activeIdx = this.lyricsData.findIndex((l, i, arr) => curr >= l.time - 0.2 && (!arr[i+1] || curr < arr[i+1].time - 0.2));
+                            let activeIdx = this.lyricsData.findIndex((l, i, arr) => curr >= l.time - 0.15 && (!arr[i+1] || curr < arr[i+1].time - 0.15));
                             
                             if (activeIdx !== -1) {
-                                let activeData = this.lyricsData[activeIdx];
+                                let activeLine = this.lyricsData[activeIdx];
                                 
+                                // Reset other lines
                                 this.lyricsData.forEach((l, i) => {
-                                    if(i !== activeIdx && l.el.classList.contains('active')) {
+                                    if (i !== activeIdx && l.el.classList.contains('active')) {
                                         l.el.classList.remove('active');
-                                        l.el.style.setProperty('--fill', '0%');
+                                        l.wordEls.forEach(w => {
+                                            w.style.setProperty('--wfill', i < activeIdx ? '100%' : '0%');
+                                            w.classList.remove('sung');
+                                        });
                                     }
                                 });
 
-                                if (!activeData.el.classList.contains('active')) {
-                                    activeData.el.classList.add('active');
+                                // Focus current line
+                                if (!activeLine.el.classList.contains('active')) {
+                                    activeLine.el.classList.add('active');
                                     this.DOM.lyricsContainer.scrollTo({
-                                        top: activeData.el.offsetTop - (this.DOM.lyricsContainer.clientHeight / 2) + 50,
+                                        top: activeLine.el.offsetTop - (this.DOM.lyricsContainer.clientHeight / 2) + 40,
                                         behavior: 'smooth'
                                     });
                                 }
 
-                                let nextTime = this.lyricsData[activeIdx + 1] ? this.lyricsData[activeIdx + 1].time : activeData.time + 3;
-                                let duration = nextTime - activeData.time;
-                                let percentage = Math.max(0, Math.min(100, ((curr - activeData.time) / duration) * 100));
+                                // Calculate per-word timing inside the active line
+                                let nextTime = this.lyricsData[activeIdx + 1] ? this.lyricsData[activeIdx + 1].time : activeLine.time + 3.5;
+                                let lineDuration = Math.max(0.5, (nextTime - activeLine.time) * 0.88);
+                                let elapsed = Math.max(0, curr - activeLine.time);
                                 
-                                activeData.el.style.setProperty('--fill', `${percentage}%`);
+                                let totalWords = activeLine.wordEls.length;
+                                let timePerWord = lineDuration / totalWords;
+
+                                activeLine.wordEls.forEach((wordSpan, wIdx) => {
+                                    let wordStart = wIdx * timePerWord;
+                                    let wordProgress = ((elapsed - wordStart) / timePerWord) * 100;
+                                    let clamped = Math.max(0, Math.min(100, wordProgress));
+                                    
+                                    wordSpan.style.setProperty('--wfill', `${clamped}%`);
+                                    if (clamped > 50) wordSpan.classList.add('sung');
+                                    else wordSpan.classList.remove('sung');
+                                });
                             }
                         }
                     }
@@ -420,7 +431,7 @@
             }
         }
 
-        const player = new BypassMusicEngine();
+        const player = new FullStackMusicEngine();
     </script>
 </body>
 </html>
