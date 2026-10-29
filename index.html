@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Music Streamer</title>
+    <title>Insta Downloader</title>
     <style>
         * {
             margin: 0;
@@ -13,245 +13,178 @@
         }
         body {
             background-color: #121212;
-            color: #fff;
-            padding-bottom: 100px; /* Space for bottom player */
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
         }
         .header {
-            background-color: #1db954;
-            padding: 20px;
-            text-align: center;
             font-size: 24px;
             font-weight: bold;
+            color: #E1306C; /* Instagram Pink */
+            margin-bottom: 20px;
         }
-        .search-container {
+        .search-box {
+            width: 100%;
+            max-width: 400px;
+            background: #1e1e1e;
             padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #282828;
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+        .btn-group {
             display: flex;
             gap: 10px;
             justify-content: center;
+            flex-wrap: wrap;
         }
-        .search-container input {
-            width: 70%;
+        button {
             padding: 10px 15px;
-            border-radius: 20px;
             border: none;
-            outline: none;
-            background-color: #282828;
-            color: white;
-            font-size: 16px;
-        }
-        .search-container button {
-            padding: 10px 20px;
-            border-radius: 20px;
-            border: none;
-            background-color: #1db954;
+            border-radius: 8px;
+            background: #E1306C;
             color: white;
             font-weight: bold;
             cursor: pointer;
+            flex: 1;
+            min-width: 100px;
         }
-        .song-list {
-            padding: 0 20px;
+        button:active {
+            background: #C13584;
         }
-        .song-item {
-            display: flex;
-            align-items: center;
-            background-color: #1e1e1e;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .song-item:active {
-            background-color: #282828;
-        }
-        .song-item img {
-            width: 50px;
-            height: 50px;
-            border-radius: 5px;
-            margin-right: 15px;
-        }
-        .song-info h4 {
-            font-size: 16px;
-            margin-bottom: 3px;
-        }
-        .song-info p {
-            font-size: 12px;
-            color: #b3b3b3;
-        }
-        /* Bottom Player Fixed */
-        .bottom-player {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background-color: #181818;
-            border-top: 1px solid #282828;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .player-info {
-            display: flex;
-            align-items: center;
-            width: 60%;
-        }
-        .player-info img {
-            width: 40px;
-            height: 40px;
-            border-radius: 5px;
-            margin-right: 10px;
-        }
-        .player-text h4 {
+        #status {
+            margin-top: 15px;
             font-size: 14px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            color: #FFDC80;
         }
-        .player-text p {
-            font-size: 12px;
-            color: #b3b3b3;
-        }
-        .controls button {
-            background: none;
-            border: none;
-            color: #1db954;
-            font-size: 35px;
-            cursor: pointer;
-        }
-        #loading {
-            text-align: center;
-            display: none;
+        .result-container {
             margin-top: 20px;
-            color: #1db954;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .media-card {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+        }
+        .media-card img, .media-card video {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .download-btn {
+            background: #405DE6;
+            width: 100%;
+            display: inline-block;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">Music Stream</div>
+    <div class="header">InstaSaver Pro</div>
 
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Search for songs, artists...">
-        <button onclick="searchSongs()">Search</button>
-    </div>
-
-    <div id="loading">Searching online...</div>
-    
-    <div class="song-list" id="results">
-        <!-- Search results will appear here -->
-    </div>
-
-    <!-- Fixed Bottom Audio Player -->
-    <div class="bottom-player">
-        <div class="player-info">
-            <img id="now-playing-img" src="https://via.placeholder.com/40x40/1db954/ffffff?text=🎵" alt="Cover">
-            <div class="player-text">
-                <h4 id="now-playing-title">Not Playing</h4>
-                <p id="now-playing-artist">-</p>
-            </div>
+    <div class="search-box">
+        <input type="text" id="username" placeholder="Instagram Username (e.g. cristiano)">
+        <div class="btn-group">
+            <button onclick="fetchData('stories')">Stories</button>
+            <button onclick="fetchData('reels')">Reels</button>
         </div>
-        <div class="controls">
-            <button id="playBtn" onclick="togglePlay()">▶️</button>
-        </div>
+        <div id="status"></div>
     </div>
 
-    <audio id="audioPlayer"></audio>
+    <div class="result-container" id="results">
+        <!-- Videos or Images yahan show honge -->
+    </div>
 
     <script>
-        const audio = document.getElementById('audioPlayer');
-        const playBtn = document.getElementById('playBtn');
-        const searchInput = document.getElementById('searchInput');
-        const resultsContainer = document.getElementById('results');
-        const loadingText = document.getElementById('loading');
-        
-        let isPlaying = false;
+        // NOTE: Aapko RapidAPI se ek free Instagram Scraper API key leni hogi
+        const API_KEY = 'YAHAN_APNI_RAPIDAPI_KEY_DALEIN'; 
+        const API_HOST = 'instagram-scraper-api2.p.rapidapi.com'; // Example host
 
-        // Search Songs API Fetch
-        function searchSongs() {
-            let query = searchInput.value.trim();
-            if(query === "") return;
+        async function fetchData(type) {
+            const username = document.getElementById('username').value.trim();
+            const statusBox = document.getElementById('status');
+            const resultsBox = document.getElementById('results');
 
-            resultsContainer.innerHTML = "";
-            loadingText.style.display = "block";
-
-            // Using iTunes Public API for online search and streaming
-            let apiUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=15`;
-
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => {
-                    loadingText.style.display = "none";
-                    displayResults(data.results);
-                })
-                .catch(error => {
-                    loadingText.style.display = "none";
-                    alert("Network error! Check your internet connection.");
-                });
-        }
-
-        // Show Results on Screen
-        function displayResults(songs) {
-            if(songs.length === 0) {
-                resultsContainer.innerHTML = "<p style='text-align:center;'>No songs found.</p>";
+            if (!username) {
+                statusBox.innerText = "Pehle username dalein!";
                 return;
             }
 
-            songs.forEach(song => {
-                let songElement = document.createElement('div');
-                songElement.className = 'song-item';
+            statusBox.innerText = `Fetching ${type} for @${username}... Please wait.`;
+            resultsBox.innerHTML = '';
+
+            // Example RapidAPI Endpoint URL (Yeh API par depend karta hai)
+            const url = `https://${API_HOST}/v1/${type}?username=${username}`;
+
+            const options = {
+                method: 'GET',
+                headers: {
+                    'X-RapidAPI-Key': API_KEY,
+                    'X-RapidAPI-Host': API_HOST
+                }
+            };
+
+            try {
+                // Fetch data from API
+                const response = await fetch(url, options);
+                const data = await response.json();
+
+                statusBox.innerText = "Data loaded successfully!";
                 
-                // Get high quality image by replacing URL text
-                let imgUrl = song.artworkUrl100.replace('100x100bb', '200x200bb');
+                // Yahan API ke response ke hisaab se data show karein
+                // Example ke liye maan lijiye data.items me media links hain
+                if(data.items && data.items.length > 0) {
+                    data.items.forEach(item => {
+                        let mediaHtml = '';
+                        
+                        if(item.video_url) {
+                            mediaHtml = `<video controls src="${item.video_url}"></video>`;
+                        } else {
+                            mediaHtml = `<img src="${item.image_url}" alt="Post">`;
+                        }
 
-                songElement.innerHTML = `
-                    <img src="${imgUrl}" alt="cover">
-                    <div class="song-info">
-                        <h4>${song.trackName}</h4>
-                        <p>${song.artistName}</p>
-                    </div>
-                `;
+                        let downloadLink = item.video_url ? item.video_url : item.image_url;
 
-                // Add Click Event to Play Online Stream URL
-                songElement.onclick = () => playOnlineStream(song.previewUrl, song.trackName, song.artistName, imgUrl);
-                
-                resultsContainer.appendChild(songElement);
-            });
-        }
+                        const card = `
+                            <div class="media-card">
+                                ${mediaHtml}
+                                <a href="${downloadLink}" target="_blank" class="download-btn" download>Download</a>
+                            </div>
+                        `;
+                        resultsBox.innerHTML += card;
+                    });
+                } else {
+                    statusBox.innerText = "Koi data nahi mila ya account private hai.";
+                }
 
-        // Play Online URL
-        function playOnlineStream(streamUrl, title, artist, img) {
-            // Update Bottom Player UI
-            document.getElementById('now-playing-title').innerText = title;
-            document.getElementById('now-playing-artist').innerText = artist;
-            document.getElementById('now-playing-img').src = img;
-
-            // Set audio source to Online URL and Play
-            audio.src = streamUrl;
-            audio.play();
-            
-            isPlaying = true;
-            playBtn.innerText = "⏸️";
-        }
-
-        // Play/Pause Toggle
-        function togglePlay() {
-            if (!audio.src) return; // No song loaded
-            
-            if (isPlaying) {
-                audio.pause();
-                playBtn.innerText = "▶️";
-            } else {
-                audio.play();
-                playBtn.innerText = "⏸️";
+            } catch (error) {
+                console.error(error);
+                statusBox.innerText = "Error! API key check karein ya internet connection dekhein.";
             }
-            isPlaying = !isPlaying;
         }
-
-        // When song ends naturally
-        audio.onended = function() {
-            isPlaying = false;
-            playBtn.innerText = "▶️";
-        };
     </script>
 </body>
 </html>
