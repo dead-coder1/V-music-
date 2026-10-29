@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Music Player</title>
+    <title>Online Music Streamer</title>
     <style>
         * {
             margin: 0;
@@ -13,242 +13,245 @@
         }
         body {
             background-color: #121212;
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            color: #fff;
+            padding-bottom: 100px; /* Space for bottom player */
         }
-        .player-container {
-            background-color: #1e1e1e;
-            width: 90%;
-            max-width: 400px;
-            border-radius: 20px;
-            padding: 30px 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        .header {
+            background-color: #1db954;
+            padding: 20px;
             text-align: center;
+            font-size: 24px;
+            font-weight: bold;
         }
-        .cover-art {
-            width: 200px;
-            height: 200px;
-            background: linear-gradient(135deg, #1db954, #191414);
-            border-radius: 50%;
-            margin: 0 auto 20px auto;
+        .search-container {
+            padding: 20px;
             display: flex;
+            gap: 10px;
             justify-content: center;
+        }
+        .search-container input {
+            width: 70%;
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+            background-color: #282828;
+            color: white;
+            font-size: 16px;
+        }
+        .search-container button {
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: none;
+            background-color: #1db954;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .song-list {
+            padding: 0 20px;
+        }
+        .song-item {
+            display: flex;
             align-items: center;
-            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
-            animation: spin 10s linear infinite;
-            animation-play-state: paused;
+            background-color: #1e1e1e;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
         }
-        .cover-art.playing {
-            animation-play-state: running;
+        .song-item:active {
+            background-color: #282828;
         }
-        .cover-art span {
-            font-size: 50px;
+        .song-item img {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            margin-right: 15px;
         }
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
+        .song-info h4 {
+            font-size: 16px;
+            margin-bottom: 3px;
         }
-        .track-info h2 {
-            font-size: 22px;
-            margin-bottom: 5px;
+        .song-info p {
+            font-size: 12px;
+            color: #b3b3b3;
+        }
+        /* Bottom Player Fixed */
+        .bottom-player {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #181818;
+            border-top: 1px solid #282828;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .player-info {
+            display: flex;
+            align-items: center;
+            width: 60%;
+        }
+        .player-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        .player-text h4 {
+            font-size: 14px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .track-info p {
-            font-size: 14px;
-            color: #b3b3b3;
-            margin-bottom: 20px;
-        }
-        .progress-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .progress-bar {
-            flex: 1;
-            -webkit-appearance: none;
-            height: 5px;
-            background: #404040;
-            border-radius: 5px;
-            margin: 0 10px;
-            outline: none;
-        }
-        .progress-bar::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 12px;
-            height: 12px;
-            background: #1db954;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        .time {
+        .player-text p {
             font-size: 12px;
             color: #b3b3b3;
         }
-        .controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-        .btn {
+        .controls button {
             background: none;
             border: none;
-            color: #ffffff;
-            font-size: 24px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .btn:active {
-            transform: scale(0.9);
-        }
-        .play-btn {
-            font-size: 40px;
             color: #1db954;
+            font-size: 35px;
+            cursor: pointer;
         }
-        .file-upload {
-            background-color: #282828;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        .file-upload input {
-            color: #ffffff;
-            width: 100%;
+        #loading {
+            text-align: center;
+            display: none;
+            margin-top: 20px;
+            color: #1db954;
         }
     </style>
 </head>
 <body>
 
-    <div class="player-container">
-        <div class="cover-art" id="cover">
-            <span>🎵</span>
-        </div>
-        
-        <div class="track-info">
-            <h2 id="title">No Song Selected</h2>
-            <p id="artist">Upload music below</p>
-        </div>
+    <div class="header">Music Stream</div>
 
-        <div class="progress-container">
-            <span class="time" id="current-time">0:00</span>
-            <input type="range" class="progress-bar" id="progress" value="0" step="1">
-            <span class="time" id="duration">0:00</span>
-        </div>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search for songs, artists...">
+        <button onclick="searchSongs()">Search</button>
+    </div>
 
+    <div id="loading">Searching online...</div>
+    
+    <div class="song-list" id="results">
+        <!-- Search results will appear here -->
+    </div>
+
+    <!-- Fixed Bottom Audio Player -->
+    <div class="bottom-player">
+        <div class="player-info">
+            <img id="now-playing-img" src="https://via.placeholder.com/40x40/1db954/ffffff?text=🎵" alt="Cover">
+            <div class="player-text">
+                <h4 id="now-playing-title">Not Playing</h4>
+                <p id="now-playing-artist">-</p>
+            </div>
+        </div>
         <div class="controls">
-            <button class="btn" id="prev" onclick="prevSong()">⏮️</button>
-            <button class="btn play-btn" id="play" onclick="togglePlay()">▶️</button>
-            <button class="btn" id="next" onclick="nextSong()">⏭️</button>
-        </div>
-
-        <div class="file-upload">
-            <input type="file" id="audio-upload" accept="audio/*" multiple>
+            <button id="playBtn" onclick="togglePlay()">▶️</button>
         </div>
     </div>
 
-    <audio id="audio"></audio>
+    <audio id="audioPlayer"></audio>
 
     <script>
-        const audio = document.getElementById('audio');
-        const playBtn = document.getElementById('play');
-        const prevBtn = document.getElementById('prev');
-        const nextBtn = document.getElementById('next');
-        const title = document.getElementById('title');
-        const progress = document.getElementById('progress');
-        const currentTimeEl = document.getElementById('current-time');
-        const durationEl = document.getElementById('duration');
-        const cover = document.getElementById('cover');
-        const audioUpload = document.getElementById('audio-upload');
-
-        let playlist = [];
-        let currentSongIndex = 0;
+        const audio = document.getElementById('audioPlayer');
+        const playBtn = document.getElementById('playBtn');
+        const searchInput = document.getElementById('searchInput');
+        const resultsContainer = document.getElementById('results');
+        const loadingText = document.getElementById('loading');
+        
         let isPlaying = false;
 
-        // Load files from device
-        audioUpload.addEventListener('change', function(event) {
-            const files = event.target.files;
-            if (files.length > 0) {
-                playlist = [];
-                for (let i = 0; i < files.length; i++) {
-                    playlist.push(files[i]);
-                }
-                currentSongIndex = 0;
-                loadSong(playlist[currentSongIndex]);
-            }
-        });
+        // Search Songs API Fetch
+        function searchSongs() {
+            let query = searchInput.value.trim();
+            if(query === "") return;
 
-        function loadSong(file) {
-            title.innerText = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
-            audio.src = URL.createObjectURL(file);
-            progress.value = 0;
-            if (isPlaying) {
-                audio.play();
-            }
+            resultsContainer.innerHTML = "";
+            loadingText.style.display = "block";
+
+            // Using iTunes Public API for online search and streaming
+            let apiUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=15`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    loadingText.style.display = "none";
+                    displayResults(data.results);
+                })
+                .catch(error => {
+                    loadingText.style.display = "none";
+                    alert("Network error! Check your internet connection.");
+                });
         }
 
+        // Show Results on Screen
+        function displayResults(songs) {
+            if(songs.length === 0) {
+                resultsContainer.innerHTML = "<p style='text-align:center;'>No songs found.</p>";
+                return;
+            }
+
+            songs.forEach(song => {
+                let songElement = document.createElement('div');
+                songElement.className = 'song-item';
+                
+                // Get high quality image by replacing URL text
+                let imgUrl = song.artworkUrl100.replace('100x100bb', '200x200bb');
+
+                songElement.innerHTML = `
+                    <img src="${imgUrl}" alt="cover">
+                    <div class="song-info">
+                        <h4>${song.trackName}</h4>
+                        <p>${song.artistName}</p>
+                    </div>
+                `;
+
+                // Add Click Event to Play Online Stream URL
+                songElement.onclick = () => playOnlineStream(song.previewUrl, song.trackName, song.artistName, imgUrl);
+                
+                resultsContainer.appendChild(songElement);
+            });
+        }
+
+        // Play Online URL
+        function playOnlineStream(streamUrl, title, artist, img) {
+            // Update Bottom Player UI
+            document.getElementById('now-playing-title').innerText = title;
+            document.getElementById('now-playing-artist').innerText = artist;
+            document.getElementById('now-playing-img').src = img;
+
+            // Set audio source to Online URL and Play
+            audio.src = streamUrl;
+            audio.play();
+            
+            isPlaying = true;
+            playBtn.innerText = "⏸️";
+        }
+
+        // Play/Pause Toggle
         function togglePlay() {
-            if (playlist.length === 0) return alert("Pehle niche se gaane select karein!");
+            if (!audio.src) return; // No song loaded
             
             if (isPlaying) {
                 audio.pause();
-                playBtn.innerText = '▶️';
-                cover.classList.remove('playing');
+                playBtn.innerText = "▶️";
             } else {
                 audio.play();
-                playBtn.innerText = '⏸️';
-                cover.classList.add('playing');
+                playBtn.innerText = "⏸️";
             }
             isPlaying = !isPlaying;
         }
 
-        function nextSong() {
-            if (playlist.length === 0) return;
-            currentSongIndex = (currentSongIndex + 1) % playlist.length;
-            loadSong(playlist[currentSongIndex]);
-            if (!isPlaying) togglePlay();
-        }
-
-        function prevSong() {
-            if (playlist.length === 0) return;
-            currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
-            loadSong(playlist[currentSongIndex]);
-            if (!isPlaying) togglePlay();
-        }
-
-        // Update Progress Bar
-        audio.addEventListener('timeupdate', updateProgress);
-
-        function updateProgress() {
-            const { duration, currentTime } = audio;
-            if (duration) {
-                progress.max = duration;
-                progress.value = currentTime;
-                
-                let currentMinutes = Math.floor(currentTime / 60);
-                let currentSeconds = Math.floor(currentTime % 60);
-                if(currentSeconds < 10) currentSeconds = "0" + currentSeconds;
-                currentTimeEl.innerText = `${currentMinutes}:${currentSeconds}`;
-
-                let durationMinutes = Math.floor(duration / 60);
-                let durationSeconds = Math.floor(duration % 60);
-                if(durationSeconds < 10) durationSeconds = "0" + durationSeconds;
-                durationEl.innerText = `${durationMinutes}:${durationSeconds}`;
-            }
-        }
-
-        // Seek Audio
-        progress.addEventListener('input', () => {
-            audio.currentTime = progress.value;
-        });
-
-        // Auto play next song
-        audio.addEventListener('ended', nextSong);
+        // When song ends naturally
+        audio.onended = function() {
+            isPlaying = false;
+            playBtn.innerText = "▶️";
+        };
     </script>
 </body>
 </html>
