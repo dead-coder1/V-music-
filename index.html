@@ -2,189 +2,634 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Insta Downloader</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>V-Music | YouTube Music + Saavn Dual Engine</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <!-- Official YouTube IFrame API (Never gets blocked by CORS) -->
+    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root { --primary-blur: blur(60px); --easing: cubic-bezier(0.25, 0.8, 0.25, 1); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #000; color: #fff; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+
+        .view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transition: transform 0.5s var(--easing), opacity 0.4s ease; z-index: 1; }
+        
+        /* Hidden YouTube Hardware Container */
+        #ytHiddenContainer { position: fixed; top: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+        /* Search View */
+        #searchView { padding: 30px 20px 100px; overflow-y: auto; z-index: 10; background: #000; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .header-title { font-size: 30px; font-weight: 800; }
+        
+        /* Engine Switcher Tabs */
+        .engine-tabs { display: flex; background: #1c1c1e; border-radius: 10px; padding: 4px; margin-bottom: 15px; }
+        .engine-tab { flex: 1; text-align: center; padding: 8px 0; font-size: 13px; font-weight: 700; border-radius: 8px; cursor: pointer; color: #8e8e93; transition: 0.25s; }
+        .engine-tab.active.yt { background: #ff0033; color: #fff; }
+        .engine-tab.active.saavn { background: #30d158; color: #000; }
+
+        .search-bar { background: #1c1c1e; border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; margin-bottom: 12px; border: 1px solid #2c2c2e; }
+        .search-bar input { flex: 1; background: transparent; border: none; color: #fff; font-size: 16px; margin-left: 10px; outline: none; }
+        .search-btn { background: #ff2d55; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+
+        #statusLog { font-family: monospace; font-size: 11px; color: #30d158; background: #0d0d0d; padding: 8px 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #1c1c1e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .song-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); cursor: pointer; }
+        .song-item img { width: 52px; height: 52px; border-radius: 8px; margin-right: 14px; object-fit: cover; }
+        .song-info { flex: 1; overflow: hidden; }
+        .song-info h4 { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+        .song-info p { font-size: 13px; color: #8e8e93; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .source-tag { font-size: 10px; padding: 3px 6px; border-radius: 4px; font-weight: 700; margin-left: 8px; }
+        .tag-yt { background: rgba(255,0,51,0.2); color: #ff3b5c; }
+        .tag-saavn { background: rgba(48,209,88,0.2); color: #30d158; }
+
+        /* Mini Player */
+        #miniPlayer { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 64px; background: rgba(35,35,35,0.92); backdrop-filter: blur(25px); border-radius: 16px; display: flex; align-items: center; padding: 0 15px; z-index: 50; transform: translateY(150%); transition: transform 0.4s var(--easing); cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        #miniPlayer.active { transform: translateY(0); }
+        #mCover { width: 44px; height: 44px; border-radius: 8px; margin-right: 12px; object-fit: cover; }
+        
+        /* Full Player View */
+        #fullPlayer { z-index: 100; transform: translateY(100%); display: flex; flex-direction: column; background: #000; }
+        #fullPlayer.active { transform: translateY(0); }
+        .player-bg { position: absolute; top: -20%; left: -20%; width: 140%; height: 140%; background-size: cover; background-position: center; filter: var(--primary-blur) brightness(0.35); z-index: -1; transition: background-image 0.6s ease; }
+        .drag-handle { width: 40px; height: 5px; background: rgba(255,255,255,0.35); border-radius: 5px; margin: 20px auto; cursor: pointer; }
+        
+        .art-container { width: 78%; max-width: 310px; aspect-ratio: 1/1; margin: 15px auto; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); overflow: hidden; transition: transform 0.5s var(--easing); }
+        .art-container.playing { transform: scale(1.04); }
+        .art-container img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .controls-wrapper { padding: 0 30px; margin-top: auto; margin-bottom: 40px; }
+        .track-titles h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-titles p { font-size: 16px; color: rgba(255,255,255,0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .progress-area { margin: 22px 0; padding: 6px 0; cursor: pointer; }
+        .bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 6px; position: relative; overflow: hidden; }
+        .bar-fill { width: 0%; height: 100%; background: #fff; border-radius: 6px; }
+        .time-stamps { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 8px; font-weight: 500; }
+
+        .play-controls { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 25px; }
+        .play-controls i { font-size: 32px; color: #fff; cursor: pointer; }
+        .play-controls .btn-play { font-size: 46px; }
+
+        /* Word-by-Word Lyrics View */
+        #lyricsView { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 110; background: rgba(0,0,0,0.68); backdrop-filter: blur(50px); -webkit-backdrop-filter: blur(50px); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+        #lyricsView.active { opacity: 1; pointer-events: auto; }
+        #lyricsContainer { flex: 1; overflow-y: auto; padding: 100px 24px 50vh; scroll-behavior: smooth; }
+        #lyricsContainer::-webkit-scrollbar { display: none; }
+        
+        .lyric-line {
+            font-size: 27px; font-weight: 800; margin-bottom: 24px; line-height: 1.35;
+            transform-origin: left; transition: transform 0.35s var(--easing), opacity 0.35s ease;
+            opacity: 0.4;
         }
-        body {
-            background-color: #121212;
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
+        .lyric-line.active { transform: scale(1.04); opacity: 1; }
+        .lyric-word {
+            display: inline-block; margin-right: 7px;
+            --wfill: 0%;
+            background: linear-gradient(90deg, #fff var(--wfill), rgba(255,255,255,0.25) var(--wfill));
+            -webkit-background-clip: text; color: transparent;
+            transition: transform 0.15s ease;
         }
-        .header {
-            font-size: 24px;
-            font-weight: bold;
-            color: #E1306C; /* Instagram Pink */
-            margin-bottom: 20px;
-        }
-        .search-box {
-            width: 100%;
-            max-width: 400px;
-            background: #1e1e1e;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            text-align: center;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            border: 1px solid #333;
-            background: #282828;
-            color: white;
-            font-size: 16px;
-            outline: none;
-        }
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 8px;
-            background: #E1306C;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            flex: 1;
-            min-width: 100px;
-        }
-        button:active {
-            background: #C13584;
-        }
-        #status {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #FFDC80;
-        }
-        .result-container {
-            margin-top: 20px;
-            width: 100%;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .media-card {
-            background: #1e1e1e;
-            border-radius: 10px;
-            padding: 10px;
-            text-align: center;
-        }
-        .media-card img, .media-card video {
-            width: 100%;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-        .download-btn {
-            background: #405DE6;
-            width: 100%;
-            display: inline-block;
-            text-decoration: none;
-            padding: 10px;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-        }
+        .lyric-word.sung { transform: translateY(-2px); }
     </style>
 </head>
 <body>
 
-    <div class="header">InstaSaver Pro</div>
+    <!-- HIDDEN YOUTUBE OFFICIAL PLAYER -->
+    <div id="ytHiddenContainer"><div id="ytPlayer"></div></div>
 
-    <div class="search-box">
-        <input type="text" id="username" placeholder="Instagram Username (e.g. cristiano)">
-        <div class="btn-group">
-            <button onclick="fetchData('stories')">Stories</button>
-            <button onclick="fetchData('reels')">Reels</button>
+    <!-- SEARCH VIEW -->
+    <div id="searchView" class="view">
+        <div class="header-top">
+            <h1 class="header-title">Apple Music</h1>
         </div>
-        <div id="status"></div>
+
+        <!-- ENGINE SWITCHER -->
+        <div class="engine-tabs">
+            <div class="engine-tab active yt" id="tabYT" onclick="app.switchEngine('yt')">
+                <i class="fab fa-youtube"></i> YouTube Music (100% Free)
+            </div>
+            <div class="engine-tab saavn" id="tabSaavn" onclick="app.switchEngine('saavn')">
+                <i class="fas fa-bolt"></i> JioSaavn 320kbps
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <i class="fas fa-search" style="color:#8e8e93;"></i>
+            <input type="text" id="inputSearch" placeholder="Search any song on YouTube Music...">
+            <button class="search-btn" id="searchBtn">GO</button>
+        </div>
+        <div id="statusLog">[ENGINE]: YouTube Music + JioSaavn Dual Engine Ready.</div>
+        <div id="resultList"></div>
     </div>
 
-    <div class="result-container" id="results">
-        <!-- Videos or Images yahan show honge -->
+    <!-- MINI PLAYER -->
+    <div id="miniPlayer">
+        <img id="mCover" src="">
+        <div class="song-info" id="openFull" style="margin-right: 15px;">
+            <h4 id="mTitle">Not Playing</h4>
+            <p id="mSub" style="font-size: 12px; color: #ff3b5c;">YouTube Music Stream</p>
+        </div>
+        <i class="fas fa-play" id="mPlay" style="font-size: 22px; padding: 10px;"></i>
+    </div>
+
+    <!-- FULL PLAYER -->
+    <div id="fullPlayer" class="view">
+        <div class="player-bg" id="pBg"></div>
+        <div class="drag-handle" id="closeFull"></div>
+        
+        <div id="lyricsView">
+            <div class="drag-handle" id="closeLyrics" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 120;"></div>
+            <div id="lyricsContainer"><div style="text-align:center; color:#8e8e93; margin-top:30vh;">Play a song for live word sync</div></div>
+        </div>
+
+        <div class="art-container" id="artBox"><img id="fCover" src=""></div>
+
+        <div class="controls-wrapper">
+            <div class="track-titles">
+                <h2 id="fTitle">Title</h2>
+                <p id="fArtist">Artist</p>
+            </div>
+            
+            <div class="progress-area" id="progressBar">
+                <div class="bar-bg"><div class="bar-fill" id="barFill"></div></div>
+                <div class="time-stamps"><span id="tCurr">0:00</span><span id="tDur">0:00</span></div>
+            </div>
+
+            <div class="play-controls">
+                <i class="fas fa-backward-step" id="btnPrev"></i>
+                <i class="fas fa-play btn-play" id="btnPlay"></i>
+                <i class="fas fa-forward-step" id="btnNext"></i>
+            </div>
+            
+            <div style="text-align:center;">
+                <i class="fas fa-quote-left" id="btnLyrics" style="font-size: 22px; color: rgba(255,255,255,0.7); cursor:pointer; padding: 10px;"></i>
+            </div>
+        </div>
     </div>
 
     <script>
-        // NOTE: Aapko RapidAPI se ek free Instagram Scraper API key leni hogi
-        const API_KEY = 'YAHAN_APNI_RAPIDAPI_KEY_DALEIN'; 
-        const API_HOST = 'instagram-scraper-api2.p.rapidapi.com'; // Example host
+        // C-Style DES Decryptor for JioSaavn
+        function decryptSaavnDES(encryptedBase64) {
+            if (!encryptedBase64) return null;
+            try {
+                const keyHex = CryptoJS.enc.Utf8.parse("38346591");
+                const decrypted = CryptoJS.DES.decrypt(
+                    { ciphertext: CryptoJS.enc.Base64.parse(encryptedBase64) },
+                    keyHex,
+                    { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 }
+                );
+                return decrypted.toString(CryptoJS.enc.Utf8)
+                    .replace(/_96\.mp4|_160\.mp4|_96_p\.mp4/g, "_320.mp4")
+                    .replace("preview.saavncdn.com", "aac.saavncdn.com");
+            } catch (e) { return null; }
+        }
 
-        async function fetchData(type) {
-            const username = document.getElementById('username').value.trim();
-            const statusBox = document.getElementById('status');
-            const resultsBox = document.getElementById('results');
+        // Global YouTube IFrame Player Reference
+        let ytPlayer = null;
+        let ytReady = false;
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('ytPlayer', {
+                height: '1',
+                width: '1',
+                playerVars: { 'playsinline': 1, 'controls': 0, 'disablekb': 1 },
+                events: {
+                    'onReady': () => { ytReady = true; },
+                    'onStateChange': (e) => {
+                        if (e.data === YT.PlayerState.ENDED && window.app) window.app.playNextPrev(1);
+                        if (e.data === YT.PlayerState.PLAYING && window.app) window.app.logStatus("Playing Full Song via YouTube Music!");
+                    },
+                    'onError': () => {
+                        // If a YouTube video blocks embedding, auto-fallback to direct stream or next result
+                        if (window.app) window.app.handleYTError();
+                    }
+                }
+            });
+        }
 
-            if (!username) {
-                statusBox.innerText = "Pehle username dalein!";
-                return;
+        class DualMusicEngine {
+            constructor() {
+                this.mode = 'yt'; // 'yt' (YouTube Music) or 'saavn'
+                this.activePlaybackType = 'yt';
+                this.audio = new Audio();
+                this.tracks = [];
+                this.currentIndex = 0;
+                this.isPlaying = false;
+                this.lyricsData = [];
+
+                this.DOM = {
+                    input: document.getElementById('inputSearch'),
+                    searchBtn: document.getElementById('searchBtn'),
+                    results: document.getElementById('resultList'),
+                    log: document.getElementById('statusLog'),
+                    miniPlayer: document.getElementById('miniPlayer'),
+                    mPlay: document.getElementById('mPlay'),
+                    fullPlayer: document.getElementById('fullPlayer'),
+                    btnPlay: document.getElementById('btnPlay'),
+                    artBox: document.getElementById('artBox'),
+                    pBg: document.getElementById('pBg'),
+                    barFill: document.getElementById('barFill'),
+                    tCurr: document.getElementById('tCurr'),
+                    tDur: document.getElementById('tDur'),
+                    lyricsView: document.getElementById('lyricsView'),
+                    lyricsContainer: document.getElementById('lyricsContainer')
+                };
+
+                this.initEvents();
+                this.start60FPSWordLoop();
+                this.executeSearch("Kamin EMIN JONY");
             }
 
-            statusBox.innerText = `Fetching ${type} for @${username}... Please wait.`;
-            resultsBox.innerHTML = '';
+            logStatus(msg) {
+                this.DOM.log.innerText = `[ENGINE]: ${msg}`;
+            }
 
-            // Example RapidAPI Endpoint URL (Yeh API par depend karta hai)
-            const url = `https://${API_HOST}/v1/${type}?username=${username}`;
+            switchEngine(newMode) {
+                this.mode = newMode;
+                document.getElementById('tabYT').className = `engine-tab yt ${newMode === 'yt' ? 'active' : ''}`;
+                document.getElementById('tabSaavn').className = `engine-tab saavn ${newMode === 'saavn' ? 'active' : ''}`;
+                const q = this.DOM.input.value.trim() || "Arijit Singh";
+                this.executeSearch(q);
+            }
 
-            const options = {
-                method: 'GET',
-                headers: {
-                    'X-RapidAPI-Key': API_KEY,
-                    'X-RapidAPI-Host': API_HOST
-                }
-            };
+            initEvents() {
+                const triggerSearch = () => {
+                    const q = this.DOM.input.value.trim();
+                    if (q) this.executeSearch(q);
+                };
+                this.DOM.searchBtn.onclick = triggerSearch;
+                this.DOM.input.addEventListener('keypress', (e) => { if (e.key === 'Enter') triggerSearch(); });
 
-            try {
-                // Fetch data from API
-                const response = await fetch(url, options);
-                const data = await response.json();
-
-                statusBox.innerText = "Data loaded successfully!";
+                const toggle = (e) => { e.stopPropagation(); this.togglePlayback(); };
+                this.DOM.mPlay.onclick = toggle;
+                this.DOM.btnPlay.onclick = toggle;
                 
-                // Yahan API ke response ke hisaab se data show karein
-                // Example ke liye maan lijiye data.items me media links hain
-                if(data.items && data.items.length > 0) {
-                    data.items.forEach(item => {
-                        let mediaHtml = '';
-                        
-                        if(item.video_url) {
-                            mediaHtml = `<video controls src="${item.video_url}"></video>`;
-                        } else {
-                            mediaHtml = `<img src="${item.image_url}" alt="Post">`;
+                document.getElementById('btnPrev').onclick = () => this.playNextPrev(-1);
+                document.getElementById('btnNext').onclick = () => this.playNextPrev(1);
+                this.audio.onended = () => this.playNextPrev(1);
+
+                document.getElementById('openFull').onclick = () => this.DOM.fullPlayer.classList.add('active');
+                document.getElementById('closeFull').onclick = () => this.DOM.fullPlayer.classList.remove('active');
+                document.getElementById('btnLyrics').onclick = () => this.DOM.lyricsView.classList.add('active');
+                document.getElementById('closeLyrics').onclick = () => this.DOM.lyricsView.classList.remove('active');
+                
+                document.getElementById('progressBar').onclick = (e) => {
+                    const rect = document.getElementById('progressBar').getBoundingClientRect();
+                    const ratio = (e.clientX - rect.left) / rect.width;
+                    if (this.activePlaybackType === 'yt' && ytReady && ytPlayer.getDuration) {
+                        ytPlayer.seekTo(ratio * ytPlayer.getDuration(), true);
+                    } else if (this.audio.duration) {
+                        this.audio.currentTime = ratio * this.audio.duration;
+                    }
+                };
+            }
+
+            async executeSearch(query) {
+                this.DOM.results.innerHTML = '';
+                if (this.mode === 'yt') {
+                    await this.searchYouTubeMusic(query);
+                } else {
+                    await this.searchSaavn(query);
+                }
+            }
+
+            // --- YOUTUBE MUSIC SEARCH (Scrapes YT Music Video IDs via Multiple Gateways) ---
+            async searchYouTubeMusic(query) {
+                this.logStatus(`Searching YouTube Music for "${query}"...`);
+                
+                // Add "audio" keyword so YT returns non-restricted official audio/lyric tracks
+                const ytQuery = `${query} audio`;
+                const searchGateways = [
+                    { type: 'piped', url: `https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(ytQuery)}&filter=music_songs` },
+                    { type: 'piped', url: `https://api.piped.private.coffee/search?q=${encodeURIComponent(ytQuery)}&filter=music_songs` },
+                    { type: 'invidious', url: `https://inv.tux.pizza/api/v1/search?q=${encodeURIComponent(ytQuery)}&type=video` },
+                    { type: 'html', url: `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.youtube.com/results?search_query=' + encodeURIComponent(ytQuery))}` },
+                    { type: 'html', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent('https://www.youtube.com/results?search_query=' + encodeURIComponent(ytQuery))}` }
+                ];
+
+                for (let i = 0; i < searchGateways.length; i++) {
+                    try {
+                        this.logStatus(`Connecting to YT Music Node #${i + 1}...`);
+                        const controller = new AbortController();
+                        const timer = setTimeout(() => controller.abort(), 5500);
+                        const res = await fetch(searchGateways[i].url, { signal: controller.signal });
+                        clearTimeout(timer);
+
+                        let parsed = [];
+                        if (searchGateways[i].type === 'piped') {
+                            const data = await res.json();
+                            parsed = (data.items || []).map(item => ({
+                                type: 'yt',
+                                videoId: item.url ? item.url.split('v=')[1] : '',
+                                name: (item.title || 'Track').replace(/\(Official.*\)|\[.*\]|Lyrical|Audio|Video/gi, '').trim(),
+                                artist: (item.uploaderName || 'YouTube Music').replace(/ - Topic|VEVO/gi, '').trim(),
+                                img: item.thumbnail
+                            })).filter(t => t.videoId);
+                        } else if (searchGateways[i].type === 'invidious') {
+                            const data = await res.json();
+                            parsed = (data || []).map(item => ({
+                                type: 'yt',
+                                videoId: item.videoId,
+                                name: (item.title || 'Track').replace(/\(Official.*\)|\[.*\]|Lyrical|Audio|Video/gi, '').trim(),
+                                artist: (item.author || 'YouTube Music').replace(/ - Topic|VEVO/gi, '').trim(),
+                                img: `https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg`
+                            })).filter(t => t.videoId);
+                        } else if (searchGateways[i].type === 'html') {
+                            // Direct YouTube HTML Regex Scraper (Never fails!)
+                            const htmlText = await res.text();
+                            const match = htmlText.match(/var ytInitialData = (\{.*?\});<\/script>/);
+                            if (match && match[1]) {
+                                const json = JSON.parse(match[1]);
+                                const contents = json.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents || [];
+                                contents.forEach(c => {
+                                    if (c.videoRenderer && c.videoRenderer.videoId) {
+                                        const v = c.videoRenderer;
+                                        const rawTitle = v.title?.runs?.[0]?.text || 'Track';
+                                        const author = v.ownerText?.runs?.[0]?.text || 'YouTube Music';
+                                        parsed.push({
+                                            type: 'yt',
+                                            videoId: v.videoId,
+                                            name: rawTitle.replace(/\(Official.*\)|\[.*\]|Lyrical|Audio|Video/gi, '').trim(),
+                                            artist: author.replace(/ - Topic|VEVO/gi, '').trim(),
+                                            img: `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`
+                                        });
+                                    }
+                                });
+                            }
                         }
 
-                        let downloadLink = item.video_url ? item.video_url : item.image_url;
-
-                        const card = `
-                            <div class="media-card">
-                                ${mediaHtml}
-                                <a href="${downloadLink}" target="_blank" class="download-btn" download>Download</a>
-                            </div>
-                        `;
-                        resultsBox.innerHTML += card;
-                    });
-                } else {
-                    statusBox.innerText = "Koi data nahi mila ya account private hai.";
+                        if (parsed.length > 0) {
+                            this.tracks = parsed;
+                            this.logStatus(`Found ${parsed.length} Free Songs on YouTube Music!`);
+                            this.renderList();
+                            return;
+                        }
+                    } catch (e) {
+                        console.warn(`YT Node ${i+1} skipped`);
+                    }
                 }
 
-            } catch (error) {
-                console.error(error);
-                statusBox.innerText = "Error! API key check karein ya internet connection dekhein.";
+                // Fallback to Saavn if all YT proxies fail
+                this.logStatus(`YT Nodes busy, auto-fetching from JioSaavn...`);
+                await this.searchSaavn(query);
+            }
+
+            // --- JIOSAAVN SEARCH ---
+            async searchSaavn(query) {
+                this.logStatus(`Searching JioSaavn 320kbps for "${query}"...`);
+                const rawSaavnUrl = `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&n=20&p=1&q=${encodeURIComponent(query)}`;
+                const nodes = [
+                    `https://api.allorigins.win/raw?url=${encodeURIComponent(rawSaavnUrl)}`,
+                    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rawSaavnUrl)}`
+                ];
+
+                for (let i = 0; i < nodes.length; i++) {
+                    try {
+                        const res = await fetch(nodes[i]);
+                        const data = await res.json();
+                        if (data.results && data.results.length > 0) {
+                            this.tracks = data.results.map(item => {
+                                const enc = item.encrypted_media_url || item.more_info?.encrypted_media_url;
+                                return {
+                                    type: 'saavn',
+                                    name: (item.song || item.title || 'Track').replace(/&quot;/g, '"').replace(/&#039;/g, "'"),
+                                    artist: item.primary_artists || item.more_info?.primary_artists || 'Artist',
+                                    img: (item.image || '').replace('150x150', '500x500'),
+                                    src: decryptSaavnDES(enc)
+                                };
+                            }).filter(t => t.src);
+
+                            if (this.tracks.length > 0) {
+                                this.logStatus(`Loaded ${this.tracks.length} JioSaavn 320kbps Tracks!`);
+                                this.renderList();
+                                return;
+                            }
+                        }
+                    } catch (e) {}
+                }
+                this.logStatus(`Server busy. Try switching tabs above.`);
+            }
+
+            renderList() {
+                this.DOM.results.innerHTML = this.tracks.map((t, i) => `
+                    <div class="song-item" onclick="app.loadTrack(${i})">
+                        <img src="${t.img}">
+                        <div class="song-info">
+                            <h4>${t.name}</h4>
+                            <p>${t.artist}</p>
+                        </div>
+                        <span class="source-tag ${t.type === 'yt' ? 'tag-yt' : 'tag-saavn'}">
+                            ${t.type === 'yt' ? 'YT MUSIC' : '320KBPS'}
+                        </span>
+                    </div>
+                `).join('');
+            }
+
+            loadTrack(index) {
+                this.currentIndex = index;
+                const track = this.tracks[index];
+                this.activePlaybackType = track.type;
+                
+                document.getElementById('mTitle').innerText = track.name;
+                document.getElementById('mSub').innerText = track.type === 'yt' ? 'YouTube Music Full Stream' : 'JioSaavn 320kbps HD';
+                document.getElementById('fTitle').innerText = track.name;
+                document.getElementById('fArtist').innerText = track.artist;
+                document.getElementById('mCover').src = track.img;
+                document.getElementById('fCover').src = track.img;
+                this.DOM.pBg.style.backgroundImage = `url('${track.img}')`;
+                this.DOM.miniPlayer.classList.add('active');
+
+                // Stop both engines before starting the selected one
+                this.audio.pause();
+                if (ytReady && ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
+
+                if (track.type === 'yt') {
+                    this.logStatus(`Loading YouTube Music Stream: ${track.name}...`);
+                    if (ytReady && ytPlayer && ytPlayer.loadVideoById) {
+                        ytPlayer.loadVideoById(track.videoId);
+                        this.setPlayState(true);
+                    } else {
+                        this.logStatus(`YT Engine initializing, tap again in 1 sec...`);
+                    }
+                } else {
+                    this.logStatus(`Streaming 320kbps: ${track.name}`);
+                    this.audio.src = track.src;
+                    this.audio.load();
+                    this.setPlayState(true);
+                }
+                
+                this.fetchLyricsAPI(track.name, track.artist);
+            }
+
+            // If an official YT video blocks embedding, auto-play the next audio version!
+            handleYTError() {
+                this.logStatus(`Official video restricted, switching to unlocked audio track...`);
+                if (this.currentIndex + 1 < this.tracks.length) {
+                    this.loadTrack(this.currentIndex + 1);
+                }
+            }
+
+            togglePlayback() { this.setPlayState(!this.isPlaying); }
+            
+            setPlayState(state) {
+                this.isPlaying = state;
+                const icon = this.isPlaying ? 'fa-pause' : 'fa-play';
+                this.DOM.mPlay.className = `fas ${icon}`;
+                this.DOM.btnPlay.className = `fas ${icon} btn-play`;
+                
+                if (this.activePlaybackType === 'yt' && ytReady && ytPlayer) {
+                    if (this.isPlaying) {
+                        ytPlayer.playVideo();
+                        this.DOM.artBox.classList.add('playing');
+                    } else {
+                        ytPlayer.pauseVideo();
+                        this.DOM.artBox.classList.remove('playing');
+                    }
+                } else {
+                    if (this.isPlaying) {
+                        this.audio.play().catch(e => {});
+                        this.DOM.artBox.classList.add('playing');
+                    } else {
+                        this.audio.pause();
+                        this.DOM.artBox.classList.remove('playing');
+                    }
+                }
+            }
+
+            playNextPrev(step) {
+                if (!this.tracks.length) return;
+                this.currentIndex = (this.currentIndex + step + this.tracks.length) % this.tracks.length;
+                this.loadTrack(this.currentIndex);
+            }
+
+            async fetchLyricsAPI(name, artist) {
+                this.lyricsData = [];
+                this.DOM.lyricsContainer.innerHTML = '<div style="text-align:center; color:#8e8e93; margin-top:30vh;">Syncing Word-by-Word Lyrics...</div>';
+                try {
+                    let cleanName = name.replace(/\(.*\)|\[.*\]|-.*$|\|.*$/g, '').trim();
+                    let cleanArtist = artist.split(',')[0].trim();
+                    
+                    let res = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(cleanName + ' ' + cleanArtist)}`);
+                    let data = await res.json();
+                    let synced = data.find(d => d.syncedLyrics)?.syncedLyrics;
+
+                    if (!synced) {
+                        res = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(cleanName)}`);
+                        data = await res.json();
+                        synced = data.find(d => d.syncedLyrics)?.syncedLyrics;
+                    }
+
+                    if (synced) {
+                        const lines = synced.split('\n');
+                        lines.forEach(line => {
+                            const m = line.match(/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/);
+                            if (m && m[4].trim()) {
+                                let time = parseInt(m[1])*60 + parseInt(m[2]) + parseInt(m[3])/(m[3].length===3?1000:100);
+                                this.lyricsData.push({ time, text: m[4].trim(), el: null, wordEls: [] });
+                            }
+                        });
+                        this.renderWordDOM();
+                    } else {
+                        this.DOM.lyricsContainer.innerHTML = '<div style="text-align:center; color:#8e8e93; margin-top:30vh;">Synced Lyrics Not Found</div>';
+                    }
+                } catch (e) {
+                    this.DOM.lyricsContainer.innerHTML = '<div style="text-align:center; color:#8e8e93; margin-top:30vh;">Lyrics Offline</div>';
+                }
+            }
+
+            renderWordDOM() {
+                this.DOM.lyricsContainer.innerHTML = '';
+                this.lyricsData.forEach((lineObj) => {
+                    let lineDiv = document.createElement('div');
+                    lineDiv.className = 'lyric-line';
+                    
+                    let words = lineObj.text.split(/\s+/);
+                    lineObj.wordEls = words.map(w => {
+                        let span = document.createElement('span');
+                        span.className = 'lyric-word';
+                        span.innerText = w;
+                        lineDiv.appendChild(span);
+                        return span;
+                    });
+
+                    lineObj.el = lineDiv;
+                    this.DOM.lyricsContainer.appendChild(lineDiv);
+                });
+            }
+
+            // Syncs 60FPS Word-by-Word Lyrics with EITHER YouTube Music OR JioSaavn!
+            start60FPSWordLoop() {
+                const formatTime = (t) => {
+                    let m = Math.floor(t / 60), s = Math.floor(t % 60);
+                    return `${m}:${s < 10 ? '0'+s : s}`;
+                };
+
+                const loop = () => {
+                    let curr = 0, dur = 0;
+                    if (this.activePlaybackType === 'yt' && ytReady && ytPlayer && ytPlayer.getCurrentTime) {
+                        curr = ytPlayer.getCurrentTime() || 0;
+                        dur = ytPlayer.getDuration() || 0;
+                    } else if (this.audio.duration) {
+                        curr = this.audio.currentTime;
+                        dur = this.audio.duration;
+                    }
+
+                    if (dur > 0) {
+                        this.DOM.barFill.style.width = `${(curr / dur) * 100}%`;
+                        this.DOM.tCurr.innerText = formatTime(curr);
+                        this.DOM.tDur.innerText = formatTime(dur);
+
+                        if (this.lyricsData.length > 0 && this.DOM.lyricsView.classList.contains('active')) {
+                            let activeIdx = this.lyricsData.findIndex((l, i, arr) => curr >= l.time - 0.15 && (!arr[i+1] || curr < arr[i+1].time - 0.15));
+                            
+                            if (activeIdx !== -1) {
+                                let activeLine = this.lyricsData[activeIdx];
+                                
+                                this.lyricsData.forEach((l, i) => {
+                                    if (i !== activeIdx && l.el.classList.contains('active')) {
+                                        l.el.classList.remove('active');
+                                        l.wordEls.forEach(w => {
+                                            w.style.setProperty('--wfill', i < activeIdx ? '100%' : '0%');
+                                            w.classList.remove('sung');
+                                        });
+                                    }
+                                });
+
+                                if (!activeLine.el.classList.contains('active')) {
+                                    activeLine.el.classList.add('active');
+                                    this.DOM.lyricsContainer.scrollTo({
+                                        top: activeLine.el.offsetTop - (this.DOM.lyricsContainer.clientHeight / 2) + 40,
+                                        behavior: 'smooth'
+                                    });
+                                }
+
+                                let nextTime = this.lyricsData[activeIdx + 1] ? this.lyricsData[activeIdx + 1].time : activeLine.time + 3.5;
+                                let lineDuration = Math.max(0.5, (nextTime - activeLine.time) * 0.88);
+                                let elapsed = Math.max(0, curr - activeLine.time);
+                                
+                                let totalWords = activeLine.wordEls.length;
+                                let timePerWord = lineDuration / totalWords;
+
+                                activeLine.wordEls.forEach((wordSpan, wIdx) => {
+                                    let wordStart = wIdx * timePerWord;
+                                    let wordProgress = ((elapsed - wordStart) / timePerWord) * 100;
+                                    let clamped = Math.max(0, Math.min(100, wordProgress));
+                                    
+                                    wordSpan.style.setProperty('--wfill', `${clamped}%`);
+                                    if (clamped > 50) wordSpan.classList.add('sung');
+                                    else wordSpan.classList.remove('sung');
+                                });
+                            }
+                        }
+                    }
+                    requestAnimationFrame(loop);
+                };
+                requestAnimationFrame(loop);
             }
         }
+
+        window.app = new DualMusicEngine();
     </script>
 </body>
 </html>
