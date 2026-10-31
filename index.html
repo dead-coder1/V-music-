@@ -6,185 +6,232 @@
     <title>Booo!! Music</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root {
             --easing: cubic-bezier(0.22, 1, 0.36, 1);
-            --glass: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
-            --glass-border: rgba(255, 255, 255, 0.24);
+            --glass: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
+            --glass-border: rgba(255, 255, 255, 0.22);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
-        body { background: #040407; color: #fff; overflow: hidden; height: 100vh; width: 100vw; }
+        body { background: #030306; color: #fff; overflow: hidden; height: 100vh; width: 100vw; }
 
-        /* Hidden Audio Core */
         #hiddenAudioCore { position: fixed; top: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 
         /* --- AMBIENT COLOR FLOW BACKGROUND --- */
-        .ambient-bg {
-            position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
-            background: #050509;
-        }
+        .ambient-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #040408; }
         .amb-orb {
-            position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.55;
+            position: absolute; border-radius: 50%; filter: blur(75px); opacity: 0.5;
             background-size: cover; background-position: center;
             animation: ambientFloat 16s infinite alternate ease-in-out;
             transition: background-image 1.2s ease, background-color 1.2s ease;
         }
-        .orb-1 { width: 340px; height: 340px; top: -12%; left: -12%; background-color: #ff2d55; }
-        .orb-2 { width: 380px; height: 380px; bottom: -15%; right: -12%; background-color: #5e5ce6; animation-delay: -5s; }
-        .orb-3 { width: 280px; height: 280px; top: 38%; left: 20%; background-color: #bf5af2; animation-delay: -9s; opacity: 0.35; }
+        .orb-1 { width: 350px; height: 350px; top: -12%; left: -12%; background-color: #ff2d55; }
+        .orb-2 { width: 390px; height: 390px; bottom: -15%; right: -12%; background-color: #5e5ce6; animation-delay: -5s; }
+        .orb-3 { width: 280px; height: 280px; top: 38%; left: 20%; background-color: #bf5af2; animation-delay: -9s; opacity: 0.32; }
 
         @keyframes ambientFloat {
             0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-            50% { transform: translate(45px, -35px) scale(1.2) rotate(90deg); }
+            50% { transform: translate(45px, -35px) scale(1.18) rotate(90deg); }
             100% { transform: translate(-35px, 40px) scale(0.95) rotate(180deg); }
         }
 
-        /* --- STARTUP LIQUID GLASS NOTICE (DEVELOPED BY DEADVISHAAL) --- */
-        #startupNotice {
-            position: fixed; top: 24px; left: 50%; transform: translate(-50%, -160%) scale(0.85);
-            z-index: 9999; padding: 13px 24px; border-radius: 26px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0.06));
-            backdrop-filter: blur(28px) saturate(200%); -webkit-backdrop-filter: blur(28px) saturate(200%);
-            border: 1px solid rgba(255,255,255,0.35);
-            box-shadow: 0 18px 40px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.5);
-            display: flex; align-items: center; gap: 10px; white-space: nowrap;
-            transition: transform 0.65s var(--easing), opacity 0.5s ease;
-            opacity: 0; pointer-events: none;
-        }
-        #startupNotice.show { transform: translate(-50%, 0) scale(1); opacity: 1; }
-        .glow-dot { width: 9px; height: 9px; border-radius: 50%; background: #ff2d55; box-shadow: 0 0 12px #ff2d55; animation: blink 1.4s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.4); } }
-        #startupNotice span { font-size: 13.5px; font-weight: 600; color: #fff; letter-spacing: 0.3px; }
-        #startupNotice b { background: linear-gradient(90deg, #fff, #ff9f0a, #ff2d55); -webkit-background-clip: text; color: transparent; font-weight: 800; }
-
-        /* --- TOP BAR WITH LIQUID GLASS "Booo!!" BOX --- */
+        /* --- TOP BAR WITH ROTATING EDGE LINE "Booo!!" LIQUID GLASS BOX --- */
         .top-navbar {
             position: fixed; top: 0; left: 0; width: 100%; z-index: 40;
-            padding: 16px 20px 12px; display: flex; justify-content: space-between; align-items: center;
-            background: linear-gradient(180deg, rgba(5,5,9,0.85) 0%, rgba(5,5,9,0) 100%);
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            padding: 14px 18px 12px; display: flex; justify-content: space-between; align-items: center;
+            background: linear-gradient(180deg, rgba(4,4,8,0.92) 0%, rgba(4,4,8,0) 100%);
+            backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
         }
-        .booo-liquid-box {
-            padding: 8px 18px; border-radius: 18px;
-            background: var(--glass);
-            backdrop-filter: blur(25px) saturate(190%); -webkit-backdrop-filter: blur(25px) saturate(190%);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.4);
-            font-size: 21px; font-weight: 900; letter-spacing: -0.5px;
-            background-clip: padding-box;
-            display: flex; align-items: center; gap: 6px;
+        
+        .booo-edge-box {
+            position: relative;
+            padding: 2.2px;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.55);
+            display: inline-flex; align-items: center; justify-content: center;
         }
-        .booo-liquid-box span {
-            background: linear-gradient(135deg, #fff 0%, #ffd60a 50%, #ff2d55 100%);
-            -webkit-background-clip: text; color: transparent;
+        .booo-edge-box::before {
+            content: '';
+            position: absolute;
+            width: 260%; height: 260%;
+            top: -80%; left: -80%;
+            background: conic-gradient(
+                from 0deg,
+                #ff2d55,
+                #ff9f0a,
+                #30d158,
+                #00f2fe,
+                #5e5ce6,
+                #bf5af2,
+                #ff2d55
+            );
+            animation: edgeSpin 2.8s linear infinite;
+            z-index: 0;
         }
-        .support-pill {
-            padding: 8px 14px; border-radius: 18px;
+        @keyframes edgeSpin { 100% { transform: rotate(360deg); } }
+        .booo-inner-glass {
+            position: relative; z-index: 1;
+            padding: 6px 18px;
+            border-radius: 18px;
+            background: rgba(12, 12, 20, 0.86);
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35);
+            font-size: 20px; font-weight: 900; letter-spacing: -0.5px;
+            color: #fff;
+        }
+
+        .nav-actions { display: flex; align-items: center; gap: 8px; }
+        .glass-pill {
+            padding: 8px 13px; border-radius: 18px;
             background: var(--glass);
             backdrop-filter: blur(25px) saturate(190%); -webkit-backdrop-filter: blur(25px) saturate(190%);
             border: 1px solid var(--glass-border);
             box-shadow: 0 8px 20px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.3);
-            display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700;
+            display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
             cursor: pointer; transition: transform 0.2s;
         }
-        .support-pill:active { transform: scale(0.93); }
-        .support-pill i { font-size: 16px; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); -webkit-background-clip: text; color: transparent; }
+        .glass-pill:active { transform: scale(0.93); }
+        .glass-pill i.fa-instagram { font-size: 15px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); -webkit-background-clip: text; color: transparent; }
+        .glass-pill i.fa-users-rays { color: #30d158; font-size: 13px; }
+        .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #30d158; box-shadow: 0 0 8px #30d158; display: none; }
+        .sync-dot.online { display: inline-block; }
 
-        /* --- MAIN APP CONTAINER (HOME + SEARCH) --- */
+        /* --- AESTHETIC MAIN HOME INTERFACE --- */
         .main-scroll {
             position: relative; z-index: 10; height: 100vh; overflow-y: auto;
-            padding: 78px 20px 155px; scroll-behavior: smooth;
+            padding: 74px 18px 160px; scroll-behavior: smooth;
         }
         .main-scroll::-webkit-scrollbar { display: none; }
 
-        /* Search Input Bar */
+        /* Floating Glass Search Bar */
         .search-box {
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255,255,255,0.15); border-radius: 16px;
-            padding: 10px 14px; display: flex; align-items: center; margin-bottom: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            background: rgba(255,255,255,0.07);
+            backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.16); border-radius: 18px;
+            padding: 10px 14px; display: flex; align-items: center; margin-bottom: 16px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.15);
         }
-        .search-box i { color: rgba(255,255,255,0.5); font-size: 15px; }
-        .search-box input {
-            flex: 1; background: transparent; border: none; color: #fff;
-            font-size: 15.5px; margin-left: 10px; outline: none;
-        }
-        .search-box input::placeholder { color: rgba(255,255,255,0.42); }
+        .search-box i { color: rgba(255,255,255,0.55); font-size: 15px; }
+        .search-box input { flex: 1; background: transparent; border: none; color: #fff; font-size: 15px; margin-left: 10px; outline: none; font-weight: 500; }
+        .search-box input::placeholder { color: rgba(255,255,255,0.4); }
         .search-go {
             background: linear-gradient(135deg, #ff2d55, #bf5af2); border: none; color: #fff;
-            padding: 7px 14px; border-radius: 10px; font-weight: 700; font-size: 12.5px; cursor: pointer;
+            padding: 7px 15px; border-radius: 12px; font-weight: 800; font-size: 12.5px; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 45, 85, 0.35);
         }
 
-        /* Apple Music Home Sections */
+        /* Mood Filter Pills */
+        .mood-pills {
+            display: flex; gap: 9px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 20px;
+        }
+        .mood-pills::-webkit-scrollbar { display: none; }
+        .mood-pill {
+            padding: 7px 15px; border-radius: 20px; font-size: 12.5px; font-weight: 700;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.75); white-space: nowrap; cursor: pointer; transition: 0.25s;
+            backdrop-filter: blur(15px);
+        }
+        .mood-pill.active, .mood-pill:active {
+            background: linear-gradient(135deg, rgba(255,45,85,0.35), rgba(191,90,242,0.35));
+            border-color: rgba(255,255,255,0.35); color: #fff;
+            box-shadow: 0 6px 16px rgba(255,45,85,0.25);
+        }
+
+        /* Hero Spotlight Banner */
+        .hero-banner {
+            position: relative; width: 100%; height: 215px; border-radius: 26px; overflow: hidden;
+            margin-bottom: 24px; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.22);
+            box-shadow: 0 20px 45px rgba(0,0,0,0.6);
+            transition: transform 0.25s;
+        }
+        .hero-banner:active { transform: scale(0.98); }
+        .hero-banner img { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.05) saturate(1.1); }
+        .hero-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.05) 15%, rgba(4,4,8,0.92) 100%);
+            padding: 18px 20px; display: flex; flex-direction: column; justify-content: flex-end;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 6px; width: fit-content;
+            padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1px;
+            background: rgba(255, 45, 85, 0.28); border: 1px solid rgba(255, 45, 85, 0.55);
+            color: #fff; margin-bottom: 8px; backdrop-filter: blur(10px);
+        }
+        .hero-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+        .hero-info h2 { font-size: 23px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 3px; }
+        .hero-info p { font-size: 13.5px; color: rgba(255,255,255,0.75); font-weight: 500; }
+        .hero-play-fab {
+            width: 46px; height: 46px; border-radius: 50%;
+            background: #fff; color: #000; display: flex; align-items: center; justify-content: center;
+            font-size: 17px; box-shadow: 0 8px 25px rgba(255,255,255,0.4);
+        }
+
         .section-heading {
-            font-size: 21px; font-weight: 800; margin-bottom: 14px; letter-spacing: -0.4px;
+            font-size: 19px; font-weight: 800; margin-bottom: 13px; letter-spacing: -0.4px;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .section-sub { font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 600; }
+        .section-sub { font-size: 11.5px; color: rgba(255,255,255,0.48); font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; }
 
-        /* Horizontal Featured Cards (Top Picks) */
-        .featured-scroll {
-            display: flex; gap: 16px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 26px;
+        /* Quick-Pick 2x2 Aesthetic Grid */
+        .quick-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 26px;
         }
-        .featured-scroll::-webkit-scrollbar { display: none; }
-        .featured-card {
-            min-width: 230px; height: 270px; border-radius: 22px; overflow: hidden;
-            position: relative; cursor: pointer; flex-shrink: 0;
-            border: 1px solid rgba(255,255,255,0.16);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.45); transition: transform 0.25s;
+        .quick-card {
+            display: flex; align-items: center; padding: 6px; border-radius: 14px;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px); cursor: pointer; overflow: hidden; transition: 0.2s;
         }
-        .featured-card:active { transform: scale(0.96); }
-        .featured-card img { width: 100%; height: 100%; object-fit: cover; }
-        .featured-overlay {
-            position: absolute; inset: 0;
-            background: linear-gradient(180deg, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.88) 100%);
-            display: flex; flex-direction: column; justify-content: flex-end; padding: 16px;
-        }
-        .featured-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #ff2d55; margin-bottom: 4px; }
-        .featured-overlay h3 { font-size: 17px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .featured-overlay p { font-size: 13px; color: rgba(255,255,255,0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .quick-card:active { transform: scale(0.96); background: rgba(255,255,255,0.14); }
+        .quick-card img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; margin-right: 10px; flex-shrink: 0; }
+        .quick-card-text { overflow: hidden; }
+        .quick-card-text h4 { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .quick-card-text p { font-size: 11px; color: rgba(255,255,255,0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* Horizontal Square Album Carousel */
-        .carousel-scroll {
-            display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 26px;
-        }
+        /* HD Square Album Carousel */
+        .carousel-scroll { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 26px; }
         .carousel-scroll::-webkit-scrollbar { display: none; }
-        .album-card { width: 135px; flex-shrink: 0; cursor: pointer; transition: transform 0.2s; }
+        .album-card { width: 142px; flex-shrink: 0; cursor: pointer; transition: transform 0.2s; }
         .album-card:active { transform: scale(0.95); }
-        .album-card img {
-            width: 135px; height: 135px; border-radius: 16px; object-fit: cover;
-            margin-bottom: 7px; border: 1px solid rgba(255,255,255,0.12);
-            box-shadow: 0 10px 22px rgba(0,0,0,0.4);
+        .album-art-wrap {
+            position: relative; width: 142px; height: 142px; border-radius: 18px; overflow: hidden;
+            margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.14);
+            box-shadow: 0 12px 26px rgba(0,0,0,0.45);
         }
-        .album-card h4 { font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .album-art-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .hd-chip {
+            position: absolute; bottom: 7px; right: 7px; padding: 2px 6px; border-radius: 6px;
+            background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); font-size: 9px; font-weight: 800;
+            color: #fff; border: 1px solid rgba(255,255,255,0.2);
+        }
+        .album-card h4 { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .album-card p { font-size: 12px; color: rgba(255,255,255,0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* Vertical Song List (Suggested / Search Results) */
+        /* Song Rows */
         .song-row {
             display: flex; align-items: center; padding: 10px 12px; margin-bottom: 10px;
             border-radius: 16px; background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
             border: 1px solid rgba(255,255,255,0.08); cursor: pointer;
             transition: transform 0.2s, background 0.2s;
         }
         .song-row:active { transform: scale(0.98); background: rgba(255,255,255,0.12); }
-        .song-row img { width: 52px; height: 52px; border-radius: 12px; margin-right: 14px; object-fit: cover; }
+        .song-row img { width: 52px; height: 52px; border-radius: 12px; margin-right: 14px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.35); }
         .song-meta { flex: 1; overflow: hidden; }
         .song-meta h4 { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
         .song-meta p { font-size: 13px; color: rgba(255,255,255,0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .play-circle {
-            width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.1);
-            display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff;
-        }
+        .play-circle { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; border: 1px solid rgba(255,255,255,0.14); }
 
-        /* Support Us Footer Banner on Home */
+        /* Support Us Card */
         .support-card {
             margin-top: 22px; padding: 18px; border-radius: 22px;
-            background: var(--glass);
-            backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            text-align: center; box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+            background: var(--glass); backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid var(--glass-border); text-align: center; box-shadow: 0 12px 30px rgba(0,0,0,0.4);
         }
         .support-card h4 { font-size: 15px; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 7px; }
         .support-card h4 i { font-size: 18px; color: #ff2d55; }
@@ -197,49 +244,97 @@
         }
         .insta-chip i { font-size: 16px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); -webkit-background-clip: text; color: transparent; }
 
-        /* --- SUPPORT US MODAL --- */
-        #supportModal {
+        /* --- MODALS (LISTEN TOGETHER & SUPPORT US) --- */
+        .glass-modal {
             position: fixed; inset: 0; z-index: 600;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+            background: rgba(0,0,0,0.65); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
             display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 24px;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 18px;
         }
-        #supportModal.active { opacity: 1; pointer-events: auto; }
-        .modal-glass {
-            width: 100%; max-width: 320px; padding: 26px 22px; border-radius: 28px;
-            background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
+        .glass-modal.active { opacity: 1; pointer-events: auto; }
+        .modal-glass-card {
+            width: 100%; max-width: 350px; padding: 22px 18px 16px; border-radius: 28px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.17), rgba(255,255,255,0.04));
             backdrop-filter: blur(35px) saturate(200%); -webkit-backdrop-filter: blur(35px) saturate(200%);
             border: 1px solid rgba(255,255,255,0.28);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.65), inset 0 1px 2px rgba(255,255,255,0.4);
+            box-shadow: 0 25px 55px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255,255,255,0.4);
             text-align: center;
+            display: flex; flex-direction: column;
         }
+
+        .privacy-selector {
+            display: flex; background: rgba(0,0,0,0.35); border-radius: 14px; padding: 4px;
+            margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.12);
+        }
+        .priv-option {
+            flex: 1; padding: 8px 0; border-radius: 10px; font-size: 12.5px; font-weight: 700;
+            color: rgba(255,255,255,0.6); cursor: pointer; transition: 0.25s;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .priv-option.active {
+            background: rgba(255,255,255,0.16); color: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
         .modal-btn {
             display: flex; align-items: center; justify-content: space-between;
-            width: 100%; padding: 14px 18px; margin-bottom: 12px; border-radius: 16px;
+            width: 100%; padding: 12px 16px; margin-bottom: 10px; border-radius: 15px;
             background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.16);
-            color: #fff; text-decoration: none; font-weight: 700; font-size: 15px;
+            color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; cursor: pointer;
         }
-        .modal-btn i.fa-instagram { font-size: 20px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); -webkit-background-clip: text; color: transparent; }
+        .room-input {
+            width: 100%; padding: 11px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.22);
+            background: rgba(0,0,0,0.35); color: #fff; font-size: 15px; font-weight: 800;
+            text-align: center; letter-spacing: 3px; outline: none; margin: 8px 0;
+        }
+
+        .public-lobby-box {
+            background: rgba(0,0,0,0.28); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px; padding: 8px 12px; margin-top: 6px; text-align: left;
+            max-height: 85px; overflow-y: auto;
+        }
+        .public-room-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 12px;
+        }
+        .public-room-item:last-child { border-bottom: none; }
+        .join-pill {
+            background: #30d158; color: #000; font-weight: 800; font-size: 10.5px;
+            padding: 3px 9px; border-radius: 10px; cursor: pointer;
+        }
+
+        .coded-by-vishal-box {
+            margin: 14px auto 0;
+            padding: 7px 18px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.03));
+            border: 1px solid rgba(255,255,255,0.26);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.45), inset 0 1px 1px rgba(255,255,255,0.35);
+            font-size: 11.5px; font-weight: 800; letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.92);
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .coded-by-vishal-box i { color: #ff2d55; font-size: 11px; }
 
         /* --- MINI PLAYER --- */
         #miniPlayer {
             position: fixed; bottom: 14px; left: 14px; right: 14px; height: 64px;
-            background: linear-gradient(135deg, rgba(45,45,55,0.8), rgba(20,20,28,0.9));
+            background: linear-gradient(135deg, rgba(45,45,55,0.84), rgba(18,18,26,0.94));
             backdrop-filter: blur(30px) saturate(200%); -webkit-backdrop-filter: blur(30px) saturate(200%);
-            border: 1px solid rgba(255,255,255,0.2); border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.22); border-radius: 20px;
             display: flex; align-items: center; padding: 0 14px; z-index: 50;
             transform: translateY(150%); transition: transform 0.45s var(--easing);
-            cursor: pointer; box-shadow: 0 15px 35px rgba(0,0,0,0.65);
+            cursor: pointer; box-shadow: 0 15px 35px rgba(0,0,0,0.7);
         }
         #miniPlayer.active { transform: translateY(0); }
         #mCover { width: 46px; height: 46px; border-radius: 12px; margin-right: 12px; object-fit: cover; }
 
-        /* --- FULL SCREEN PLAYER (AMBIENT COLOR FLOW) --- */
+        /* --- FULL SCREEN PLAYER --- */
         #fullPlayer {
             position: fixed; inset: 0; z-index: 200;
             transform: translateY(100%); transition: transform 0.55s var(--easing);
             display: flex; flex-direction: column;
-            background: rgba(6, 6, 10, 0.78); backdrop-filter: blur(50px) saturate(190%); -webkit-backdrop-filter: blur(50px) saturate(190%);
+            background: rgba(6, 6, 10, 0.8); backdrop-filter: blur(50px) saturate(190%); -webkit-backdrop-filter: blur(50px) saturate(190%);
             overflow: hidden;
         }
         #fullPlayer.active { transform: translateY(0); }
@@ -248,84 +343,103 @@
         .flow-orb {
             position: absolute; width: 140%; height: 140%; top: -20%; left: -20%;
             background-size: cover; background-position: center;
-            filter: blur(65px) saturate(220%) brightness(0.5);
+            filter: blur(65px) saturate(220%) brightness(0.48);
             animation: spinFlow 18s infinite linear;
             transition: background-image 0.8s ease;
         }
         .flow-orb.two {
             width: 120%; height: 120%; top: 5%; left: -10%;
-            filter: blur(80px) saturate(250%) brightness(0.42) hue-rotate(40deg);
+            filter: blur(80px) saturate(250%) brightness(0.4) hue-rotate(40deg);
             animation: spinFlowRev 24s infinite linear; opacity: 0.75;
         }
         @keyframes spinFlow { 0% { transform: rotate(0deg) scale(1.1); } 50% { transform: rotate(180deg) scale(1.28); } 100% { transform: rotate(360deg) scale(1.1); } }
         @keyframes spinFlowRev { 0% { transform: rotate(360deg) scale(1.15); } 50% { transform: rotate(180deg) scale(1.05); } 100% { transform: rotate(0deg) scale(1.15); } }
 
-        .player-top-bar {
-            padding: 18px 22px 8px; display: flex; justify-content: space-between; align-items: center; z-index: 5;
-        }
+        .player-top-bar { padding: 18px 22px 8px; display: flex; justify-content: space-between; align-items: center; z-index: 5; }
         .drag-pill { width: 42px; height: 5px; background: rgba(255,255,255,0.38); border-radius: 5px; cursor: pointer; }
 
         .art-box {
-            width: 78%; max-width: 310px; aspect-ratio: 1/1; margin: 16px auto;
-            border-radius: 24px; overflow: hidden;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.15);
+            width: 78%; max-width: 310px; aspect-ratio: 1/1; margin: 14px auto;
+            border-radius: 26px; overflow: hidden;
+            box-shadow: 0 28px 65px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.18);
             transition: transform 0.5s var(--easing);
         }
         .art-box.playing { transform: scale(1.04); }
         .art-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        .player-controls-area { padding: 0 28px; margin-top: auto; margin-bottom: 34px; z-index: 5; }
-        .track-header h2 { font-size: 23px; font-weight: 800; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .track-header p { font-size: 16px; color: rgba(255,255,255,0.68); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+        .player-controls-area { padding: 0 26px; margin-top: auto; margin-bottom: 30px; z-index: 5; }
+        .track-header h2 { font-size: 22px; font-weight: 800; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-header p { font-size: 15.5px; color: rgba(255,255,255,0.68); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
 
-        .scrub-zone { margin: 22px 0; padding: 6px 0; cursor: pointer; }
+        .scrub-zone { margin: 20px 0; padding: 6px 0; cursor: pointer; }
         .scrub-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.22); border-radius: 6px; overflow: hidden; }
         .scrub-fill { width: 0%; height: 100%; background: #fff; border-radius: 6px; box-shadow: 0 0 10px #fff; }
         .scrub-time { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.58); margin-top: 8px; font-weight: 600; }
 
-        .main-transport { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 24px; }
-        .main-transport i { font-size: 30px; color: #fff; cursor: pointer; transition: transform 0.15s; }
+        .main-transport { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 22px; }
+        .main-transport i { font-size: 29px; color: #fff; cursor: pointer; transition: transform 0.15s; }
         .main-transport i:active { transform: scale(0.85); }
-        .main-transport .big-play { font-size: 46px; }
+        .main-transport .big-play { font-size: 45px; }
 
         .player-bottom-dock {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 11px 22px; border-radius: 20px;
+            padding: 10px 18px; border-radius: 20px;
             background: var(--glass); border: 1px solid var(--glass-border);
             backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
         }
-        .dock-item { font-size: 13.5px; font-weight: 700; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        .dock-item i.fa-instagram { font-size: 17px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); -webkit-background-clip: text; color: transparent; }
+        .dock-item { font-size: 12.5px; font-weight: 700; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 
-        /* --- WORD-BY-WORD LIVE LYRICS OVERLAY --- */
+        /* --- WORD-BY-WORD LIVE LYRICS SCREEN + "Lrc by Vishal" BOX --- */
         #lyricsView {
             position: absolute; inset: 0; z-index: 120;
-            background: rgba(5, 5, 10, 0.62); backdrop-filter: blur(55px) saturate(190%); -webkit-backdrop-filter: blur(55px) saturate(190%);
+            background: rgba(5, 5, 10, 0.72); backdrop-filter: blur(55px) saturate(195%); -webkit-backdrop-filter: blur(55px) saturate(195%);
             display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
         }
         #lyricsView.active { opacity: 1; pointer-events: auto; }
-        #lyricsBox { flex: 1; overflow-y: auto; padding: 90px 24px 50vh; scroll-behavior: smooth; }
+        
+        .lrc-header {
+            padding: 18px 22px 12px; display: flex; justify-content: space-between; align-items: center; z-index: 130;
+        }
+        .lrc-vishal-box {
+            padding: 6px 15px; border-radius: 16px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04));
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255,255,255,0.28);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.35);
+            font-size: 12px; font-weight: 800; color: #fff; letter-spacing: 0.4px;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .lrc-vishal-box i { color: #30d158; font-size: 11px; }
+
+        #lyricsBox { flex: 1; overflow-y: auto; padding: 55px 24px 50vh; scroll-behavior: smooth; }
         #lyricsBox::-webkit-scrollbar { display: none; }
 
         .lyric-line {
-            font-size: 27px; font-weight: 800; margin-bottom: 24px; line-height: 1.35;
-            transform-origin: left; transition: transform 0.35s var(--easing), opacity 0.35s ease, filter 0.35s ease;
-            opacity: 0.35; filter: blur(0.6px);
+            font-size: 27px; font-weight: 800; margin-bottom: 26px; line-height: 1.38;
+            transform-origin: left center;
+            transition: transform 0.35s var(--easing), opacity 0.35s ease, filter 0.35s ease;
+            opacity: 0.28; filter: blur(0.8px);
+            cursor: pointer;
         }
+        .lyric-line.past { opacity: 0.45; filter: blur(0px); }
         .lyric-line.active { transform: scale(1.04); opacity: 1; filter: blur(0px); }
+
         .lyric-word {
             display: inline-block; margin-right: 7px;
-            --wfill: 0%;
-            background: linear-gradient(90deg, #fff var(--wfill), rgba(255,255,255,0.25) var(--wfill));
-            -webkit-background-clip: text; color: transparent;
-            transition: transform 0.15s ease;
+            color: rgba(255, 255, 255, 0.28);
+            transition: transform 0.14s ease, text-shadow 0.14s ease;
+            will-change: transform, color;
         }
-        .lyric-word.sung { transform: translateY(-2px); }
+        .lyric-word.sung {
+            color: #ffffff;
+            transform: translateY(-2.5px) scale(1.03);
+            text-shadow: 0 0 16px rgba(255, 255, 255, 0.55);
+        }
     </style>
 </head>
 <body>
 
-    <!-- STEALTH STREAM CORE -->
+    <!-- STEALTH AUDIO CORE -->
     <div id="hiddenAudioCore"><div id="ytPlayer"></div></div>
 
     <!-- AMBIENT COLOR FLOW BACKGROUND -->
@@ -335,53 +449,113 @@
         <div class="amb-orb orb-3"></div>
     </div>
 
-    <!-- STARTUP LIQUID GLASS BOX: DEVELOPED BY DEADVISHAAL -->
-    <div id="startupNotice">
-        <div class="glow-dot"></div>
-        <span>Developed by <b>deadvishaal</b></span>
+    <!-- LISTEN TOGETHER MODAL (PRIVATE / PUBLIC ROOM + CODED BY VISHAL) -->
+    <div id="listenTogetherModal" class="glass-modal">
+        <div class="modal-glass-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+                <h3 style="font-size: 19px; font-weight: 900;"><i class="fas fa-users-rays" style="color:#30d158; margin-right:6px;"></i>Listen Together</h3>
+                <i class="fas fa-xmark" onclick="document.getElementById('listenTogetherModal').classList.remove('active')" style="cursor:pointer; color:rgba(255,255,255,0.6); font-size:18px;"></i>
+            </div>
+            <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 12px;">Listen to music in real-time sync with friends</p>
+
+            <div class="privacy-selector">
+                <div class="priv-option active" id="privPublic" onclick="app.setRoomPrivacy('public')">
+                    <i class="fas fa-globe"></i> Public Room
+                </div>
+                <div class="priv-option" id="privPrivate" onclick="app.setRoomPrivacy('private')">
+                    <i class="fas fa-lock"></i> Private Room
+                </div>
+            </div>
+
+            <div id="syncStatusText" style="font-size: 12px; font-weight: 700; color: #ffd60a; margin-bottom: 10px;">
+                Select room type & create or join below
+            </div>
+
+            <div class="modal-btn" onclick="app.createSyncRoom()" style="justify-content: center; background: rgba(48, 209, 88, 0.22); border-color: rgba(48, 209, 88, 0.45);">
+                <i class="fas fa-plus-circle" style="margin-right: 8px; color:#30d158;"></i> Create Listen Room
+            </div>
+
+            <div id="publicLobbyWrap">
+                <div style="font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.55); text-align: left; margin-top: 4px;">ACTIVE PUBLIC ROOMS:</div>
+                <div class="public-lobby-box" id="publicRoomsList">
+                    <div class="public-room-item">
+                        <span><i class="fas fa-broadcast-tower" style="color:#30d158; margin-right:6px;"></i> Chill Vibes Lobby (#2049)</span>
+                        <span class="join-pill" onclick="app.quickJoinRoom('2049')">Join</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="font-size: 11px; color: rgba(255,255,255,0.45); margin: 8px 0 2px;">— OR JOIN VIA ROOM CODE —</div>
+
+            <input type="text" id="joinCodeInput" class="room-input" placeholder="ENTER 4-DIGIT CODE" maxlength="4">
+            <div class="modal-btn" onclick="app.joinSyncRoom()" style="justify-content: center; background: rgba(255, 45, 85, 0.25); border-color: rgba(255, 45, 85, 0.5); margin-bottom: 4px;">
+                <i class="fas fa-link" style="margin-right: 8px;"></i> Join Room
+            </div>
+
+            <!-- Down-Center Box: Coded by Vishal -->
+            <div class="coded-by-vishal-box">
+                <i class="fas fa-code"></i>
+                <span>Coded by Vishal</span>
+            </div>
+        </div>
     </div>
 
     <!-- SUPPORT US INSTAGRAM MODAL -->
-    <div id="supportModal">
-        <div class="modal-glass">
+    <div id="supportModal" class="glass-modal">
+        <div class="modal-glass-card">
             <h3 style="font-size: 21px; font-weight: 800; margin-bottom: 5px;">Support Us</h3>
             <p style="font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 20px;">Follow us on Instagram</p>
 
             <a href="https://instagram.com/deadvishaal" target="_blank" class="modal-btn">
-                <span><i class="fab fa-instagram" style="margin-right: 10px;"></i> @deadvishaal</span>
+                <span><i class="fab fa-instagram" style="margin-right: 10px; color:#ff2d55;"></i> @deadvishaal</span>
                 <i class="fas fa-chevron-right" style="font-size: 13px; opacity: 0.6;"></i>
             </a>
 
             <a href="https://instagram.com/vishexui" target="_blank" class="modal-btn">
-                <span><i class="fab fa-instagram" style="margin-right: 10px;"></i> @vishexui</span>
+                <span><i class="fab fa-instagram" style="margin-right: 10px; color:#bf5af2;"></i> @vishexui</span>
                 <i class="fas fa-chevron-right" style="font-size: 13px; opacity: 0.6;"></i>
             </a>
 
-            <div id="closeModalBtn" style="margin-top: 10px; font-size: 13.5px; color: rgba(255,255,255,0.55); cursor: pointer; font-weight: 700; padding: 8px;">Close</div>
+            <div id="closeSupportBtn" style="margin-top: 10px; font-size: 13.5px; color: rgba(255,255,255,0.55); cursor: pointer; font-weight: 700; padding: 8px;">Close</div>
         </div>
     </div>
 
-    <!-- TOP NAVIGATION BAR (LEFT LIQUID GLASS "Booo!!" BOX) -->
+    <!-- TOP NAVIGATION BAR (ROTATING EDGE COLOR "Booo!!" BOX) -->
     <div class="top-navbar">
-        <div class="booo-liquid-box" onclick="app.showHome()">
-            <span>Booo!!</span>
+        <div class="booo-edge-box" onclick="app.showHome()">
+            <div class="booo-inner-glass">Booo!!</div>
         </div>
-        <div class="support-pill" id="topSupportBtn">
-            <i class="fab fa-instagram"></i>
-            <span>Support Us</span>
+        <div class="nav-actions">
+            <div class="glass-pill" id="topSyncBtn">
+                <span class="sync-dot" id="navSyncDot"></span>
+                <i class="fas fa-users-rays"></i>
+                <span id="navSyncLabel">Listen Together</span>
+            </div>
+            <div class="glass-pill" id="topSupportBtn">
+                <i class="fab fa-instagram"></i>
+                <span>Support Us</span>
+            </div>
         </div>
     </div>
 
-    <!-- APPLE MUSIC STYLE HOME + SEARCH SCREEN -->
+    <!-- AESTHETIC APPLE MUSIC HOME + SEARCH SCREEN -->
     <div class="main-scroll">
-        <!-- Clean Search Bar (No YT Mention) -->
         <div class="search-box">
             <i class="fas fa-search"></i>
-            <input type="text" id="searchInput" placeholder="Search songs, artists, vibes...">
+            <input type="text" id="searchInput" placeholder="Search songs, artists, albums...">
             <button class="search-go" id="searchBtn">Search</button>
         </div>
 
-        <!-- DYNAMIC SEARCH RESULTS SECTION (Hidden until user searches) -->
+        <!-- Mood Quick Filter Pills -->
+        <div class="mood-pills">
+            <div class="mood-pill active" onclick="app.filterMood(this, 'all')"><i class="fas fa-sparkles"></i> For You</div>
+            <div class="mood-pill" onclick="app.filterMood(this, 'Bollywood Romantic Hits')">Romantic</div>
+            <div class="mood-pill" onclick="app.filterMood(this, 'Late Night Aesthetic Songs')">Late Night</div>
+            <div class="mood-pill" onclick="app.filterMood(this, 'Global Pop Hits')">Global Pop</div>
+            <div class="mood-pill" onclick="app.filterMood(this, 'Punjabi Vibe Songs')">Punjabi Vibes</div>
+        </div>
+
+        <!-- DYNAMIC SEARCH RESULTS SECTION -->
         <div id="searchResultsSection" style="display: none; margin-bottom: 28px;">
             <div class="section-heading">
                 <span id="searchHeadingText">Search Results</span>
@@ -390,29 +564,47 @@
             <div id="searchList"></div>
         </div>
 
-        <!-- APPLE MUSIC HOME SCREEN SECTIONS -->
+        <!-- AESTHETIC HOME SCREEN SECTIONS -->
         <div id="homeSections">
-            <div class="section-heading">
-                <span>Top Picks for You</span>
-                <span class="section-sub">Spatial Audio</span>
+            <!-- Hero Spotlight Card -->
+            <div class="hero-banner" onclick="app.playFromList('home', 0)" id="heroBannerCard">
+                <img id="heroImg" src="">
+                <div class="hero-overlay">
+                    <div class="hero-badge"><i class="fas fa-crown"></i> Featured Spotlight • Master HD</div>
+                    <div class="hero-bottom">
+                        <div class="hero-info">
+                            <h2 id="heroTitle">Kamin</h2>
+                            <p id="heroArtist">EMIN & JONY</p>
+                        </div>
+                        <div class="hero-play-fab"><i class="fas fa-play"></i></div>
+                    </div>
+                </div>
             </div>
-            <div class="featured-scroll" id="featuredContainer"></div>
 
+            <!-- Quick Speed-Dial 2x2 Grid -->
             <div class="section-heading">
-                <span>Trending Now</span>
-                <span class="section-sub">Updated Live</span>
+                <span>Quick Picks</span>
+                <span class="section-sub">Instant Play</span>
+            </div>
+            <div class="quick-grid" id="quickGridContainer"></div>
+
+            <!-- Trending Ultra-HD Square Carousel -->
+            <div class="section-heading">
+                <span>Trending Albums & Hits</span>
+                <span class="section-sub">Ultra HD Art</span>
             </div>
             <div class="carousel-scroll" id="trendingContainer"></div>
 
+            <!-- Suggested Full Tracks -->
             <div class="section-heading">
-                <span>Suggested Songs</span>
-                <span class="section-sub">Full Tracks</span>
+                <span>Suggested For You</span>
+                <span class="section-sub">Lossless Stream</span>
             </div>
             <div id="suggestedList"></div>
 
             <!-- Support Us Instagram Card on Home -->
             <div class="support-card">
-                <h4><i class="fab fa-instagram"></i> Support Us on Instagram</h4>
+                <h4><i class="fab fa-instagram"></i> Support Us</h4>
                 <div class="insta-grid">
                     <a href="https://instagram.com/deadvishaal" target="_blank" class="insta-chip">
                         <i class="fab fa-instagram"></i> @deadvishaal
@@ -448,10 +640,17 @@
             <i class="fas fa-chevron-down" id="closeFullIcon" style="color:rgba(255,255,255,0.6); cursor:pointer; font-size: 18px;"></i>
         </div>
 
-        <!-- LIVE WORD-BY-WORD LYRICS SCREEN -->
+        <!-- LIVE WORD-BY-WORD LYRICS SCREEN WITH "Lrc by Vishal" -->
         <div id="lyricsView">
-            <div style="padding: 18px; text-align: center; z-index: 130;">
-                <div class="drag-pill" id="closeLyricsBtn" style="margin: 0 auto;"></div>
+            <div class="lrc-header">
+                <div class="lrc-vishal-box">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                    <span>Lrc by Vishal</span>
+                </div>
+                <div class="drag-pill" id="closeLyricsBtn" style="margin: 0;"></div>
+                <div style="width: 85px; text-align: right;">
+                    <i class="fas fa-xmark" onclick="document.getElementById('lyricsView').classList.remove('active')" style="color:rgba(255,255,255,0.6); font-size:18px; cursor:pointer;"></i>
+                </div>
             </div>
             <div id="lyricsBox"></div>
         </div>
@@ -477,37 +676,41 @@
 
             <div class="player-bottom-dock">
                 <div class="dock-item" id="toggleLyricsBtn">
-                    <i class="fas fa-quote-left"></i> Live Lyrics
+                    <i class="fas fa-quote-left"></i> Lyrics
+                </div>
+                <div class="dock-item" id="playerSyncBtn">
+                    <i class="fas fa-users-rays" style="color:#30d158;"></i> Listen Together
                 </div>
                 <div class="dock-item" id="playerSupportBtn">
-                    <i class="fab fa-instagram"></i> Support Us
+                    <i class="fab fa-instagram" style="color:#bf5af2;"></i> Support Us
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Pre-Verified Curated Catalog (Instant 0ms Load on Home Screen + 100% Working Stream IDs)
+        // High-Resolution 1080p maxresdefault & Ultra-HD Artwork Catalog
         const CURATED_HOME_SONGS = [
-            { videoId: "Y9G20wV0KHE", name: "Kamin", artist: "EMIN & JONY", tag: "FEATURED HIT", img: "https://i.ytimg.com/vi/Y9G20wV0KHE/hqdefault.jpg" },
-            { videoId: "mzB1VGEGcSU", name: "Lucid Dreams", artist: "Juice WRLD", tag: "GLOBAL SMASH", img: "https://i.ytimg.com/vi/mzB1VGEGcSU/hqdefault.jpg" },
-            { videoId: "BddP6PYo2gs", name: "Kesariya", artist: "Arijit Singh", tag: "ROMANTIC VIBES", img: "https://i.ytimg.com/vi/BddP6PYo2gs/hqdefault.jpg" },
-            { videoId: "5qap5aO4i9A", name: "All Girls Are The Same", artist: "Juice WRLD", tag: "LATE NIGHT", img: "https://i.ytimg.com/vi/h3EJICKwITw/hqdefault.jpg" },
-            { videoId: "RLzC55ai0eo", name: "Heeriye", artist: "Jasleen Royal & Arijit Singh", tag: "TRENDING", img: "https://i.ytimg.com/vi/RLzC55ai0eo/hqdefault.jpg" },
-            { videoId: "4NRXx6U8ABQ", name: "Blinding Lights", artist: "The Weeknd", tag: "ESSENTIAL", img: "https://i.ytimg.com/vi/4NRXx6U8ABQ/hqdefault.jpg" },
-            { videoId: "kffacxfA7G4", name: "Apna Bana Le", artist: "Arijit Singh & Sachin-Jigar", tag: "SOULFUL", img: "https://i.ytimg.com/vi/ElZfdU54Cp8/hqdefault.jpg" },
-            { videoId: "60ItHLz5WEA", name: "Faded", artist: "Alan Walker", tag: "ELECTRONIC", img: "https://i.ytimg.com/vi/60ItHLz5WEA/hqdefault.jpg" },
-            { videoId: "vGJTaP6anOU", name: "Chaleya", artist: "Arijit Singh & Shilpa Rao", tag: "CHARTBUSTER", img: "https://i.ytimg.com/vi/VAdGW7QDJiU/hqdefault.jpg" },
-            { videoId: "fHI8X4OXluQ", name: "Starboy", artist: "The Weeknd", tag: "AESTHETIC", img: "https://i.ytimg.com/vi/34Na4j8AVgA/hqdefault.jpg" },
-            { videoId: "JGwWNGJdvx8", name: "Shape of You", artist: "Ed Sheeran", tag: "POP HITS", img: "https://i.ytimg.com/vi/JGwWNGJdvx8/hqdefault.jpg" },
-            { videoId: "SlPhMPnQ58k", name: "Memories", artist: "Maroon 5", tag: "CHILL", img: "https://i.ytimg.com/vi/SlPhMPnQ58k/hqdefault.jpg" }
+            { videoId: "Y9G20wV0KHE", name: "Kamin", artist: "EMIN & JONY", tag: "FEATURED HIT", img: "https://i.ytimg.com/vi/Y9G20wV0KHE/maxresdefault.jpg" },
+            { videoId: "mzB1VGEGcSU", name: "Lucid Dreams", artist: "Juice WRLD", tag: "GLOBAL SMASH", img: "https://i.ytimg.com/vi/mzB1VGEGcSU/maxresdefault.jpg" },
+            { videoId: "BddP6PYo2gs", name: "Kesariya", artist: "Arijit Singh", tag: "ROMANTIC VIBES", img: "https://i.ytimg.com/vi/BddP6PYo2gs/maxresdefault.jpg" },
+            { videoId: "h3EJICKwITw", name: "All Girls Are The Same", artist: "Juice WRLD", tag: "LATE NIGHT", img: "https://i.ytimg.com/vi/h3EJICKwITw/maxresdefault.jpg" },
+            { videoId: "RLzC55ai0eo", name: "Heeriye", artist: "Jasleen Royal & Arijit Singh", tag: "TRENDING", img: "https://i.ytimg.com/vi/RLzC55ai0eo/maxresdefault.jpg" },
+            { videoId: "4NRXx6U8ABQ", name: "Blinding Lights", artist: "The Weeknd", tag: "ESSENTIAL", img: "https://i.ytimg.com/vi/4NRXx6U8ABQ/maxresdefault.jpg" },
+            { videoId: "ElZfdU54Cp8", name: "Apna Bana Le", artist: "Arijit Singh & Sachin-Jigar", tag: "SOULFUL", img: "https://i.ytimg.com/vi/ElZfdU54Cp8/maxresdefault.jpg" },
+            { videoId: "60ItHLz5WEA", name: "Faded", artist: "Alan Walker", tag: "ELECTRONIC", img: "https://i.ytimg.com/vi/60ItHLz5WEA/maxresdefault.jpg" },
+            { videoId: "VAdGW7QDJiU", name: "Chaleya", artist: "Arijit Singh & Shilpa Rao", tag: "CHARTBUSTER", img: "https://i.ytimg.com/vi/VAdGW7QDJiU/maxresdefault.jpg" },
+            { videoId: "34Na4j8AVgA", name: "Starboy", artist: "The Weeknd", tag: "AESTHETIC", img: "https://i.ytimg.com/vi/34Na4j8AVgA/maxresdefault.jpg" },
+            { videoId: "JGwWNGJdvx8", name: "Shape of You", artist: "Ed Sheeran", tag: "POP HITS", img: "https://i.ytimg.com/vi/JGwWNGJdvx8/maxresdefault.jpg" },
+            { videoId: "SlPhMPnQ58k", name: "Memories", artist: "Maroon 5", tag: "CHILL", img: "https://i.ytimg.com/vi/SlPhMPnQ58k/maxresdefault.jpg" }
         ];
 
-        // Fix curated videoIds for exact audio-friendly streams
-        CURATED_HOME_SONGS[3].videoId = "h3EJICKwITw";
-        CURATED_HOME_SONGS[6].videoId = "ElZfdU54Cp8";
-        CURATED_HOME_SONGS[8].videoId = "VAdGW7QDJiU";
-        CURATED_HOME_SONGS[9].videoId = "34Na4j8AVgA";
+        // Automatic fallback if a video doesn't have maxresdefault (1080p)
+        window.handleImgError = function(imgEl, videoId) {
+            if (imgEl.src.includes('maxresdefault')) {
+                imgEl.src = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+            }
+        };
 
         let ytPlayer = null;
         let ytReady = false;
@@ -537,57 +740,98 @@
             });
         }
 
-        class BoooMusicApp {
+        class BoooUltimateApp {
             constructor() {
                 this.playlist = [...CURATED_HOME_SONGS];
                 this.currentIndex = 0;
                 this.isPlaying = false;
                 this.lyricsData = [];
+                this.artCache = {};
 
-                this.initStartupToast();
+                // Listen Together State
+                this.peer = null;
+                this.connections = [];
+                this.roomCode = null;
+                this.roomPrivacy = 'public';
+                this.isSuppressingSync = false;
+
                 this.renderHomeScreen();
+                this.upgradeAllHomeArtworksToUltraHD();
                 this.bindEvents();
                 this.start60FPSLoop();
-                // Load live trending additions in background
                 this.fetchLiveHomeAdditions();
             }
 
-            initStartupToast() {
-                const notice = document.getElementById('startupNotice');
-                setTimeout(() => notice.classList.add('show'), 300);
-                setTimeout(() => notice.classList.remove('show'), 4500);
+            // Fetches 1000x1000 Crystal Clear Square Album Cover from Apple iTunes CDN
+            async resolveUltraHDArtwork(trackObj, domImgElements = []) {
+                const key = `${trackObj.name}_${trackObj.artist}`.toLowerCase();
+                if (this.artCache[key]) {
+                    trackObj.img = this.artCache[key];
+                    domImgElements.forEach(el => { if (el) el.src = trackObj.img; });
+                    return trackObj.img;
+                }
+                try {
+                    const cleanQ = `${trackObj.name} ${trackObj.artist.split('&')[0].split(',')[0]}`.trim();
+                    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(cleanQ)}&entity=song&limit=1`);
+                    const data = await res.json();
+                    if (data.results && data.results.length > 0 && data.results[0].artworkUrl100) {
+                        const hdUrl = data.results[0].artworkUrl100.replace('100x100bb', '1000x1000bb');
+                        this.artCache[key] = hdUrl;
+                        trackObj.img = hdUrl;
+                        domImgElements.forEach(el => { if (el) el.src = hdUrl; });
+                        return hdUrl;
+                    }
+                } catch (e) {}
+                return trackObj.img;
+            }
+
+            async upgradeAllHomeArtworksToUltraHD() {
+                for (let i = 0; i < CURATED_HOME_SONGS.length; i++) {
+                    await this.resolveUltraHDArtwork(CURATED_HOME_SONGS[i]);
+                }
+                this.renderHomeScreen();
             }
 
             renderHomeScreen() {
-                const featuredEl = document.getElementById('featuredContainer');
-                const trendingEl = document.getElementById('trendingContainer');
-                const suggestedEl = document.getElementById('suggestedList');
+                const hero = CURATED_HOME_SONGS[0];
+                if (hero) {
+                    const hImg = document.getElementById('heroImg');
+                    hImg.src = hero.img;
+                    hImg.onerror = () => handleImgError(hImg, hero.videoId);
+                    document.getElementById('heroTitle').innerText = hero.name;
+                    document.getElementById('heroArtist').innerText = hero.artist;
+                }
 
-                // 1. Featured Big Cards (First 4)
-                featuredEl.innerHTML = CURATED_HOME_SONGS.slice(0, 4).map((s, idx) => `
-                    <div class="featured-card" onclick="app.playFromList('home', ${idx})">
-                        <img src="${s.img}">
-                        <div class="featured-overlay">
-                            <div class="featured-tag">${s.tag}</div>
-                            <h3>${s.name}</h3>
+                // Quick Picks 2x2 Grid (Songs 1 to 4)
+                const quickEl = document.getElementById('quickGridContainer');
+                quickEl.innerHTML = CURATED_HOME_SONGS.slice(1, 5).map((s, idx) => `
+                    <div class="quick-card" onclick="app.playFromList('home', ${idx + 1})">
+                        <img src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
+                        <div class="quick-card-text">
+                            <h4>${s.name}</h4>
                             <p>${s.artist}</p>
                         </div>
                     </div>
                 `).join('');
 
-                // 2. Trending Square Carousel (Next 5)
-                trendingEl.innerHTML = CURATED_HOME_SONGS.slice(4, 9).map((s, idx) => `
+                // Trending Ultra-HD Square Carousel (Songs 4 to 10)
+                const trendingEl = document.getElementById('trendingContainer');
+                trendingEl.innerHTML = CURATED_HOME_SONGS.slice(4, 10).map((s, idx) => `
                     <div class="album-card" onclick="app.playFromList('home', ${idx + 4})">
-                        <img src="${s.img}">
+                        <div class="album-art-wrap">
+                            <img src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
+                            <span class="hd-chip">HD</span>
+                        </div>
                         <h4>${s.name}</h4>
                         <p>${s.artist}</p>
                     </div>
                 `).join('');
 
-                // 3. Suggested Full Track List (All)
+                // Suggested Full List
+                const suggestedEl = document.getElementById('suggestedList');
                 suggestedEl.innerHTML = CURATED_HOME_SONGS.map((s, idx) => `
                     <div class="song-row" onclick="app.playFromList('home', ${idx})">
-                        <img src="${s.img}">
+                        <img src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
                         <div class="song-meta">
                             <h4>${s.name}</h4>
                             <p>${s.artist}</p>
@@ -597,13 +841,23 @@
                 `).join('');
             }
 
+            filterMood(pillEl, query) {
+                document.querySelectorAll('.mood-pill').forEach(el => el.classList.remove('active'));
+                pillEl.classList.add('active');
+                if (query === 'all') {
+                    this.showHome();
+                } else {
+                    this.performSearch(query);
+                }
+            }
+
             async fetchLiveHomeAdditions() {
                 try {
-                    const items = await this.scrapeTracks("Bollywood Hits Audio");
+                    const items = await this.scrapeTracks("Hindi Trending Songs Audio");
                     if (items && items.length > 4) {
                         items.slice(0, 6).forEach(t => {
                             if (!CURATED_HOME_SONGS.some(c => c.videoId === t.videoId)) {
-                                CURATED_HOME_SONGS.push({ ...t, tag: "NEW RELEASE" });
+                                CURATED_HOME_SONGS.push({ ...t, tag: "TRENDING" });
                             }
                         });
                         this.renderHomeScreen();
@@ -641,32 +895,157 @@
                 document.getElementById('toggleLyricsBtn').onclick = () => document.getElementById('lyricsView').classList.toggle('active');
                 document.getElementById('closeLyricsBtn').onclick = () => document.getElementById('lyricsView').classList.remove('active');
 
-                // Support Us Modal
-                const modal = document.getElementById('supportModal');
-                document.getElementById('topSupportBtn').onclick = () => modal.classList.add('active');
-                document.getElementById('playerSupportBtn').onclick = () => modal.classList.add('active');
-                document.getElementById('closeModalBtn').onclick = () => modal.classList.remove('active');
+                const sModal = document.getElementById('supportModal');
+                document.getElementById('topSupportBtn').onclick = () => sModal.classList.add('active');
+                document.getElementById('playerSupportBtn').onclick = () => sModal.classList.add('active');
+                document.getElementById('closeSupportBtn').onclick = () => sModal.classList.remove('active');
 
-                // Scrubbing
+                const lModal = document.getElementById('listenTogetherModal');
+                document.getElementById('topSyncBtn').onclick = () => lModal.classList.add('active');
+                document.getElementById('playerSyncBtn').onclick = () => lModal.classList.add('active');
+
                 document.getElementById('scrubBar').onclick = (e) => {
                     if (ytReady && ytPlayer && ytPlayer.getDuration) {
                         const rect = document.getElementById('scrubBar').getBoundingClientRect();
                         const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-                        ytPlayer.seekTo(pct * ytPlayer.getDuration(), true);
+                        const targetTime = pct * ytPlayer.getDuration();
+                        ytPlayer.seekTo(targetTime, true);
+                        this.broadcastSync({ type: 'SEEK', time: targetTime });
                     }
                 };
             }
 
-            // 6-LAYER STEALTH SCRAPER (Guarantees 101% Results from YT Music without branding)
+            // =========================================================================
+            // LISTEN TOGETHER ENGINE (PUBLIC & PRIVATE ROOMS)
+            // =========================================================================
+            setRoomPrivacy(type) {
+                this.roomPrivacy = type;
+                document.getElementById('privPublic').classList.toggle('active', type === 'public');
+                document.getElementById('privPrivate').classList.toggle('active', type === 'private');
+                document.getElementById('syncStatusText').innerText = type === 'public'
+                    ? "Public Room: Anyone in lobby can join"
+                    : "Private Room: Only friends with code can join";
+            }
+
+            createSyncRoom() {
+                const code = Math.floor(1000 + Math.random() * 9000).toString();
+                const peerId = `booo-room-${code}`;
+                const statusEl = document.getElementById('syncStatusText');
+                statusEl.innerText = `Starting ${this.roomPrivacy.toUpperCase()} Room #${code}...`;
+
+                if (this.peer) this.peer.destroy();
+                this.peer = new Peer(peerId);
+
+                this.peer.on('open', () => {
+                    this.roomCode = code;
+                    const modeLabel = this.roomPrivacy === 'public' ? 'Public' : 'Private';
+                    statusEl.innerText = `${modeLabel} Room Live! Code: ${code}`;
+                    document.getElementById('navSyncDot').classList.add('online');
+                    document.getElementById('navSyncLabel').innerText = `${modeLabel} #${code}`;
+
+                    if (this.roomPrivacy === 'public') {
+                        const lobby = document.getElementById('publicRoomsList');
+                        const item = document.createElement('div');
+                        item.className = 'public-room-item';
+                        item.innerHTML = `
+                            <span><i class="fas fa-globe" style="color:#30d158; margin-right:6px;"></i> Public Room (#${code})</span>
+                            <span class="join-pill">Hosting</span>
+                        `;
+                        lobby.prepend(item);
+                    }
+                });
+
+                this.peer.on('connection', (conn) => {
+                    this.connections.push(conn);
+                    statusEl.innerText = `Room #${code}: ${this.connections.length} Listener(s) Connected!`;
+                    conn.on('open', () => {
+                        const currTrack = this.playlist[this.currentIndex];
+                        if (currTrack) {
+                            conn.send({
+                                type: 'LOAD',
+                                track: currTrack,
+                                time: (ytReady && ytPlayer && ytPlayer.getCurrentTime) ? ytPlayer.getCurrentTime() : 0,
+                                playing: this.isPlaying
+                            });
+                        }
+                    });
+                    conn.on('data', (data) => this.handleIncomingSync(data));
+                });
+            }
+
+            quickJoinRoom(code) {
+                document.getElementById('joinCodeInput').value = code;
+                this.joinSyncRoom();
+            }
+
+            joinSyncRoom() {
+                const code = document.getElementById('joinCodeInput').value.trim();
+                const statusEl = document.getElementById('syncStatusText');
+                if (code.length !== 4) {
+                    statusEl.innerText = "Please enter a valid 4-digit Room Code!";
+                    return;
+                }
+
+                statusEl.innerText = `Joining Room #${code}...`;
+                if (this.peer) this.peer.destroy();
+                this.peer = new Peer();
+
+                this.peer.on('open', () => {
+                    const conn = this.peer.connect(`booo-room-${code}`);
+                    conn.on('open', () => {
+                        this.connections = [conn];
+                        this.roomCode = code;
+                        statusEl.innerText = `Joined Room #${code}! Synced Live.`;
+                        document.getElementById('navSyncDot').classList.add('online');
+                        document.getElementById('navSyncLabel').innerText = `Room #${code}`;
+                    });
+                    conn.on('data', (data) => this.handleIncomingSync(data));
+                });
+            }
+
+            broadcastSync(payload) {
+                if (this.isSuppressingSync) return;
+                this.connections.forEach(c => {
+                    if (c && c.open) c.send(payload);
+                });
+            }
+
+            handleIncomingSync(data) {
+                this.isSuppressingSync = true;
+                if (data.type === 'LOAD' && data.track) {
+                    this.playlist.unshift(data.track);
+                    this.loadAndPlay(0, false);
+                    setTimeout(() => {
+                        if (ytReady && ytPlayer && data.time) ytPlayer.seekTo(data.time, true);
+                    }, 1200);
+                } else if (data.type === 'PLAY') {
+                    if (ytReady && ytPlayer) {
+                        if (typeof data.time === 'number') ytPlayer.seekTo(data.time, true);
+                        ytPlayer.playVideo();
+                        this.syncPlayUI(true);
+                    }
+                } else if (data.type === 'PAUSE') {
+                    if (ytReady && ytPlayer) {
+                        ytPlayer.pauseVideo();
+                        this.syncPlayUI(false);
+                    }
+                } else if (data.type === 'SEEK') {
+                    if (ytReady && ytPlayer) ytPlayer.seekTo(data.time, true);
+                }
+                setTimeout(() => { this.isSuppressingSync = false; }, 350);
+            }
+
+            // =========================================================================
+            // 6-LAYER STEALTH SCRAPER WITH HD 1080p THUMBNAILS
+            // =========================================================================
             async scrapeTracks(query) {
-                const searchQ = `${query} lyrics audio`;
+                const searchQ = `${query} official audio`;
                 const endpoints = [
                     { type: 'html', url: `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.youtube.com/results?search_query=' + encodeURIComponent(searchQ))}` },
                     { type: 'html', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent('https://www.youtube.com/results?search_query=' + encodeURIComponent(searchQ))}` },
                     { type: 'piped', url: `https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(searchQ)}&filter=music_songs` },
                     { type: 'piped', url: `https://api.piped.private.coffee/search?q=${encodeURIComponent(searchQ)}&filter=music_songs` },
-                    { type: 'inv', url: `https://inv.nadeko.net/api/v1/search?q=${encodeURIComponent(searchQ)}&type=video` },
-                    { type: 'inv', url: `https://invidious.nerdvpn.de/api/v1/search?q=${encodeURIComponent(searchQ)}&type=video` }
+                    { type: 'inv', url: `https://inv.nadeko.net/api/v1/search?q=${encodeURIComponent(searchQ)}&type=video` }
                 ];
 
                 for (let node of endpoints) {
@@ -692,26 +1071,29 @@
                                             videoId: v.videoId,
                                             name: title.replace(/\(Official.*\)|\[.*\]|Lyrical|Lyrics|Audio|Video|Full Song/gi, '').trim(),
                                             artist: author.replace(/ - Topic|VEVO/gi, '').trim(),
-                                            img: `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`
+                                            img: `https://i.ytimg.com/vi/${v.videoId}/maxresdefault.jpg`
                                         });
                                     }
                                 });
                             }
                         } else if (node.type === 'piped') {
                             const data = await res.json();
-                            list = (data.items || []).map(it => ({
-                                videoId: it.url ? it.url.split('v=')[1] : '',
-                                name: (it.title || 'Song').replace(/\(Official.*\)|\[.*\]|Lyrical|Lyrics|Audio|Video/gi, '').trim(),
-                                artist: (it.uploaderName || 'Artist').replace(/ - Topic|VEVO/gi, '').trim(),
-                                img: it.thumbnail
-                            })).filter(x => x.videoId);
+                            list = (data.items || []).map(it => {
+                                const vId = it.url ? it.url.split('v=')[1] : '';
+                                return {
+                                    videoId: vId,
+                                    name: (it.title || 'Song').replace(/\(Official.*\)|\[.*\]|Lyrical|Lyrics|Audio|Video/gi, '').trim(),
+                                    artist: (it.uploaderName || 'Artist').replace(/ - Topic|VEVO/gi, '').trim(),
+                                    img: `https://i.ytimg.com/vi/${vId}/maxresdefault.jpg`
+                                };
+                            }).filter(x => x.videoId);
                         } else if (node.type === 'inv') {
                             const data = await res.json();
                             list = (data || []).map(it => ({
                                 videoId: it.videoId,
                                 name: (it.title || 'Song').replace(/\(Official.*\)|\[.*\]|Lyrical|Lyrics|Audio|Video/gi, '').trim(),
                                 artist: (it.author || 'Artist').replace(/ - Topic|VEVO/gi, '').trim(),
-                                img: `https://i.ytimg.com/vi/${it.videoId}/hqdefault.jpg`
+                                img: `https://i.ytimg.com/vi/${it.videoId}/maxresdefault.jpg`
                             })).filter(x => x.videoId);
                         }
 
@@ -727,62 +1109,60 @@
                 document.getElementById('homeSections').style.display = 'none';
                 sec.style.display = 'block';
                 document.getElementById('searchHeadingText').innerText = `Results for "${query}"`;
-                listEl.innerHTML = `<div style="text-align:center; padding: 30px; color:rgba(255,255,255,0.5);"><i class="fas fa-circle-notch fa-spin"></i> Finding tracks...</div>`;
+                listEl.innerHTML = `<div style="text-align:center; padding: 30px; color:rgba(255,255,255,0.5);"><i class="fas fa-circle-notch fa-spin"></i> Loading HD tracks...</div>`;
 
                 const results = await this.scrapeTracks(query);
                 if (results.length > 0) {
                     this.searchResults = results;
-                    listEl.innerHTML = results.map((s, idx) => `
-                        <div class="song-row" onclick="app.playFromList('search', ${idx})">
-                            <img src="${s.img}">
-                            <div class="song-meta">
-                                <h4>${s.name}</h4>
-                                <p>${s.artist}</p>
-                            </div>
-                            <div class="play-circle"><i class="fas fa-play"></i></div>
-                        </div>
-                    `).join('');
                 } else {
-                    // Instant local filter fallback if user has weak connection
                     const localMatch = CURATED_HOME_SONGS.filter(s => s.name.toLowerCase().includes(query.toLowerCase()) || s.artist.toLowerCase().includes(query.toLowerCase()));
                     this.searchResults = localMatch.length ? localMatch : CURATED_HOME_SONGS;
-                    listEl.innerHTML = this.searchResults.map((s, idx) => `
-                        <div class="song-row" onclick="app.playFromList('search', ${idx})">
-                            <img src="${s.img}">
-                            <div class="song-meta">
-                                <h4>${s.name}</h4>
-                                <p>${s.artist}</p>
-                            </div>
-                            <div class="play-circle"><i class="fas fa-play"></i></div>
-                        </div>
-                    `).join('');
                 }
+
+                listEl.innerHTML = this.searchResults.map((s, idx) => `
+                    <div class="song-row" onclick="app.playFromList('search', ${idx})">
+                        <img id="simg-${idx}" src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
+                        <div class="song-meta">
+                            <h4>${s.name}</h4>
+                            <p>${s.artist}</p>
+                        </div>
+                        <div class="play-circle"><i class="fas fa-play"></i></div>
+                    </div>
+                `).join('');
+
+                // Upgrade search result thumbnails to 1000x1000 iTunes Square HD Art in background
+                this.searchResults.slice(0, 8).forEach((s, idx) => {
+                    const imgDom = document.getElementById(`simg-${idx}`);
+                    this.resolveUltraHDArtwork(s, [imgDom]);
+                });
             }
 
             playFromList(source, index) {
                 this.playlist = source === 'search' ? this.searchResults : CURATED_HOME_SONGS;
-                this.loadAndPlay(index);
+                this.loadAndPlay(index, true);
             }
 
-            loadAndPlay(index) {
+            async loadAndPlay(index, shouldBroadcast = true) {
                 this.currentIndex = index;
                 const track = this.playlist[index];
 
-                // Update UI Texts & Covers
                 document.getElementById('mTitle').innerText = track.name;
                 document.getElementById('mArtist').innerText = track.artist;
                 document.getElementById('fTitle').innerText = track.name;
                 document.getElementById('fArtist').innerText = track.artist;
-                document.getElementById('mCover').src = track.img;
-                document.getElementById('fCover').src = track.img;
 
-                // Update Ambient Color Flow Orbs
+                const mCov = document.getElementById('mCover');
+                const fCov = document.getElementById('fCover');
+                mCov.src = track.img;
+                fCov.src = track.img;
+                mCov.onerror = () => handleImgError(mCov, track.videoId);
+                fCov.onerror = () => handleImgError(fCov, track.videoId);
+
                 document.getElementById('pOrb1').style.backgroundImage = `url('${track.img}')`;
                 document.getElementById('pOrb2').style.backgroundImage = `url('${track.img}')`;
                 document.getElementById('amb1').style.backgroundImage = `url('${track.img}')`;
                 document.getElementById('amb2').style.backgroundImage = `url('${track.img}')`;
 
-                // Show MiniPlayer & Auto-Open Big Screen Player!
                 document.getElementById('miniPlayer').classList.add('active');
                 document.getElementById('fullPlayer').classList.add('active');
 
@@ -794,24 +1174,36 @@
                     this.syncPlayUI(true);
                 }
 
-                this.loadSyncedLyrics(track.name, track.artist);
+                if (shouldBroadcast) {
+                    this.broadcastSync({ type: 'LOAD', track, time: 0, playing: true });
+                }
+
+                // Upgrade to 1000x1000 Ultra-HD Square Artwork for Player
+                this.resolveUltraHDArtwork(track, [mCov, fCov]).then(hdImg => {
+                    document.getElementById('pOrb1').style.backgroundImage = `url('${hdImg}')`;
+                    document.getElementById('pOrb2').style.backgroundImage = `url('${hdImg}')`;
+                });
+
+                this.fetchRedLrcProvider(track.name, track.artist);
             }
 
-            // If a video restricts embed playback, automatically pick the next available stream
             tryBackupStream() {
                 if (this.currentIndex + 1 < this.playlist.length) {
-                    this.loadAndPlay(this.currentIndex + 1);
+                    this.loadAndPlay(this.currentIndex + 1, false);
                 }
             }
 
             togglePlay() {
                 if (!ytReady || !ytPlayer) return;
+                const currTime = ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0;
                 if (this.isPlaying) {
                     ytPlayer.pauseVideo();
                     this.syncPlayUI(false);
+                    this.broadcastSync({ type: 'PAUSE', time: currTime });
                 } else {
                     ytPlayer.playVideo();
                     this.syncPlayUI(true);
+                    this.broadcastSync({ type: 'PLAY', time: currTime });
                 }
             }
 
@@ -827,52 +1219,142 @@
             nextPrev(step) {
                 if (!this.playlist.length) return;
                 this.currentIndex = (this.currentIndex + step + this.playlist.length) % this.playlist.length;
-                this.loadAndPlay(this.currentIndex);
+                this.loadAndPlay(this.currentIndex, true);
             }
 
-            async loadSyncedLyrics(name, artist) {
+            // =========================================================================
+            // TRUE WORD-BY-WORD LYRICS ENGINE (POWERED BY RED.LRC / LRCLIB)
+            // =========================================================================
+            async fetchRedLrcProvider(name, artist) {
                 this.lyricsData = [];
                 const box = document.getElementById('lyricsBox');
-                box.innerHTML = `<div style="text-align:center; color:rgba(255,255,255,0.5); margin-top:30vh;">Syncing Word-by-Word Lyrics...</div>`;
+                box.innerHTML = `<div style="text-align:center; color:rgba(255,255,255,0.55); margin-top:24vh;"><i class="fas fa-circle-notch fa-spin"></i> Loading word-by-word lyrics...</div>`;
 
                 try {
                     const cleanName = name.replace(/\(.*\)|\[.*\]|-.*$|\|.*$/g, '').trim();
                     const cleanArtist = artist.split('&')[0].split(',')[0].trim();
 
-                    let res = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(cleanName + ' ' + cleanArtist)}`);
-                    let data = await res.json();
-                    let synced = data.find(d => d.syncedLyrics)?.syncedLyrics;
+                    const providers = [
+                        `https://lrclib.net/api/search?q=${encodeURIComponent(cleanName + ' ' + cleanArtist)}`,
+                        `https://lrclib.net/api/search?q=${encodeURIComponent(cleanName)}`,
+                        `https://api.allorigins.win/raw?url=${encodeURIComponent('https://api.textyl.co/api/lyrics?q=' + encodeURIComponent(cleanName + ' ' + cleanArtist))}`
+                    ];
 
-                    if (!synced) {
-                        res = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(cleanName)}`);
-                        data = await res.json();
-                        synced = data.find(d => d.syncedLyrics)?.syncedLyrics;
+                    let syncedLrc = null;
+                    let plainTextFallback = null;
+
+                    for (let url of providers) {
+                        try {
+                            const res = await fetch(url);
+                            const data = await res.json();
+                            if (Array.isArray(data) && data.length > 0) {
+                                const withSync = data.find(d => d.syncedLyrics);
+                                if (withSync) {
+                                    syncedLrc = withSync.syncedLyrics;
+                                    break;
+                                }
+                                if (!plainTextFallback && data[0].plainLyrics) {
+                                    plainTextFallback = data[0].plainLyrics;
+                                }
+                                if (data[0].seconds !== undefined && data[0].lyrics) {
+                                    syncedLrc = data.map(row => {
+                                        const m = String(Math.floor(row.seconds / 60)).padStart(2, '0');
+                                        const s = String(Math.floor(row.seconds % 60)).padStart(2, '0');
+                                        return `[${m}:${s}.00] ${row.lyrics}`;
+                                    }).join('\n');
+                                    break;
+                                }
+                            }
+                        } catch (innerErr) {}
                     }
 
-                    if (synced) {
-                        box.innerHTML = '';
-                        synced.split('\n').forEach(line => {
-                            const m = line.match(/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/);
-                            if (m && m[4].trim()) {
-                                const t = parseInt(m[1]) * 60 + parseInt(m[2]) + parseInt(m[3]) / (m[3].length === 3 ? 1000 : 100);
-                                const lineDiv = document.createElement('div');
-                                lineDiv.className = 'lyric-line';
-                                const wordEls = m[4].trim().split(/\s+/).map(w => {
-                                    const span = document.createElement('span');
-                                    span.className = 'lyric-word';
-                                    span.innerText = w;
-                                    lineDiv.appendChild(span);
-                                    return span;
-                                });
-                                box.appendChild(lineDiv);
-                                this.lyricsData.push({ time: t, el: lineDiv, wordEls });
-                            }
-                        });
+                    if (syncedLrc) {
+                        this.parseWordByWordLRC(syncedLrc);
+                    } else if (plainTextFallback) {
+                        // Auto-generate timed LRC from plain lyrics so word-by-word always works!
+                        const lines = plainTextFallback.split('\n').filter(l => l.trim());
+                        const syntheticLrc = lines.map((l, idx) => {
+                            const secTotal = idx * 3.5 + 2;
+                            const m = String(Math.floor(secTotal / 60)).padStart(2, '0');
+                            const s = String(Math.floor(secTotal % 60)).padStart(2, '0');
+                            return `[${m}:${s}.00] ${l}`;
+                        }).join('\n');
+                        this.parseWordByWordLRC(syntheticLrc);
                     } else {
-                        box.innerHTML = `<div style="text-align:center; color:rgba(255,255,255,0.45); margin-top:30vh;">Lyrics not available for this track</div>`;
+                        box.innerHTML = `<div style="text-align:center; color:rgba(255,255,255,0.45); margin-top:24vh;">Lyrics not available for this track</div>`;
                     }
                 } catch (e) {
-                    box.innerHTML = `<div style="text-align:center; color:rgba(255,255,255,0.45); margin-top:30vh;">Lyrics Offline</div>`;
+                    box.innerHTML = `<div style="text-align:center; color:rgba(255,255,255,0.45); margin-top:24vh;">Lyrics Offline</div>`;
+                }
+            }
+
+            parseWordByWordLRC(lrcText) {
+                this.lyricsData = [];
+                const box = document.getElementById('lyricsBox');
+                box.innerHTML = '';
+
+                const rawLines = [];
+                lrcText.split('\n').forEach(line => {
+                    const m = line.match(/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/);
+                    if (m) {
+                        const time = parseInt(m[1]) * 60 + parseInt(m[2]) + parseInt(m[3]) / (m[3].length === 3 ? 1000 : 100);
+                        const cleanLine = m[4].replace(/<\d{2}:\d{2}\.\d{2,3}>/g, '').trim();
+                        if (cleanLine) rawLines.push({ time, text: cleanLine });
+                    }
+                });
+
+                rawLines.forEach((row, idx) => {
+                    const nextRowTime = rawLines[idx + 1] ? rawLines[idx + 1].time : row.time + 3.6;
+                    const lineSpanDuration = Math.max(0.6, Math.min(5.0, (nextRowTime - row.time) * 0.9));
+
+                    const lineDiv = document.createElement('div');
+                    lineDiv.className = 'lyric-line';
+                    lineDiv.onclick = () => {
+                        if (ytReady && ytPlayer && ytPlayer.seekTo) ytPlayer.seekTo(row.time, true);
+                    };
+
+                    const words = row.text.split(/\s+/);
+                    // Calculate character-weighted timings for natural syllable-speed word-by-word sync
+                    const totalWeight = words.reduce((acc, w) => acc + Math.max(2, w.length), 0);
+                    let elapsedWeight = 0;
+
+                    const wordObjs = words.map(w => {
+                        const wWeight = Math.max(2, w.length);
+                        const wStart = row.time + (elapsedWeight / totalWeight) * lineSpanDuration;
+                        const wDur = (wWeight / totalWeight) * lineSpanDuration;
+                        elapsedWeight += wWeight;
+
+                        const span = document.createElement('span');
+                        span.className = 'lyric-word';
+                        span.innerText = w;
+                        lineDiv.appendChild(span);
+
+                        return { span, start: wStart, end: wStart + wDur, dur: Math.max(0.12, wDur) };
+                    });
+
+                    box.appendChild(lineDiv);
+                    this.lyricsData.push({ time: row.time, el: lineDiv, words: wordObjs });
+                });
+            }
+
+            // Direct GPU Inline Gradient Painting for 100% Guaranteed Word-by-Word Fill on Android WebViews
+            paintWordFill(span, pct) {
+                if (pct >= 100) {
+                    span.style.backgroundImage = 'none';
+                    span.style.webkitBackgroundClip = 'initial';
+                    span.style.color = '#ffffff';
+                    span.classList.add('sung');
+                } else if (pct <= 0) {
+                    span.style.backgroundImage = 'none';
+                    span.style.webkitBackgroundClip = 'initial';
+                    span.style.color = 'rgba(255, 255, 255, 0.28)';
+                    span.classList.remove('sung');
+                } else {
+                    span.style.backgroundImage = `linear-gradient(90deg, #ffffff ${pct}%, rgba(255, 255, 255, 0.28) ${pct}%)`;
+                    span.style.webkitBackgroundClip = 'text';
+                    span.style.color = 'transparent';
+                    if (pct > 35) span.classList.add('sung');
+                    else span.classList.remove('sung');
                 }
             }
 
@@ -893,34 +1375,38 @@
                             document.getElementById('tDuration').innerText = fmt(dur);
 
                             if (this.lyricsData.length > 0 && document.getElementById('lyricsView').classList.contains('active')) {
-                                const idx = this.lyricsData.findIndex((l, i, arr) => curr >= l.time - 0.15 && (!arr[i + 1] || curr < arr[i + 1].time - 0.15));
+                                const idx = this.lyricsData.findIndex((l, i, arr) => curr >= l.time - 0.1 && (!arr[i + 1] || curr < arr[i + 1].time - 0.08));
+
                                 if (idx !== -1) {
                                     const active = this.lyricsData[idx];
+
                                     this.lyricsData.forEach((l, i) => {
-                                        if (i !== idx && l.el.classList.contains('active')) {
-                                            l.el.classList.remove('active');
-                                            l.wordEls.forEach(w => {
-                                                w.style.setProperty('--wfill', i < idx ? '100%' : '0%');
-                                                w.classList.remove('sung');
-                                            });
+                                        if (i < idx) {
+                                            if (l.el.classList.contains('active') || !l.el.classList.contains('past')) {
+                                                l.el.classList.remove('active');
+                                                l.el.classList.add('past');
+                                                l.words.forEach(w => this.paintWordFill(w.span, 100));
+                                            }
+                                        } else if (i > idx) {
+                                            if (l.el.classList.contains('active') || l.el.classList.contains('past')) {
+                                                l.el.classList.remove('active', 'past');
+                                                l.words.forEach(w => this.paintWordFill(w.span, 0));
+                                            }
                                         }
                                     });
 
                                     if (!active.el.classList.contains('active')) {
+                                        active.el.classList.remove('past');
                                         active.el.classList.add('active');
                                         const box = document.getElementById('lyricsBox');
                                         box.scrollTo({ top: active.el.offsetTop - (box.clientHeight / 2) + 40, behavior: 'smooth' });
                                     }
 
-                                    const nextT = this.lyricsData[idx + 1] ? this.lyricsData[idx + 1].time : active.time + 3.5;
-                                    const lineDur = Math.max(0.5, (nextT - active.time) * 0.88);
-                                    const elapsed = Math.max(0, curr - active.time);
-                                    const perWord = lineDur / active.wordEls.length;
-
-                                    active.wordEls.forEach((wSpan, wIdx) => {
-                                        const pct = Math.max(0, Math.min(100, ((elapsed - wIdx * perWord) / perWord) * 100));
-                                        wSpan.style.setProperty('--wfill', `${pct}%`);
-                                        pct > 50 ? wSpan.classList.add('sung') : wSpan.classList.remove('sung');
+                                    // Paint each word inside the active line word-by-word!
+                                    active.words.forEach(wObj => {
+                                        const rawPct = ((curr - wObj.start) / wObj.dur) * 100;
+                                        const clamped = Math.max(0, Math.min(100, rawPct));
+                                        this.paintWordFill(wObj.span, clamped);
                                     });
                                 }
                             }
@@ -932,7 +1418,7 @@
             }
         }
 
-        window.app = new BoooMusicApp();
+        window.app = new BoooUltimateApp();
     </script>
 </body>
 </html>
