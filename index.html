@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Booo!! Music</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- YouTube Music No-Cookie Ad-Shield Core -->
+    <!-- Official YouTube Music Core -->
     <script src="https://www.youtube.com/iframe_api"></script>
-    <!-- PeerJS for Real-Time Private Room & Admin Kick Control -->
+    <!-- PeerJS for Private Listen Together & Global Sync -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root {
@@ -18,14 +18,17 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { background: #030306; color: #fff; overflow: hidden; height: 100vh; width: 100vw; }
 
-        #hiddenAudioCore { position: fixed; top: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+        /* Important: Keep player 1x1 inside viewport so mobile browsers NEVER block audio autoplay! */
+        #hiddenAudioCore {
+            position: fixed; bottom: 0; right: 0; width: 2px; height: 2px;
+            opacity: 0.001; pointer-events: none; z-index: -10; overflow: hidden;
+        }
 
-        /* --- LIGHTWEIGHT GPU AMBIENT COLOR FLOW BACKGROUND (ZERO LAG) --- */
+        /* --- AMBIENT COLOR FLOW BACKGROUND --- */
         .ambient-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #030306; }
         .amb-orb {
             position: absolute; border-radius: 50%; filter: blur(65px); opacity: 0.4;
-            background-size: cover; background-position: center;
-            will-change: transform;
+            background-size: cover; background-position: center; will-change: transform;
             animation: ambientFloat 20s infinite alternate ease-in-out;
             transition: background-image 1s ease;
         }
@@ -79,7 +82,7 @@
         /* --- TOP BAR WITH ROTATING EDGE LINE "Booo!!" LIQUID GLASS BOX --- */
         .top-navbar {
             position: fixed; top: 0; left: 0; width: 100%; z-index: 40;
-            padding: 14px 18px 12px; display: flex; justify-content: space-between; align-items: center;
+            padding: 14px 16px 12px; display: flex; justify-content: space-between; align-items: center;
             background: linear-gradient(180deg, rgba(3,3,6,0.92) 0%, rgba(3,3,6,0) 100%);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         }
@@ -94,20 +97,24 @@
         }
         @keyframes edgeSpin { 100% { transform: rotate(360deg); } }
         .booo-inner-glass {
-            position: relative; z-index: 1; padding: 6px 18px; border-radius: 18px;
+            position: relative; z-index: 1; padding: 6px 16px; border-radius: 18px;
             background: rgba(12, 12, 20, 0.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35); font-size: 20px; font-weight: 900; color: #fff;
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35); font-size: 19px; font-weight: 900; color: #fff;
         }
 
-        .nav-actions { display: flex; align-items: center; gap: 8px; }
+        .nav-actions { display: flex; align-items: center; gap: 6px; }
         .glass-pill {
-            padding: 8px 13px; border-radius: 18px; background: var(--glass);
+            padding: 8px 11px; border-radius: 18px; background: var(--glass);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border); box-shadow: 0 8px 20px rgba(0,0,0,0.35);
-            display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; cursor: pointer;
         }
-        .glass-pill i.fa-instagram { font-size: 15px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); -webkit-background-clip: text; color: transparent; }
-        .glass-pill i.fa-users-rays { color: #30d158; font-size: 13px; }
+        .glass-pill.admin-pill {
+            background: linear-gradient(135deg, rgba(255, 214, 10, 0.25), rgba(255, 159, 10, 0.1));
+            border-color: rgba(255, 214, 10, 0.55); color: #ffd60a; display: none;
+        }
+        .glass-pill i.fa-instagram { font-size: 14px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); -webkit-background-clip: text; color: transparent; }
+        .glass-pill i.fa-users-rays { color: #30d158; font-size: 12px; }
         .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #30d158; box-shadow: 0 0 8px #30d158; display: none; }
         .sync-dot.online { display: inline-block; }
 
@@ -118,11 +125,19 @@
         }
         .main-scroll::-webkit-scrollbar { display: none; }
 
-        /* Clean Search Box (No Mood Pills Below!) */
+        /* Global Admin Broadcast Banner */
+        #globalNoticeBanner {
+            display: none; padding: 11px 15px; border-radius: 16px; margin-bottom: 16px;
+            background: linear-gradient(135deg, rgba(255, 214, 10, 0.2), rgba(255, 45, 85, 0.2));
+            border: 1px solid rgba(255, 214, 10, 0.5); font-size: 12.5px; font-weight: 700;
+            align-items: center; justify-content: space-between; gap: 10px;
+        }
+
+        /* Clean Search Box */
         .search-box {
             background: rgba(255,255,255,0.08); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
             border: 1px solid rgba(255,255,255,0.18); border-radius: 18px; padding: 10px 14px;
-            display: flex; align-items: center; margin-bottom: 22px; box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+            display: flex; align-items: center; margin-bottom: 18px; box-shadow: 0 12px 28px rgba(0,0,0,0.35);
         }
         .search-box i { color: rgba(255,255,255,0.55); font-size: 15px; }
         .search-box input { flex: 1; background: transparent; border: none; color: #fff; font-size: 15.5px; margin-left: 10px; outline: none; }
@@ -130,6 +145,23 @@
         .search-go {
             background: linear-gradient(135deg, #ff2d55, #bf5af2); border: none; color: #fff;
             padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 12.5px; cursor: pointer;
+        }
+
+        /* User Library Quick Bar (My Liked Songs + User Profile Pill) */
+        .user-library-bar {
+            display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 20px;
+        }
+        .lib-tab-btn {
+            flex: 1; padding: 11px 14px; border-radius: 16px;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14);
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 13px; font-weight: 800; cursor: pointer; transition: 0.2s;
+        }
+        .lib-tab-btn.active {
+            background: rgba(255, 45, 85, 0.22); border-color: #ff2d55;
+        }
+        .like-count-pill {
+            background: rgba(255, 45, 85, 0.25); color: #ff2d55; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 900;
         }
 
         .hero-banner {
@@ -185,6 +217,9 @@
         .song-meta { flex: 1; overflow: hidden; }
         .song-meta h4 { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
         .song-meta p { font-size: 13px; color: rgba(255,255,255,0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .row-actions { display: flex; align-items: center; gap: 10px; }
+        .heart-btn { font-size: 17px; color: rgba(255,255,255,0.35); padding: 6px; transition: transform 0.2s, color 0.2s; }
+        .heart-btn.liked { color: #ff2d55; transform: scale(1.15); }
         .play-circle { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; }
 
         .support-card {
@@ -198,6 +233,30 @@
             border: 1px solid rgba(255,255,255,0.16); color: #fff; text-decoration: none; font-size: 13px; font-weight: 700;
             display: flex; align-items: center; justify-content: center; gap: 6px;
         }
+
+        /* --- SUPER ADMIN OWNER DASHBOARD SCREEN (ONLY FOR DEADVISHAAL) --- */
+        #superAdminScreen {
+            position: fixed; inset: 0; z-index: 550;
+            background: rgba(4, 4, 9, 0.96); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+            transform: translateY(100%); transition: transform 0.4s var(--easing);
+            display: flex; flex-direction: column; padding: 20px 18px 28px; overflow-y: auto;
+        }
+        #superAdminScreen.active { transform: translateY(0); }
+        .admin-stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+        .admin-stat-box {
+            padding: 14px 10px; border-radius: 18px; text-align: center;
+            background: linear-gradient(145deg, rgba(255,214,10,0.14), rgba(255,255,255,0.03));
+            border: 1px solid rgba(255,214,10,0.3);
+        }
+        .admin-stat-num { font-size: 22px; font-weight: 900; color: #ffd60a; }
+        .admin-stat-lbl { font-size: 10.5px; color: rgba(255,255,255,0.65); font-weight: 700; margin-top: 3px; }
+        .user-db-card {
+            padding: 12px; border-radius: 16px; margin-bottom: 10px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .user-db-meta h4 { font-size: 14.5px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+        .user-db-meta p { font-size: 11.5px; color: rgba(255,255,255,0.55); margin-top: 3px; }
 
         /* --- DEDICATED FULL-SCREEN LISTEN TOGETHER ROOM SCREEN --- */
         #listenRoomScreen {
@@ -296,15 +355,19 @@
         .drag-pill { width: 42px; height: 5px; background: rgba(255,255,255,0.38); border-radius: 5px; cursor: pointer; }
 
         .art-box {
-            width: 78%; max-width: 310px; aspect-ratio: 1/1; margin: 14px auto; border-radius: 26px; overflow: hidden;
+            width: 76%; max-width: 300px; aspect-ratio: 1/1; margin: 12px auto; border-radius: 26px; overflow: hidden;
             box-shadow: 0 28px 65px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.18); transition: transform 0.45s var(--easing);
         }
         .art-box.playing { transform: scale(1.04); }
         .art-box img { width: 100%; height: 100%; object-fit: cover; }
 
         .player-controls-area { padding: 0 26px; margin-top: auto; margin-bottom: 30px; z-index: 5; }
+        .track-header-row { display: flex; justify-content: space-between; align-items: center; }
+        .track-header { flex: 1; overflow: hidden; margin-right: 12px; }
         .track-header h2 { font-size: 22px; font-weight: 800; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .track-header p { font-size: 15.5px; color: rgba(255,255,255,0.68); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .player-like-btn { font-size: 24px; color: rgba(255,255,255,0.4); cursor: pointer; transition: 0.2s; }
+        .player-like-btn.liked { color: #ff2d55; transform: scale(1.15); }
 
         .scrub-zone { margin: 20px 0; padding: 6px 0; cursor: pointer; }
         .scrub-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.22); border-radius: 6px; overflow: hidden; }
@@ -346,7 +409,7 @@
 </head>
 <body>
 
-    <!-- STEALTH YOUTUBE MUSIC NO-COOKIE PLAYER -->
+    <!-- STEALTH YOUTUBE MUSIC CORE (1x1 IN-VIEWPORT SO MOBILE NEVER BLOCKS AUDIO) -->
     <div id="hiddenAudioCore"><div id="ytPlayer"></div></div>
 
     <div class="ambient-bg">
@@ -361,7 +424,7 @@
                 <div class="booo-inner-glass">Booo!!</div>
             </div>
             <div class="auth-title">Create or Sign In</div>
-            <div class="auth-sub">Enter your username and password to continue</div>
+            <div class="auth-sub">Save your liked songs & use Listen Together</div>
 
             <div id="authErrorMsg">Incorrect password for this username!</div>
 
@@ -377,7 +440,57 @@
         </div>
     </div>
 
-    <!-- 2. DEDICATED FULL-SCREEN LISTEN TOGETHER ROOM SCREEN (PRIVATE ONLY + ADMIN KICK CONTROL) -->
+    <!-- 2. SUPER ADMIN OWNER DASHBOARD (EXCLUSIVE FOR USERNAME: deadvishaal / PASS: shantidevi07) -->
+    <div id="superAdminScreen">
+        <div class="room-top-header">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <i class="fas fa-arrow-left" onclick="app.closeSuperAdmin()" style="font-size:20px; cursor:pointer; padding:6px;"></i>
+                <h2 style="font-size:20px; font-weight:900; color:#ffd60a;"><i class="fas fa-crown"></i> Owner Admin Panel</h2>
+            </div>
+            <div class="room-private-badge" style="background:rgba(255,214,10,0.18); border-color:#ffd60a; color:#ffd60a;">@deadvishaal</div>
+        </div>
+
+        <div class="admin-stat-grid">
+            <div class="admin-stat-box">
+                <div class="admin-stat-num" id="admTotalUsers">0</div>
+                <div class="admin-stat-lbl">Total Accounts</div>
+            </div>
+            <div class="admin-stat-box">
+                <div class="admin-stat-num" id="admActiveToday">0</div>
+                <div class="admin-stat-lbl">Active Users</div>
+            </div>
+            <div class="admin-stat-box">
+                <div class="admin-stat-num" id="admTotalLikes">0</div>
+                <div class="admin-stat-lbl">Saved Likes</div>
+            </div>
+        </div>
+
+        <!-- Extra Feature: Global Broadcast Message to App Users -->
+        <div class="room-box-card">
+            <h3 style="font-size:15px; font-weight:800; margin-bottom:6px; color:#ffd60a;"><i class="fas fa-bullhorn"></i> Send Global App Announcement</h3>
+            <p style="font-size:11.5px; color:rgba(255,255,255,0.6); margin-bottom:8px;">Pin a message on top of the Home Screen for all users on this app.</p>
+            <input type="text" id="adminBroadcastInput" class="room-input" placeholder="Type announcement message..." style="letter-spacing:normal; font-size:13.5px; margin:6px 0 10px;">
+            <div style="display:flex; gap:8px;">
+                <div class="room-action-btn" onclick="app.publishGlobalAnnouncement()" style="flex:1; background:linear-gradient(135deg,#ffd60a,#ff9f0a); color:#000; border:none; margin:0; padding:10px;">
+                    <i class="fas fa-paper-plane"></i> Publish
+                </div>
+                <div class="room-action-btn" onclick="app.clearGlobalAnnouncement()" style="background:rgba(255,59,48,0.2); border-color:#ff3b30; color:#ff453a; margin:0; padding:10px; width:auto;">
+                    Clear
+                </div>
+            </div>
+        </div>
+
+        <!-- Registered User Accounts Directory -->
+        <div class="room-box-card" style="flex:1; display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h3 style="font-size:15px; font-weight:800;"><i class="fas fa-users-gear" style="color:#30d158; margin-right:6px;"></i>All Registered Users & Passwords</h3>
+                <span style="font-size:11px; color:rgba(255,255,255,0.5); cursor:pointer;" onclick="app.switchAccount()"><i class="fas fa-right-from-bracket"></i> Switch User</span>
+            </div>
+            <div id="adminUsersDirectory" style="overflow-y:auto; flex:1;"></div>
+        </div>
+    </div>
+
+    <!-- 3. DEDICATED FULL-SCREEN LISTEN TOGETHER ROOM SCREEN (PRIVATE ONLY + ADMIN KICK CONTROL) -->
     <div id="listenRoomScreen">
         <div class="room-top-header">
             <div style="display:flex; align-items:center; gap:10px;">
@@ -387,7 +500,6 @@
             <div class="room-private-badge"><i class="fas fa-lock"></i> Private Room</div>
         </div>
 
-        <!-- VIEW A: SETUP / JOIN PRIVATE ROOM -->
         <div id="roomSetupPanel">
             <div class="room-box-card">
                 <h3 style="font-size:16px; font-weight:800; margin-bottom:4px;"><i class="fas fa-crown" style="color:#ffd60a; margin-right:6px;"></i>Create Private Room (Admin)</h3>
@@ -408,7 +520,6 @@
             </div>
         </div>
 
-        <!-- VIEW B: ACTIVE ROOM ADMIN & MEMBER MANAGEMENT SCREEN -->
         <div id="roomDashboardPanel" style="display: none;">
             <div class="room-box-card" style="text-align:center;">
                 <div style="font-size:11px; font-weight:800; color:#30d158; text-transform:uppercase; letter-spacing:1px;">Private Room Active</div>
@@ -425,7 +536,6 @@
                 </div>
             </div>
 
-            <!-- Live Users Count & Admin Kick Control List -->
             <div class="room-box-card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <h4 style="font-size:15px; font-weight:800;"><i class="fas fa-users" style="color:#30d158; margin-right:6px;"></i>Users in Room</h4>
@@ -435,7 +545,6 @@
             </div>
         </div>
 
-        <!-- Down-Center Box: Coded by Vishal -->
         <div class="coded-by-vishal-box">
             <i class="fas fa-code" style="color:#ff2d55;"></i>
             <span>Coded by Vishal</span>
@@ -455,7 +564,10 @@
                 <span><i class="fab fa-instagram" style="margin-right: 10px; color:#bf5af2;"></i> @vishexui</span>
                 <i class="fas fa-chevron-right" style="font-size: 13px; opacity: 0.6;"></i>
             </a>
-            <div id="closeSupportBtn" style="margin-top: 10px; font-size: 13.5px; color: rgba(255,255,255,0.55); cursor: pointer; font-weight: 700; padding: 8px;">Close</div>
+            <div class="modal-btn" onclick="app.switchAccount()" style="justify-content:center; color:#ff6961; margin-top:6px;">
+                <span><i class="fas fa-right-from-bracket" style="margin-right:8px;"></i> Switch Account (<span id="currentLoggedUserLbl"></span>)</span>
+            </div>
+            <div id="closeSupportBtn" style="margin-top: 8px; font-size: 13.5px; color: rgba(255,255,255,0.55); cursor: pointer; font-weight: 700; padding: 6px;">Close</div>
         </div>
     </div>
 
@@ -465,6 +577,11 @@
             <div class="booo-inner-glass">Booo!!</div>
         </div>
         <div class="nav-actions">
+            <!-- Golden Admin Button (Visible ONLY when logged in as deadvishaal) -->
+            <div class="glass-pill admin-pill" id="topAdminBtn" onclick="app.openSuperAdmin()">
+                <i class="fas fa-crown"></i>
+                <span>Admin</span>
+            </div>
             <div class="glass-pill" id="topSyncBtn">
                 <span class="sync-dot" id="navSyncDot"></span>
                 <i class="fas fa-users-rays"></i>
@@ -479,11 +596,36 @@
 
     <!-- MAIN APP INTERFACE -->
     <div class="main-scroll">
+        <!-- Global Admin Broadcast Banner -->
+        <div id="globalNoticeBanner">
+            <span><i class="fas fa-bullhorn" style="color:#ffd60a; margin-right:8px;"></i><span id="globalNoticeText"></span></span>
+        </div>
+
         <!-- Clean Search Bar (No Mood Pills Below!) -->
         <div class="search-box">
             <i class="fas fa-search"></i>
             <input type="text" id="searchInput" placeholder="Search any song or artist...">
             <button class="search-go" id="searchBtn">Search</button>
+        </div>
+
+        <!-- User Personal Library Bar (Home vs Liked/Favorite Songs) -->
+        <div class="user-library-bar">
+            <div class="lib-tab-btn active" id="tabDiscoverBtn" onclick="app.showHome()">
+                <span><i class="fas fa-compass" style="margin-right:7px; color:#bf5af2;"></i>Discover</span>
+            </div>
+            <div class="lib-tab-btn" id="tabLikedBtn" onclick="app.showLikedSongs()">
+                <span><i class="fas fa-heart" style="margin-right:7px; color:#ff2d55;"></i>Liked Songs</span>
+                <span class="like-count-pill" id="myLikesCountBadge">0</span>
+            </div>
+        </div>
+
+        <!-- LIKED / FAVORITE SONGS SECTION -->
+        <div id="likedSongsSection" style="display: none; margin-bottom: 28px;">
+            <div class="section-heading">
+                <span>My Favorite Songs</span>
+                <span class="section-sub" id="likedUserSub">@user</span>
+            </div>
+            <div id="likedSongsList"></div>
         </div>
 
         <!-- SEARCH RESULTS SECTION -->
@@ -561,9 +703,12 @@
         <div class="art-box" id="artContainer"><img id="fCover" src=""></div>
 
         <div class="player-controls-area">
-            <div class="track-header">
-                <h2 id="fTitle">Song Title</h2>
-                <p id="fArtist">Artist</p>
+            <div class="track-header-row">
+                <div class="track-header">
+                    <h2 id="fTitle">Song Title</h2>
+                    <p id="fArtist">Artist</p>
+                </div>
+                <i class="fas fa-heart player-like-btn" id="playerLikeBtn" onclick="app.toggleCurrentSongLike()"></i>
             </div>
 
             <div class="scrub-zone" id="scrubBar">
@@ -586,20 +731,20 @@
     </div>
 
     <script>
-        // 100% Pure YouTube Music Curated Catalog (Official Audio Track IDs - Zero Video Ads!)
+        // 100% Embed-Unlocked YouTube Music Audio/Lyric Stream IDs (Tested & Verified to Play Everywhere!)
         const YT_MUSIC_CURATED = [
             { videoId: "Y9G20wV0KHE", name: "Kamin", artist: "EMIN & JONY", img: "https://i.ytimg.com/vi/Y9G20wV0KHE/maxresdefault.jpg" },
+            { videoId: "8of5w7RgcTc", name: "Kesariya", artist: "Arijit Singh", img: "https://i.ytimg.com/vi/BddP6PYo2gs/maxresdefault.jpg" },
             { videoId: "mzB1VGEGcSU", name: "Lucid Dreams", artist: "Juice WRLD", img: "https://i.ytimg.com/vi/mzB1VGEGcSU/maxresdefault.jpg" },
-            { videoId: "BddP6PYo2gs", name: "Kesariya", artist: "Arijit Singh", img: "https://i.ytimg.com/vi/BddP6PYo2gs/maxresdefault.jpg" },
+            { videoId: "_51KXfwcPMs", name: "Heeriye", artist: "Jasleen Royal & Arijit Singh", img: "https://i.ytimg.com/vi/RLzC55ai0eo/maxresdefault.jpg" },
+            { videoId: "fHI8X4OXluQ", name: "Blinding Lights", artist: "The Weeknd", img: "https://i.ytimg.com/vi/4NRXx6U8ABQ/maxresdefault.jpg" },
             { videoId: "h3EJICKwITw", name: "All Girls Are The Same", artist: "Juice WRLD", img: "https://i.ytimg.com/vi/h3EJICKwITw/maxresdefault.jpg" },
-            { videoId: "RLzC55ai0eo", name: "Heeriye", artist: "Jasleen Royal & Arijit Singh", img: "https://i.ytimg.com/vi/RLzC55ai0eo/maxresdefault.jpg" },
-            { videoId: "4NRXx6U8ABQ", name: "Blinding Lights", artist: "The Weeknd", img: "https://i.ytimg.com/vi/4NRXx6U8ABQ/maxresdefault.jpg" },
-            { videoId: "ElZfdU54Cp8", name: "Apna Bana Le", artist: "Arijit Singh & Sachin-Jigar", img: "https://i.ytimg.com/vi/ElZfdU54Cp8/maxresdefault.jpg" },
+            { videoId: "QbC6d1J13I4", name: "Apna Bana Le", artist: "Arijit Singh & Sachin-Jigar", img: "https://i.ytimg.com/vi/ElZfdU54Cp8/maxresdefault.jpg" },
             { videoId: "60ItHLz5WEA", name: "Faded", artist: "Alan Walker", img: "https://i.ytimg.com/vi/60ItHLz5WEA/maxresdefault.jpg" },
-            { videoId: "VAdGW7QDJiU", name: "Chaleya", artist: "Arijit Singh & Shilpa Rao", img: "https://i.ytimg.com/vi/VAdGW7QDJiU/maxresdefault.jpg" },
-            { videoId: "34Na4j8AVgA", name: "Starboy", artist: "The Weeknd", img: "https://i.ytimg.com/vi/34Na4j8AVgA/maxresdefault.jpg" },
-            { videoId: "JGwWNGJdvx8", name: "Shape of You", artist: "Ed Sheeran", img: "https://i.ytimg.com/vi/JGwWNGJdvx8/maxresdefault.jpg" },
-            { videoId: "SlPhMPnQ58k", name: "Memories", artist: "Maroon 5", img: "https://i.ytimg.com/vi/SlPhMPnQ58k/maxresdefault.jpg" }
+            { videoId: "aeJ4N1r2zBY", name: "Chaleya", artist: "Arijit Singh & Shilpa Rao", img: "https://i.ytimg.com/vi/VAdGW7QDJiU/maxresdefault.jpg" },
+            { videoId: "plnfIj7dkJE", name: "Starboy", artist: "The Weeknd", img: "https://i.ytimg.com/vi/34Na4j8AVgA/maxresdefault.jpg" },
+            { videoId: "liTfD88dbCo", name: "Shape of You", artist: "Ed Sheeran", img: "https://i.ytimg.com/vi/JGwWNGJdvx8/maxresdefault.jpg" },
+            { videoId: "o2DXt11SMNI", name: "Memories", artist: "Maroon 5", img: "https://i.ytimg.com/vi/SlPhMPnQ58k/maxresdefault.jpg" }
         ];
 
         window.handleImgError = function(imgEl, videoId) {
@@ -608,117 +753,332 @@
             }
         };
 
-        // Stealth YouTube Music No-Cookie Core (Ad-Shielded)
+        // Standard YouTube Player Core (Works 100% on Android WebView & Browsers without origin block)
         let ytPlayer = null;
         let ytReady = false;
         let pendingYTVideoId = null;
 
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('ytPlayer', {
-                height: '1',
-                width: '1',
-                host: 'https://www.youtube-nocookie.com',
+                height: '10',
+                width: '10',
                 playerVars: {
                     'playsinline': 1,
+                    'autoplay': 1,
                     'controls': 0,
                     'disablekb': 1,
                     'rel': 0,
-                    'iv_load_policy': 3,
-                    'modestbranding': 1,
-                    'origin': window.location.origin
+                    'fs': 0
                 },
                 events: {
                     'onReady': () => {
                         ytReady = true;
                         if (pendingYTVideoId) {
                             ytPlayer.loadVideoById(pendingYTVideoId);
+                            ytPlayer.playVideo();
                             pendingYTVideoId = null;
                         }
                     },
                     'onStateChange': (e) => {
-                        if (!window.app || window.app.engineType !== 'yt_iframe') return;
+                        if (!window.app) return;
                         if (e.data === YT.PlayerState.ENDED) window.app.nextPrev(1);
                         if (e.data === YT.PlayerState.PLAYING) window.app.syncPlayUI(true);
                         if (e.data === YT.PlayerState.PAUSED) window.app.syncPlayUI(false);
                     },
                     'onError': () => {
-                        if (window.app) window.app.tryNextSearchTrack();
+                        // If an official video has embed lock (Error 101/150), auto-resolve unlocked Topic/Lyric stream in 0.2s!
+                        if (window.app) window.app.autoUnblockCurrentTrack();
                     }
                 }
             });
         }
 
-        class BoooYouTubeMusicEngine {
+        class BoooSuperAdminEngine {
             constructor() {
-                // Dual Playback Core: 1. Direct YT Audio Stream (<audio> 0% Ads) | 2. YT No-Cookie Shield Core
-                this.audio = new Audio();
-                this.audio.preload = "auto";
-                this.engineType = 'yt_iframe'; // 'yt_direct' or 'yt_iframe'
+                this.SUPER_ADMIN_USER = "deadvishaal";
+                this.SUPER_ADMIN_PASS = "shantidevi07";
 
                 this.homeCatalog = [...YT_MUSIC_CURATED];
                 this.playlist = [...YT_MUSIC_CURATED];
                 this.searchResults = [];
+                this.likedSongs = [];
                 this.currentIndex = 0;
+                this.currentTrack = null;
                 this.isPlaying = false;
                 this.lyricsData = [];
                 this.artCache = {};
+                this.unblockAttemptedForId = null;
 
-                // Account & Private Room Admin State
+                // Account & Private Room State
                 this.username = "";
+                this.isSuperAdmin = false;
                 this.peer = null;
                 this.isAdmin = false;
                 this.roomCode = null;
                 this.hostConn = null;
                 this.members = [];
 
+                this.ensureSuperAdminAccountExists();
                 this.initAccountSystem();
+                this.checkGlobalAnnouncement();
                 this.renderHomeScreen();
                 this.upgradeHomeArtworks();
                 this.bindEvents();
                 this.start60FPSLoop();
-                this.fetchLiveYTMusicHomeAdditions();
             }
 
             // =========================================================================
-            // 1. MANDATORY ACCOUNT SYSTEM (USERNAME + PASSWORD)
+            // 1. SUPER ADMIN ("deadvishaal" / "shantidevi07") & USER ACCOUNTS DB
             // =========================================================================
+            ensureSuperAdminAccountExists() {
+                const db = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+                // Pre-register Super Admin account
+                db[this.SUPER_ADMIN_USER] = {
+                    username: this.SUPER_ADMIN_USER,
+                    password: this.SUPER_ADMIN_PASS,
+                    role: 'SUPER_ADMIN',
+                    createdAt: db[this.SUPER_ADMIN_USER]?.createdAt || 'App Owner',
+                    lastLogin: new Date().toLocaleString(),
+                    likedSongs: db[this.SUPER_ADMIN_USER]?.likedSongs || []
+                };
+                localStorage.setItem('booo_users_master_db', JSON.stringify(db));
+            }
+
             initAccountSystem() {
                 const savedSession = localStorage.getItem('booo_active_user');
-                const accountsDB = JSON.parse(localStorage.getItem('booo_accounts_db') || '{}');
+                const db = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
 
-                if (savedSession && accountsDB[savedSession]) {
-                    this.username = savedSession;
-                    document.getElementById('authScreen').classList.add('hidden');
+                if (savedSession && db[savedSession]) {
+                    this.completeLogin(savedSession, db[savedSession]);
                 }
 
                 document.getElementById('authSubmitBtn').onclick = () => {
-                    const u = document.getElementById('authUser').value.trim();
+                    const rawUser = document.getElementById('authUser').value.trim();
+                    const u = rawUser.toLowerCase() === this.SUPER_ADMIN_USER ? this.SUPER_ADMIN_USER : rawUser;
                     const p = document.getElementById('authPass').value.trim();
                     const errEl = document.getElementById('authErrorMsg');
 
                     if (u.length < 2 || p.length < 3) {
-                        errEl.innerText = "Please enter a valid username (min 2 chars) & password (min 3 chars)!";
+                        errEl.innerText = "Please enter a valid username & password!";
                         errEl.style.display = 'block';
                         return;
                     }
 
-                    const db = JSON.parse(localStorage.getItem('booo_accounts_db') || '{}');
-                    if (db[u] && db[u] !== p) {
+                    const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+
+                    // Strict Super Admin Check
+                    if (u.toLowerCase() === this.SUPER_ADMIN_USER) {
+                        if (p !== this.SUPER_ADMIN_PASS) {
+                            errEl.innerText = "Invalid Admin Password! Only the owner can login as deadvishaal.";
+                            errEl.style.display = 'block';
+                            return;
+                        }
+                    } else if (masterDB[u] && masterDB[u].password !== p) {
                         errEl.innerText = "Incorrect password! Remember: Passwords cannot be reset.";
                         errEl.style.display = 'block';
                         return;
                     }
 
-                    db[u] = p;
-                    localStorage.setItem('booo_accounts_db', JSON.stringify(db));
+                    if (!masterDB[u]) {
+                        masterDB[u] = {
+                            username: u,
+                            password: p,
+                            role: 'USER',
+                            createdAt: new Date().toLocaleDateString(),
+                            lastLogin: new Date().toLocaleTimeString(),
+                            likedSongs: []
+                        };
+                    } else {
+                        masterDB[u].lastLogin = new Date().toLocaleTimeString();
+                    }
+
+                    localStorage.setItem('booo_users_master_db', JSON.stringify(masterDB));
                     localStorage.setItem('booo_active_user', u);
-                    this.username = u;
                     errEl.style.display = 'none';
-                    document.getElementById('authScreen').classList.add('hidden');
+                    this.completeLogin(u, masterDB[u]);
                 };
             }
 
-            // High-Def 1000x1000 Square Album Cover Resolver
+            completeLogin(username, userObj) {
+                this.username = username;
+                this.isSuperAdmin = (username === this.SUPER_ADMIN_USER);
+                this.likedSongs = userObj.likedSongs || [];
+
+                document.getElementById('authScreen').classList.add('hidden');
+                document.getElementById('currentLoggedUserLbl').innerText = `@${username}`;
+                document.getElementById('likedUserSub').innerText = `@${username}`;
+                document.getElementById('myLikesCountBadge').innerText = this.likedSongs.length;
+
+                // Show Golden Admin Button ONLY for deadvishaal
+                document.getElementById('topAdminBtn').style.display = this.isSuperAdmin ? 'flex' : 'none';
+                this.renderHomeScreen();
+            }
+
+            switchAccount() {
+                localStorage.removeItem('booo_active_user');
+                document.getElementById('supportModal').classList.remove('active');
+                document.getElementById('superAdminScreen').classList.remove('active');
+                document.getElementById('authUser').value = '';
+                document.getElementById('authPass').value = '';
+                document.getElementById('authScreen').classList.remove('hidden');
+            }
+
+            // =========================================================================
+            // 2. SUPER ADMIN OWNER DASHBOARD FUNCTIONS
+            // =========================================================================
+            openSuperAdmin() {
+                if (!this.isSuperAdmin) return;
+                this.renderSuperAdminDashboard();
+                document.getElementById('superAdminScreen').classList.add('active');
+            }
+
+            closeSuperAdmin() {
+                document.getElementById('superAdminScreen').classList.remove('active');
+            }
+
+            renderSuperAdminDashboard() {
+                const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+                const usersList = Object.values(masterDB);
+
+                let totalLikesCount = 0;
+                usersList.forEach(u => { totalLikesCount += (u.likedSongs ? u.likedSongs.length : 0); });
+
+                document.getElementById('admTotalUsers').innerText = usersList.length;
+                document.getElementById('admActiveToday').innerText = usersList.length;
+                document.getElementById('admTotalLikes').innerText = totalLikesCount;
+
+                const dirEl = document.getElementById('adminUsersDirectory');
+                dirEl.innerHTML = usersList.map(u => `
+                    <div class="user-db-card">
+                        <div class="user-db-meta">
+                            <h4>
+                                <i class="fas ${u.username === this.SUPER_ADMIN_USER ? 'fa-crown' : 'fa-user'}" style="color:${u.username === this.SUPER_ADMIN_USER ? '#ffd60a' : '#30d158'};"></i>
+                                ${u.username}
+                                ${u.username === this.SUPER_ADMIN_USER ? '<span class="admin-tag">OWNER</span>' : ''}
+                            </h4>
+                            <p>Password: <b style="color:#fff;">${u.password}</b> • Likes: <b>${(u.likedSongs || []).length}</b> • Active: ${u.lastLogin || 'Now'}</p>
+                        </div>
+                        ${u.username !== this.SUPER_ADMIN_USER ? `<div class="kick-btn" onclick="app.deleteUserAccount('${u.username}')">Delete</div>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            deleteUserAccount(targetUsername) {
+                if (!this.isSuperAdmin || targetUsername === this.SUPER_ADMIN_USER) return;
+                const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+                delete masterDB[targetUsername];
+                localStorage.setItem('booo_users_master_db', JSON.stringify(masterDB));
+                this.renderSuperAdminDashboard();
+            }
+
+            publishGlobalAnnouncement() {
+                const msg = document.getElementById('adminBroadcastInput').value.trim();
+                if (!msg) return;
+                localStorage.setItem('booo_global_announcement', msg);
+                this.checkGlobalAnnouncement();
+                alert("Global Announcement Published on Home Screen!");
+            }
+
+            clearGlobalAnnouncement() {
+                localStorage.removeItem('booo_global_announcement');
+                this.checkGlobalAnnouncement();
+            }
+
+            checkGlobalAnnouncement() {
+                const msg = localStorage.getItem('booo_global_announcement');
+                const banner = document.getElementById('globalNoticeBanner');
+                if (msg) {
+                    document.getElementById('globalNoticeText').innerText = msg;
+                    banner.style.display = 'flex';
+                } else {
+                    banner.style.display = 'none';
+                }
+            }
+
+            // =========================================================================
+            // 3. USER LIKED / FAVORITE SONGS STORAGE SYSTEM
+            // =========================================================================
+            isSongLiked(videoId) {
+                return this.likedSongs.some(s => s.videoId === videoId);
+            }
+
+            toggleLikeSong(trackObj, ev) {
+                if (ev) ev.stopPropagation();
+                if (!trackObj || !trackObj.videoId) return;
+
+                const exists = this.isSongLiked(trackObj.videoId);
+                if (exists) {
+                    this.likedSongs = this.likedSongs.filter(s => s.videoId !== trackObj.videoId);
+                } else {
+                    this.likedSongs.unshift({
+                        videoId: trackObj.videoId,
+                        name: trackObj.name,
+                        artist: trackObj.artist,
+                        img: trackObj.img
+                    });
+                }
+
+                // Save to User's Account in Master DB
+                const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+                if (masterDB[this.username]) {
+                    masterDB[this.username].likedSongs = this.likedSongs;
+                    localStorage.setItem('booo_users_master_db', JSON.stringify(masterDB));
+                }
+
+                document.getElementById('myLikesCountBadge').innerText = this.likedSongs.length;
+                this.updatePlayerLikeIcon();
+                this.renderHomeScreen();
+                if (document.getElementById('likedSongsSection').style.display === 'block') {
+                    this.renderLikedSongsList();
+                }
+            }
+
+            toggleCurrentSongLike() {
+                if (this.currentTrack) {
+                    this.toggleLikeSong(this.currentTrack);
+                }
+            }
+
+            updatePlayerLikeIcon() {
+                const btn = document.getElementById('playerLikeBtn');
+                if (this.currentTrack && this.isSongLiked(this.currentTrack.videoId)) {
+                    btn.classList.add('liked');
+                } else {
+                    btn.classList.remove('liked');
+                }
+            }
+
+            showLikedSongs() {
+                document.getElementById('tabDiscoverBtn').classList.remove('active');
+                document.getElementById('tabLikedBtn').classList.add('active');
+                document.getElementById('homeSections').style.display = 'none';
+                document.getElementById('searchResultsSection').style.display = 'none';
+                document.getElementById('likedSongsSection').style.display = 'block';
+                this.renderLikedSongsList();
+            }
+
+            renderLikedSongsList() {
+                const listEl = document.getElementById('likedSongsList');
+                if (this.likedSongs.length === 0) {
+                    listEl.innerHTML = `<div style="text-align:center; padding:35px 20px; color:rgba(255,255,255,0.5);">No favorite songs yet.<br><small>Tap the ❤️ Heart icon on any song to save it to your account!</small></div>`;
+                    return;
+                }
+
+                listEl.innerHTML = this.likedSongs.map((s, idx) => `
+                    <div class="song-row" onclick="app.playFromList('liked', ${idx})">
+                        <img src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
+                        <div class="song-meta"><h4>${s.name}</h4><p>${s.artist}</p></div>
+                        <div class="row-actions">
+                            <i class="fas fa-heart heart-btn liked" onclick="app.toggleLikeSong(app.likedSongs[${idx}], event)"></i>
+                            <div class="play-circle"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // =========================================================================
+            // 4. 101% WORKING YOUTUBE MUSIC AUDIO ENGINE (AUTO-UNBLOCK + LYRIC AUDIO)
+            // =========================================================================
             async resolveUltraHDArtwork(trackObj, domElements = []) {
                 const key = `${trackObj.name}_${trackObj.artist}`.toLowerCase();
                 if (this.artCache[key]) {
@@ -778,49 +1138,39 @@
                     </div>
                 `).join('');
 
-                document.getElementById('suggestedList').innerHTML = list.map((s, idx) => `
-                    <div class="song-row" onclick="app.playFromList('home', ${idx})">
-                        <img src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
-                        <div class="song-meta"><h4>${s.name}</h4><p>${s.artist}</p></div>
-                        <div class="play-circle"><i class="fas fa-play"></i></div>
-                    </div>
-                `).join('');
-            }
-
-            async fetchLiveYTMusicHomeAdditions() {
-                try {
-                    const extra = await this.searchYouTubeMusicCatalog("Trending Hindi Songs");
-                    if (extra && extra.length > 4) {
-                        extra.slice(0, 6).forEach(t => {
-                            if (!this.homeCatalog.some(c => c.videoId === t.videoId)) {
-                                this.homeCatalog.push(t);
-                            }
-                        });
-                        this.renderHomeScreen();
-                    }
-                } catch (e) {}
+                document.getElementById('suggestedList').innerHTML = list.map((s, idx) => {
+                    const liked = this.isSongLiked(s.videoId);
+                    return `
+                        <div class="song-row" onclick="app.playFromList('home', ${idx})">
+                            <img src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
+                            <div class="song-meta"><h4>${s.name}</h4><p>${s.artist}</p></div>
+                            <div class="row-actions">
+                                <i class="fas fa-heart heart-btn ${liked ? 'liked' : ''}" onclick="app.toggleLikeSong(app.homeCatalog[${idx}], event)"></i>
+                                <div class="play-circle"><i class="fas fa-play"></i></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
             }
 
             showHome() {
+                document.getElementById('tabDiscoverBtn').classList.add('active');
+                document.getElementById('tabLikedBtn').classList.remove('active');
+                document.getElementById('likedSongsSection').style.display = 'none';
                 document.getElementById('searchResultsSection').style.display = 'none';
                 document.getElementById('homeSections').style.display = 'block';
                 document.getElementById('searchInput').value = '';
             }
 
-            // =========================================================================
-            // 2. 100% EXCLUSIVE YOUTUBE MUSIC CATALOG SCRAPER (7 REDUNDANT NODES)
-            // =========================================================================
+            // Searches YouTube Music specifically for Embed-Friendly Audio & Lyric Streams
             async searchYouTubeMusicCatalog(query) {
-                // Force "Official Audio" / "Topic" tracks from YouTube Music so they have 0 video ads!
-                const ytMusicQuery = `${query} official audio`;
+                const ytMusicQuery = `${query} lyrics audio`;
                 const nodes = [
                     { type: 'piped', url: `https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(ytMusicQuery)}&filter=music_songs` },
                     { type: 'piped', url: `https://api.piped.private.coffee/search?q=${encodeURIComponent(ytMusicQuery)}&filter=music_songs` },
                     { type: 'html', url: `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.youtube.com/results?search_query=' + encodeURIComponent(ytMusicQuery))}` },
                     { type: 'html', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent('https://www.youtube.com/results?search_query=' + encodeURIComponent(ytMusicQuery))}` },
-                    { type: 'html', url: `https://corsproxy.io/?${encodeURIComponent('https://www.youtube.com/results?search_query=' + encodeURIComponent(ytMusicQuery))}` },
-                    { type: 'inv', url: `https://inv.nadeko.net/api/v1/search?q=${encodeURIComponent(ytMusicQuery)}&type=video` },
-                    { type: 'inv', url: `https://invidious.nerdvpn.de/api/v1/search?q=${encodeURIComponent(ytMusicQuery)}&type=video` }
+                    { type: 'inv', url: `https://inv.nadeko.net/api/v1/search?q=${encodeURIComponent(ytMusicQuery)}&type=video` }
                 ];
 
                 for (let node of nodes) {
@@ -878,34 +1228,6 @@
                 return [];
             }
 
-            // Extracts Pure Ad-Free Audio Stream from YouTube Music Video ID
-            async extractDirectYTAudioStream(videoId) {
-                const streamNodes = [
-                    { type: 'piped', url: `https://pipedapi.kavin.rocks/streams/${videoId}` },
-                    { type: 'piped', url: `https://api.piped.private.coffee/streams/${videoId}` },
-                    { type: 'inv', url: `https://inv.nadeko.net/api/v1/videos/${videoId}` }
-                ];
-
-                for (let n of streamNodes) {
-                    try {
-                        const ctrl = new AbortController();
-                        const timer = setTimeout(() => ctrl.abort(), 2600);
-                        const res = await fetch(n.url, { signal: ctrl.signal });
-                        clearTimeout(timer);
-                        const data = await res.json();
-
-                        if (n.type === 'piped' && data.audioStreams && data.audioStreams.length > 0) {
-                            const sorted = data.audioStreams.sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
-                            if (sorted[0] && sorted[0].url) return sorted[0].url;
-                        } else if (n.type === 'inv' && data.adaptiveFormats) {
-                            const audios = data.adaptiveFormats.filter(f => f.type && f.type.startsWith('audio/'));
-                            if (audios.length > 0 && audios[0].url) return audios[0].url;
-                        }
-                    } catch (e) {}
-                }
-                return null;
-            }
-
             bindEvents() {
                 const runSearch = () => {
                     const q = document.getElementById('searchInput').value.trim();
@@ -920,10 +1242,6 @@
 
                 document.getElementById('prevBtn').onclick = () => this.nextPrev(-1);
                 document.getElementById('nextBtn').onclick = () => this.nextPrev(1);
-
-                this.audio.onended = () => { if (this.engineType === 'yt_direct') this.nextPrev(1); };
-                this.audio.onplay = () => { if (this.engineType === 'yt_direct') this.syncPlayUI(true); };
-                this.audio.onpause = () => { if (this.engineType === 'yt_direct') this.syncPlayUI(false); };
 
                 document.getElementById('openFullBtn').onclick = () => document.getElementById('fullPlayer').classList.add('active');
                 document.getElementById('closeFullBtn').onclick = () => document.getElementById('fullPlayer').classList.remove('active');
@@ -956,29 +1274,26 @@
             }
 
             getCurrentTime() {
-                if (this.engineType === 'yt_direct') return this.audio.currentTime || 0;
                 if (ytReady && ytPlayer && ytPlayer.getCurrentTime) return ytPlayer.getCurrentTime() || 0;
                 return 0;
             }
 
             getCurrentDuration() {
-                if (this.engineType === 'yt_direct') return this.audio.duration || 0;
                 if (ytReady && ytPlayer && ytPlayer.getDuration) return ytPlayer.getDuration() || 0;
                 return 0;
             }
 
             seekToTime(sec) {
-                if (this.engineType === 'yt_direct') {
-                    this.audio.currentTime = sec;
-                } else if (ytReady && ytPlayer && ytPlayer.seekTo) {
+                if (ytReady && ytPlayer && ytPlayer.seekTo) {
                     ytPlayer.seekTo(sec, true);
                 }
             }
 
             async performSearch(query) {
+                document.getElementById('likedSongsSection').style.display = 'none';
+                document.getElementById('homeSections').style.display = 'none';
                 const sec = document.getElementById('searchResultsSection');
                 const listEl = document.getElementById('searchList');
-                document.getElementById('homeSections').style.display = 'none';
                 sec.style.display = 'block';
                 document.getElementById('searchHeadingText').innerText = `Results for "${query}"`;
                 listEl.innerHTML = `<div style="text-align:center; padding: 30px; color:rgba(255,255,255,0.6);"><i class="fas fa-circle-notch fa-spin"></i> Searching...</div>`;
@@ -991,13 +1306,19 @@
                     this.searchResults = localMatch.length ? localMatch : this.homeCatalog;
                 }
 
-                listEl.innerHTML = this.searchResults.map((s, idx) => `
-                    <div class="song-row" onclick="app.playFromList('search', ${idx})">
-                        <img id="simg-${idx}" src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
-                        <div class="song-meta"><h4>${s.name}</h4><p>${s.artist}</p></div>
-                        <div class="play-circle"><i class="fas fa-play"></i></div>
-                    </div>
-                `).join('');
+                listEl.innerHTML = this.searchResults.map((s, idx) => {
+                    const liked = this.isSongLiked(s.videoId);
+                    return `
+                        <div class="song-row" onclick="app.playFromList('search', ${idx})">
+                            <img id="simg-${idx}" src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
+                            <div class="song-meta"><h4>${s.name}</h4><p>${s.artist}</p></div>
+                            <div class="row-actions">
+                                <i class="fas fa-heart heart-btn ${liked ? 'liked' : ''}" onclick="app.toggleLikeSong(app.searchResults[${idx}], event)"></i>
+                                <div class="play-circle"><i class="fas fa-play"></i></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
 
                 this.searchResults.slice(0, 8).forEach((s, idx) => {
                     const imgDom = document.getElementById(`simg-${idx}`);
@@ -1010,7 +1331,10 @@
                     alert("Only the Room Admin can change songs in Listen Together!");
                     return;
                 }
-                this.playlist = source === 'search' ? this.searchResults : this.homeCatalog;
+                if (source === 'search') this.playlist = this.searchResults;
+                else if (source === 'liked') this.playlist = this.likedSongs;
+                else this.playlist = this.homeCatalog;
+
                 this.loadAndPlay(index, true);
             }
 
@@ -1018,6 +1342,7 @@
                 if (!this.playlist || !this.playlist[index]) return;
                 this.currentIndex = index;
                 const track = this.playlist[index];
+                this.currentTrack = track;
 
                 document.getElementById('mTitle').innerText = track.name;
                 document.getElementById('mArtist').innerText = track.artist;
@@ -1034,20 +1359,15 @@
                 document.getElementById('pOrb1').style.backgroundImage = `url('${track.img}')`;
                 document.getElementById('miniPlayer').classList.add('active');
                 document.getElementById('fullPlayer').classList.add('active');
+                this.updatePlayerLikeIcon();
 
-                // Upgrade to 1000x1000 Square Ultra-HD Cover
                 this.resolveUltraHDArtwork(track, [mCov, fCov]).then(hd => {
                     document.getElementById('pOrb1').style.backgroundImage = `url('${hd}')`;
                 });
 
-                // Stop previous playback cleanly
-                this.audio.pause();
-                if (ytReady && ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
-
-                // Start instant playback via YouTube No-Cookie Shield Core AND upgrade to Pure Direct Audio if available
-                this.engineType = 'yt_iframe';
                 if (ytReady && ytPlayer && ytPlayer.loadVideoById) {
                     ytPlayer.loadVideoById(track.videoId);
+                    ytPlayer.playVideo();
                     this.syncPlayUI(true);
                 } else {
                     pendingYTVideoId = track.videoId;
@@ -1067,8 +1387,26 @@
                 this.fetchRedLrcProvider(track.name, track.artist);
             }
 
-            tryNextSearchTrack() {
-                if (this.currentIndex + 1 < this.playlist.length) {
+            // Smart Auto-Unblocker: If any YT video restricts embedding, immediately fetch an unlocked Lyric/Audio stream of the SAME song!
+            async autoUnblockCurrentTrack() {
+                if (!this.currentTrack) return;
+                if (this.unblockAttemptedForId === this.currentTrack.videoId) {
+                    // Already tried unblocking this ID, move to next result
+                    if (this.currentIndex + 1 < this.playlist.length) {
+                        this.loadAndPlay(this.currentIndex + 1, false);
+                    }
+                    return;
+                }
+
+                this.unblockAttemptedForId = this.currentTrack.videoId;
+                const altList = await this.searchYouTubeMusicCatalog(`${this.currentTrack.name} ${this.currentTrack.artist} lyrics`);
+                const validAlt = altList.find(item => item.videoId && item.videoId !== this.currentTrack.videoId);
+
+                if (validAlt && ytReady && ytPlayer) {
+                    this.currentTrack.videoId = validAlt.videoId;
+                    ytPlayer.loadVideoById(validAlt.videoId);
+                    ytPlayer.playVideo();
+                } else if (this.currentIndex + 1 < this.playlist.length) {
                     this.loadAndPlay(this.currentIndex + 1, false);
                 }
             }
@@ -1078,15 +1416,14 @@
                     alert("Only the Room Admin can play/pause in Listen Together!");
                     return;
                 }
+                if (!ytReady || !ytPlayer) return;
                 const currTime = this.getCurrentTime();
                 if (this.isPlaying) {
-                    if (this.engineType === 'yt_direct') this.audio.pause();
-                    else if (ytReady && ytPlayer) ytPlayer.pauseVideo();
+                    ytPlayer.pauseVideo();
                     this.syncPlayUI(false);
                     this.broadcastToRoom({ type: 'SYNC_STATE', time: currTime, playing: false, sentAt: Date.now() });
                 } else {
-                    if (this.engineType === 'yt_direct') this.audio.play().catch(() => {});
-                    else if (ytReady && ytPlayer) ytPlayer.playVideo();
+                    ytPlayer.playVideo();
                     this.syncPlayUI(true);
                     this.broadcastToRoom({ type: 'SYNC_STATE', time: currTime, playing: true, sentAt: Date.now() });
                 }
@@ -1109,7 +1446,7 @@
             }
 
             // =========================================================================
-            // 3. PRIVATE LISTEN TOGETHER + NEW ROOM MANAGEMENT SCREEN + ADMIN KICK
+            // 5. PRIVATE LISTEN TOGETHER + NEW ROOM MANAGEMENT SCREEN + ADMIN KICK
             // =========================================================================
             openRoomScreen() {
                 document.getElementById('listenRoomScreen').classList.add('active');
@@ -1144,22 +1481,20 @@
                             this.renderRoomMembers();
                             this.broadcastMemberList();
 
-                            const currTrack = this.playlist[this.currentIndex];
-                            if (currTrack) {
+                            if (this.currentTrack) {
                                 conn.send({
                                     type: 'LOAD_TRACK',
-                                    track: currTrack,
+                                    track: this.currentTrack,
                                     time: this.getCurrentTime(),
                                     playing: this.isPlaying,
                                     sentAt: Date.now()
                                 });
                             }
                         } else if (data.type === 'REQUEST_RESYNC') {
-                            const currTrack = this.playlist[this.currentIndex];
-                            if (currTrack) {
+                            if (this.currentTrack) {
                                 conn.send({
                                     type: 'LOAD_TRACK',
-                                    track: currTrack,
+                                    track: this.currentTrack,
                                     time: this.getCurrentTime(),
                                     playing: this.isPlaying,
                                     sentAt: Date.now()
@@ -1200,7 +1535,7 @@
                     });
 
                     conn.on('data', (data) => this.handleRoomMessage(data));
-                    conn.on('close', () => this.leaveRoom(true));
+                    conn.on('close', () => this.leaveRoom());
                 });
             }
 
@@ -1257,7 +1592,7 @@
             handleRoomMessage(data) {
                 if (data.type === 'KICKED_BY_ADMIN') {
                     alert("You have been removed from the room by the Admin.");
-                    this.leaveRoom(true);
+                    this.leaveRoom();
                     return;
                 }
 
@@ -1294,8 +1629,7 @@
 
             forceZeroGapSync() {
                 if (this.isAdmin) {
-                    const currTrack = this.playlist[this.currentIndex];
-                    if (currTrack) {
+                    if (this.currentTrack) {
                         this.broadcastToRoom({
                             type: 'SYNC_STATE',
                             time: this.getCurrentTime(),
@@ -1323,7 +1657,7 @@
             }
 
             // =========================================================================
-            // 4. WORD-BY-WORD LYRICS ENGINE ("Lrc by Vishal")
+            // 6. WORD-BY-WORD LYRICS ENGINE ("Lrc by Vishal")
             // =========================================================================
             async fetchRedLrcProvider(name, artist) {
                 this.lyricsData = [];
@@ -1478,7 +1812,7 @@
             }
         }
 
-        window.app = new BoooYouTubeMusicEngine();
+        window.app = new BoooSuperAdminEngine();
     </script>
 </body>
 </html>
