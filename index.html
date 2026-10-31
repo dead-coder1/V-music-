@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Booo!! Music</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- YouTube Music No-Cookie Ad-Shield Core -->
     <script src="https://www.youtube.com/iframe_api"></script>
+    <!-- PeerJS for Real-Time Private Room & Admin Kick Control -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root {
@@ -18,358 +20,291 @@
 
         #hiddenAudioCore { position: fixed; top: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 
-        /* --- AMBIENT COLOR FLOW BACKGROUND --- */
-        .ambient-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #040408; }
+        /* --- LIGHTWEIGHT GPU AMBIENT COLOR FLOW BACKGROUND (ZERO LAG) --- */
+        .ambient-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #030306; }
         .amb-orb {
-            position: absolute; border-radius: 50%; filter: blur(75px); opacity: 0.5;
+            position: absolute; border-radius: 50%; filter: blur(65px); opacity: 0.4;
             background-size: cover; background-position: center;
-            animation: ambientFloat 16s infinite alternate ease-in-out;
-            transition: background-image 1.2s ease, background-color 1.2s ease;
+            will-change: transform;
+            animation: ambientFloat 20s infinite alternate ease-in-out;
+            transition: background-image 1s ease;
         }
-        .orb-1 { width: 350px; height: 350px; top: -12%; left: -12%; background-color: #ff2d55; }
-        .orb-2 { width: 390px; height: 390px; bottom: -15%; right: -12%; background-color: #5e5ce6; animation-delay: -5s; }
-        .orb-3 { width: 280px; height: 280px; top: 38%; left: 20%; background-color: #bf5af2; animation-delay: -9s; opacity: 0.32; }
+        .orb-1 { width: 320px; height: 320px; top: -10%; left: -10%; background-color: #ff2d55; }
+        .orb-2 { width: 350px; height: 350px; bottom: -12%; right: -10%; background-color: #5e5ce6; animation-delay: -6s; }
 
         @keyframes ambientFloat {
-            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-            50% { transform: translate(45px, -35px) scale(1.18) rotate(90deg); }
-            100% { transform: translate(-35px, 40px) scale(0.95) rotate(180deg); }
+            0% { transform: translate3d(0, 0, 0) scale(1); }
+            100% { transform: translate3d(25px, -20px, 0) scale(1.1); }
         }
+
+        /* --- 1. MANDATORY ACCOUNT AUTH SCREEN --- */
+        #authScreen {
+            position: fixed; inset: 0; z-index: 9000;
+            background: radial-gradient(circle at 50% 20%, #1a0b2e 0%, #030306 75%);
+            display: flex; align-items: center; justify-content: center; padding: 22px;
+            transition: opacity 0.4s ease, transform 0.4s var(--easing);
+        }
+        #authScreen.hidden { opacity: 0; pointer-events: none; transform: scale(1.05); }
+        .auth-glass-card {
+            width: 100%; max-width: 360px; padding: 30px 24px 26px; border-radius: 30px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255,255,255,0.28);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.4);
+            text-align: center;
+        }
+        .auth-title { font-size: 24px; font-weight: 900; margin-top: 14px; margin-bottom: 4px; letter-spacing: -0.5px; }
+        .auth-sub { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 20px; }
+        .auth-input {
+            width: 100%; padding: 13px 16px; border-radius: 16px;
+            background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.2);
+            color: #fff; font-size: 15px; font-weight: 600; outline: none; margin-bottom: 12px;
+        }
+        .auth-input:focus { border-color: #ff2d55; }
+        .password-warning-box {
+            padding: 11px 14px; border-radius: 14px; margin-bottom: 18px;
+            background: rgba(255, 59, 48, 0.16); border: 1px solid rgba(255, 59, 48, 0.45);
+            color: #ff6961; font-size: 12px; font-weight: 700; line-height: 1.4; text-align: left;
+            display: flex; align-items: flex-start; gap: 9px;
+        }
+        .password-warning-box i { font-size: 15px; margin-top: 2px; color: #ff3b30; }
+        .auth-submit-btn {
+            width: 100%; padding: 14px; border-radius: 16px; border: none;
+            background: linear-gradient(135deg, #ff2d55, #bf5af2); color: #fff;
+            font-size: 15.5px; font-weight: 800; cursor: pointer;
+            box-shadow: 0 10px 25px rgba(255, 45, 85, 0.4);
+        }
+        #authErrorMsg { color: #ff453a; font-size: 12.5px; font-weight: 700; margin-bottom: 10px; display: none; }
 
         /* --- TOP BAR WITH ROTATING EDGE LINE "Booo!!" LIQUID GLASS BOX --- */
         .top-navbar {
             position: fixed; top: 0; left: 0; width: 100%; z-index: 40;
             padding: 14px 18px 12px; display: flex; justify-content: space-between; align-items: center;
-            background: linear-gradient(180deg, rgba(4,4,8,0.92) 0%, rgba(4,4,8,0) 100%);
-            backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+            background: linear-gradient(180deg, rgba(3,3,6,0.92) 0%, rgba(3,3,6,0) 100%);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         }
-        
         .booo-edge-box {
-            position: relative;
-            padding: 2.2px;
-            border-radius: 20px;
-            overflow: hidden;
-            cursor: pointer;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.55);
-            display: inline-flex; align-items: center; justify-content: center;
+            position: relative; padding: 2.2px; border-radius: 20px; overflow: hidden; cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.55); display: inline-flex; align-items: center; justify-content: center;
         }
         .booo-edge-box::before {
-            content: '';
-            position: absolute;
-            width: 260%; height: 260%;
-            top: -80%; left: -80%;
-            background: conic-gradient(
-                from 0deg,
-                #ff2d55,
-                #ff9f0a,
-                #30d158,
-                #00f2fe,
-                #5e5ce6,
-                #bf5af2,
-                #ff2d55
-            );
-            animation: edgeSpin 2.8s linear infinite;
-            z-index: 0;
+            content: ''; position: absolute; width: 260%; height: 260%; top: -80%; left: -80%;
+            background: conic-gradient(from 0deg, #ff2d55, #ff9f0a, #30d158, #00f2fe, #5e5ce6, #bf5af2, #ff2d55);
+            animation: edgeSpin 2.8s linear infinite; z-index: 0;
         }
         @keyframes edgeSpin { 100% { transform: rotate(360deg); } }
         .booo-inner-glass {
-            position: relative; z-index: 1;
-            padding: 6px 18px;
-            border-radius: 18px;
-            background: rgba(12, 12, 20, 0.86);
-            backdrop-filter: blur(25px) saturate(200%);
-            -webkit-backdrop-filter: blur(25px) saturate(200%);
-            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35);
-            font-size: 20px; font-weight: 900; letter-spacing: -0.5px;
-            color: #fff;
+            position: relative; z-index: 1; padding: 6px 18px; border-radius: 18px;
+            background: rgba(12, 12, 20, 0.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35); font-size: 20px; font-weight: 900; color: #fff;
         }
 
         .nav-actions { display: flex; align-items: center; gap: 8px; }
         .glass-pill {
-            padding: 8px 13px; border-radius: 18px;
-            background: var(--glass);
-            backdrop-filter: blur(25px) saturate(190%); -webkit-backdrop-filter: blur(25px) saturate(190%);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.3);
-            display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
-            cursor: pointer; transition: transform 0.2s;
+            padding: 8px 13px; border-radius: 18px; background: var(--glass);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+            display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; cursor: pointer;
         }
-        .glass-pill:active { transform: scale(0.93); }
         .glass-pill i.fa-instagram { font-size: 15px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); -webkit-background-clip: text; color: transparent; }
         .glass-pill i.fa-users-rays { color: #30d158; font-size: 13px; }
         .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #30d158; box-shadow: 0 0 8px #30d158; display: none; }
         .sync-dot.online { display: inline-block; }
 
-        /* --- AESTHETIC MAIN HOME INTERFACE --- */
+        /* --- MAIN APP SCROLL --- */
         .main-scroll {
             position: relative; z-index: 10; height: 100vh; overflow-y: auto;
             padding: 74px 18px 160px; scroll-behavior: smooth;
         }
         .main-scroll::-webkit-scrollbar { display: none; }
 
-        /* Floating Glass Search Bar */
+        /* Clean Search Box (No Mood Pills Below!) */
         .search-box {
-            background: rgba(255,255,255,0.07);
-            backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%);
-            border: 1px solid rgba(255,255,255,0.16); border-radius: 18px;
-            padding: 10px 14px; display: flex; align-items: center; margin-bottom: 16px;
-            box-shadow: 0 12px 28px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.08); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255,255,255,0.18); border-radius: 18px; padding: 10px 14px;
+            display: flex; align-items: center; margin-bottom: 22px; box-shadow: 0 12px 28px rgba(0,0,0,0.35);
         }
         .search-box i { color: rgba(255,255,255,0.55); font-size: 15px; }
-        .search-box input { flex: 1; background: transparent; border: none; color: #fff; font-size: 15px; margin-left: 10px; outline: none; font-weight: 500; }
-        .search-box input::placeholder { color: rgba(255,255,255,0.4); }
+        .search-box input { flex: 1; background: transparent; border: none; color: #fff; font-size: 15.5px; margin-left: 10px; outline: none; }
+        .search-box input::placeholder { color: rgba(255,255,255,0.42); }
         .search-go {
             background: linear-gradient(135deg, #ff2d55, #bf5af2); border: none; color: #fff;
-            padding: 7px 15px; border-radius: 12px; font-weight: 800; font-size: 12.5px; cursor: pointer;
-            box-shadow: 0 4px 12px rgba(255, 45, 85, 0.35);
+            padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 12.5px; cursor: pointer;
         }
 
-        /* Mood Filter Pills */
-        .mood-pills {
-            display: flex; gap: 9px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 20px;
-        }
-        .mood-pills::-webkit-scrollbar { display: none; }
-        .mood-pill {
-            padding: 7px 15px; border-radius: 20px; font-size: 12.5px; font-weight: 700;
-            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-            color: rgba(255,255,255,0.75); white-space: nowrap; cursor: pointer; transition: 0.25s;
-            backdrop-filter: blur(15px);
-        }
-        .mood-pill.active, .mood-pill:active {
-            background: linear-gradient(135deg, rgba(255,45,85,0.35), rgba(191,90,242,0.35));
-            border-color: rgba(255,255,255,0.35); color: #fff;
-            box-shadow: 0 6px 16px rgba(255,45,85,0.25);
-        }
-
-        /* Hero Spotlight Banner */
         .hero-banner {
-            position: relative; width: 100%; height: 215px; border-radius: 26px; overflow: hidden;
-            margin-bottom: 24px; cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.22);
-            box-shadow: 0 20px 45px rgba(0,0,0,0.6);
-            transition: transform 0.25s;
+            position: relative; width: 100%; height: 210px; border-radius: 26px; overflow: hidden;
+            margin-bottom: 24px; cursor: pointer; border: 1px solid rgba(255,255,255,0.22); box-shadow: 0 20px 45px rgba(0,0,0,0.6);
         }
-        .hero-banner:active { transform: scale(0.98); }
-        .hero-banner img { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.05) saturate(1.1); }
+        .hero-banner img { width: 100%; height: 100%; object-fit: cover; }
         .hero-overlay {
-            position: absolute; inset: 0;
-            background: linear-gradient(180deg, rgba(0,0,0,0.05) 15%, rgba(4,4,8,0.92) 100%);
+            position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.05) 15%, rgba(3,3,6,0.92) 100%);
             padding: 18px 20px; display: flex; flex-direction: column; justify-content: flex-end;
         }
         .hero-badge {
-            display: inline-flex; align-items: center; gap: 6px; width: fit-content;
-            padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 1px;
-            background: rgba(255, 45, 85, 0.28); border: 1px solid rgba(255, 45, 85, 0.55);
-            color: #fff; margin-bottom: 8px; backdrop-filter: blur(10px);
+            display: inline-flex; align-items: center; gap: 6px; width: fit-content; padding: 4px 10px; border-radius: 12px;
+            font-size: 10px; font-weight: 800; background: rgba(255, 45, 85, 0.28); border: 1px solid rgba(255, 45, 85, 0.55); color: #fff; margin-bottom: 8px;
         }
         .hero-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
-        .hero-info h2 { font-size: 23px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 3px; }
-        .hero-info p { font-size: 13.5px; color: rgba(255,255,255,0.75); font-weight: 500; }
-        .hero-play-fab {
-            width: 46px; height: 46px; border-radius: 50%;
-            background: #fff; color: #000; display: flex; align-items: center; justify-content: center;
-            font-size: 17px; box-shadow: 0 8px 25px rgba(255,255,255,0.4);
-        }
+        .hero-info h2 { font-size: 23px; font-weight: 900; margin-bottom: 3px; }
+        .hero-info p { font-size: 13.5px; color: rgba(255,255,255,0.75); }
+        .hero-play-fab { width: 46px; height: 46px; border-radius: 50%; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; font-size: 17px; }
 
         .section-heading {
-            font-size: 19px; font-weight: 800; margin-bottom: 13px; letter-spacing: -0.4px;
-            display: flex; justify-content: space-between; align-items: center;
+            font-size: 19px; font-weight: 800; margin-bottom: 13px; display: flex; justify-content: space-between; align-items: center;
         }
-        .section-sub { font-size: 11.5px; color: rgba(255,255,255,0.48); font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; }
+        .section-sub { font-size: 11.5px; color: rgba(255,255,255,0.48); font-weight: 700; text-transform: uppercase; }
 
-        /* Quick-Pick 2x2 Aesthetic Grid */
-        .quick-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 26px;
-        }
+        .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 26px; }
         .quick-card {
-            display: flex; align-items: center; padding: 6px; border-radius: 14px;
-            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(20px); cursor: pointer; overflow: hidden; transition: 0.2s;
+            display: flex; align-items: center; padding: 6px; border-radius: 14px; background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1); cursor: pointer; overflow: hidden;
         }
-        .quick-card:active { transform: scale(0.96); background: rgba(255,255,255,0.14); }
         .quick-card img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; margin-right: 10px; flex-shrink: 0; }
-        .quick-card-text { overflow: hidden; }
         .quick-card-text h4 { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .quick-card-text p { font-size: 11px; color: rgba(255,255,255,0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* HD Square Album Carousel */
         .carousel-scroll { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 26px; }
         .carousel-scroll::-webkit-scrollbar { display: none; }
-        .album-card { width: 142px; flex-shrink: 0; cursor: pointer; transition: transform 0.2s; }
-        .album-card:active { transform: scale(0.95); }
+        .album-card { width: 142px; flex-shrink: 0; cursor: pointer; }
         .album-art-wrap {
-            position: relative; width: 142px; height: 142px; border-radius: 18px; overflow: hidden;
-            margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.14);
-            box-shadow: 0 12px 26px rgba(0,0,0,0.45);
+            position: relative; width: 142px; height: 142px; border-radius: 18px; overflow: hidden; margin-bottom: 8px;
+            border: 1px solid rgba(255,255,255,0.14); box-shadow: 0 12px 26px rgba(0,0,0,0.45);
         }
         .album-art-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        .hd-chip {
-            position: absolute; bottom: 7px; right: 7px; padding: 2px 6px; border-radius: 6px;
-            background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); font-size: 9px; font-weight: 800;
-            color: #fff; border: 1px solid rgba(255,255,255,0.2);
-        }
+        .hd-chip { position: absolute; bottom: 7px; right: 7px; padding: 2px 6px; border-radius: 6px; background: rgba(0,0,0,0.65); font-size: 9px; font-weight: 800; color: #fff; }
         .album-card h4 { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .album-card p { font-size: 12px; color: rgba(255,255,255,0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* Song Rows */
         .song-row {
-            display: flex; align-items: center; padding: 10px 12px; margin-bottom: 10px;
-            border-radius: 16px; background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(255,255,255,0.08); cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
+            display: flex; align-items: center; padding: 10px 12px; margin-bottom: 10px; border-radius: 16px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); cursor: pointer;
         }
-        .song-row:active { transform: scale(0.98); background: rgba(255,255,255,0.12); }
-        .song-row img { width: 52px; height: 52px; border-radius: 12px; margin-right: 14px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.35); }
+        .song-row:active { background: rgba(255,255,255,0.12); transform: scale(0.99); }
+        .song-row img { width: 52px; height: 52px; border-radius: 12px; margin-right: 14px; object-fit: cover; }
         .song-meta { flex: 1; overflow: hidden; }
         .song-meta h4 { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
         .song-meta p { font-size: 13px; color: rgba(255,255,255,0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .play-circle { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; border: 1px solid rgba(255,255,255,0.14); }
+        .play-circle { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; }
 
-        /* Support Us Card */
         .support-card {
-            margin-top: 22px; padding: 18px; border-radius: 22px;
-            background: var(--glass); backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%);
+            margin-top: 22px; padding: 18px; border-radius: 22px; background: var(--glass);
             border: 1px solid var(--glass-border); text-align: center; box-shadow: 0 12px 30px rgba(0,0,0,0.4);
         }
         .support-card h4 { font-size: 15px; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 7px; }
-        .support-card h4 i { font-size: 18px; color: #ff2d55; }
         .insta-grid { display: flex; gap: 10px; }
         .insta-chip {
-            flex: 1; padding: 11px 10px; border-radius: 14px;
-            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16);
-            color: #fff; text-decoration: none; font-size: 13px; font-weight: 700;
+            flex: 1; padding: 11px 10px; border-radius: 14px; background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.16); color: #fff; text-decoration: none; font-size: 13px; font-weight: 700;
             display: flex; align-items: center; justify-content: center; gap: 6px;
         }
-        .insta-chip i { font-size: 16px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); -webkit-background-clip: text; color: transparent; }
 
-        /* --- MODALS (LISTEN TOGETHER & SUPPORT US) --- */
-        .glass-modal {
-            position: fixed; inset: 0; z-index: 600;
-            background: rgba(0,0,0,0.65); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 18px;
+        /* --- DEDICATED FULL-SCREEN LISTEN TOGETHER ROOM SCREEN --- */
+        #listenRoomScreen {
+            position: fixed; inset: 0; z-index: 500;
+            background: rgba(5, 5, 10, 0.96); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px);
+            transform: translateY(100%); transition: transform 0.4s var(--easing);
+            display: flex; flex-direction: column; padding: 20px 20px 24px; overflow-y: auto;
         }
-        .glass-modal.active { opacity: 1; pointer-events: auto; }
-        .modal-glass-card {
-            width: 100%; max-width: 350px; padding: 22px 18px 16px; border-radius: 28px;
-            background: linear-gradient(145deg, rgba(255,255,255,0.17), rgba(255,255,255,0.04));
-            backdrop-filter: blur(35px) saturate(200%); -webkit-backdrop-filter: blur(35px) saturate(200%);
-            border: 1px solid rgba(255,255,255,0.28);
-            box-shadow: 0 25px 55px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255,255,255,0.4);
-            text-align: center;
-            display: flex; flex-direction: column;
-        }
+        #listenRoomScreen.active { transform: translateY(0); }
 
-        .privacy-selector {
-            display: flex; background: rgba(0,0,0,0.35); border-radius: 14px; padding: 4px;
-            margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.12);
+        .room-top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .room-private-badge {
+            display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 14px;
+            background: rgba(48, 209, 88, 0.16); border: 1px solid rgba(48, 209, 88, 0.45);
+            color: #30d158; font-size: 11.5px; font-weight: 800;
         }
-        .priv-option {
-            flex: 1; padding: 8px 0; border-radius: 10px; font-size: 12.5px; font-weight: 700;
-            color: rgba(255,255,255,0.6); cursor: pointer; transition: 0.25s;
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-        }
-        .priv-option.active {
-            background: rgba(255,255,255,0.16); color: #fff;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-
-        .modal-btn {
-            display: flex; align-items: center; justify-content: space-between;
-            width: 100%; padding: 12px 16px; margin-bottom: 10px; border-radius: 15px;
-            background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.16);
-            color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; cursor: pointer;
+        .room-box-card {
+            padding: 20px 18px; border-radius: 24px; margin-bottom: 16px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+            border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 15px 40px rgba(0,0,0,0.5);
         }
         .room-input {
-            width: 100%; padding: 11px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.22);
-            background: rgba(0,0,0,0.35); color: #fff; font-size: 15px; font-weight: 800;
-            text-align: center; letter-spacing: 3px; outline: none; margin: 8px 0;
+            width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.22);
+            background: rgba(0,0,0,0.45); color: #fff; font-size: 15px; font-weight: 800; text-align: center;
+            letter-spacing: 2px; outline: none; margin: 8px 0 12px;
+        }
+        .room-action-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; padding: 13px; border-radius: 15px; font-weight: 800; font-size: 14px;
+            color: #fff; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 10px;
         }
 
-        .public-lobby-box {
-            background: rgba(0,0,0,0.28); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 14px; padding: 8px 12px; margin-top: 6px; text-align: left;
-            max-height: 85px; overflow-y: auto;
+        .member-list-box {
+            max-height: 220px; overflow-y: auto; margin-top: 10px;
+            border-radius: 16px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px;
         }
-        .public-room-item {
+        .member-row {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 12px;
+            padding: 10px 4px; border-bottom: 1px solid rgba(255,255,255,0.07);
         }
-        .public-room-item:last-child { border-bottom: none; }
-        .join-pill {
-            background: #30d158; color: #000; font-weight: 800; font-size: 10.5px;
-            padding: 3px 9px; border-radius: 10px; cursor: pointer;
+        .member-row:last-child { border-bottom: none; }
+        .member-name { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .admin-tag { font-size: 10px; padding: 2px 7px; border-radius: 8px; background: #ffd60a; color: #000; font-weight: 900; }
+        .kick-btn {
+            padding: 5px 12px; border-radius: 10px; background: rgba(255, 59, 48, 0.22);
+            border: 1px solid #ff3b30; color: #ff453a; font-size: 11.5px; font-weight: 800; cursor: pointer;
         }
 
         .coded-by-vishal-box {
-            margin: 14px auto 0;
-            padding: 7px 18px;
-            border-radius: 16px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.03));
-            border: 1px solid rgba(255,255,255,0.26);
-            box-shadow: 0 6px 18px rgba(0,0,0,0.45), inset 0 1px 1px rgba(255,255,255,0.35);
-            font-size: 11.5px; font-weight: 800; letter-spacing: 0.5px;
-            color: rgba(255,255,255,0.92);
-            display: inline-flex; align-items: center; gap: 6px;
+            margin: auto auto 0; padding: 8px 20px; border-radius: 18px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
+            border: 1px solid rgba(255,255,255,0.28); font-size: 12px; font-weight: 800; color: #fff;
+            display: inline-flex; align-items: center; gap: 7px; box-shadow: 0 8px 20px rgba(0,0,0,0.45);
         }
-        .coded-by-vishal-box i { color: #ff2d55; font-size: 11px; }
 
-        /* --- MINI PLAYER --- */
+        /* --- SUPPORT MODAL --- */
+        .glass-modal {
+            position: fixed; inset: 0; z-index: 600; background: rgba(0,0,0,0.7); backdrop-filter: blur(20px);
+            display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 18px;
+        }
+        .glass-modal.active { opacity: 1; pointer-events: auto; }
+        .modal-glass-card {
+            width: 100%; max-width: 340px; padding: 24px 20px; border-radius: 28px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.17), rgba(255,255,255,0.04));
+            backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.28); text-align: center;
+        }
+        .modal-btn {
+            display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 13px 16px; margin-bottom: 10px;
+            border-radius: 15px; background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.16); color: #fff; text-decoration: none; font-weight: 700; font-size: 14px;
+        }
+
+        /* --- MINI & FULL PLAYERS --- */
         #miniPlayer {
             position: fixed; bottom: 14px; left: 14px; right: 14px; height: 64px;
-            background: linear-gradient(135deg, rgba(45,45,55,0.84), rgba(18,18,26,0.94));
-            backdrop-filter: blur(30px) saturate(200%); -webkit-backdrop-filter: blur(30px) saturate(200%);
-            border: 1px solid rgba(255,255,255,0.22); border-radius: 20px;
-            display: flex; align-items: center; padding: 0 14px; z-index: 50;
-            transform: translateY(150%); transition: transform 0.45s var(--easing);
-            cursor: pointer; box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+            background: linear-gradient(135deg, rgba(45,45,55,0.9), rgba(18,18,26,0.96)); backdrop-filter: blur(25px);
+            border: 1px solid rgba(255,255,255,0.22); border-radius: 20px; display: flex; align-items: center; padding: 0 14px; z-index: 50;
+            transform: translateY(150%); transition: transform 0.4s var(--easing); cursor: pointer; box-shadow: 0 15px 35px rgba(0,0,0,0.7);
         }
         #miniPlayer.active { transform: translateY(0); }
         #mCover { width: 46px; height: 46px; border-radius: 12px; margin-right: 12px; object-fit: cover; }
 
-        /* --- FULL SCREEN PLAYER --- */
         #fullPlayer {
-            position: fixed; inset: 0; z-index: 200;
-            transform: translateY(100%); transition: transform 0.55s var(--easing);
-            display: flex; flex-direction: column;
-            background: rgba(6, 6, 10, 0.8); backdrop-filter: blur(50px) saturate(190%); -webkit-backdrop-filter: blur(50px) saturate(190%);
-            overflow: hidden;
+            position: fixed; inset: 0; z-index: 200; transform: translateY(100%); transition: transform 0.5s var(--easing);
+            display: flex; flex-direction: column; background: rgba(6, 6, 10, 0.9); backdrop-filter: blur(40px); overflow: hidden;
         }
         #fullPlayer.active { transform: translateY(0); }
 
-        .player-ambient-layer { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+        .player-ambient-layer { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
         .flow-orb {
-            position: absolute; width: 140%; height: 140%; top: -20%; left: -20%;
-            background-size: cover; background-position: center;
-            filter: blur(65px) saturate(220%) brightness(0.48);
-            animation: spinFlow 18s infinite linear;
-            transition: background-image 0.8s ease;
+            position: absolute; width: 130%; height: 130%; top: -15%; left: -15%; background-size: cover; background-position: center;
+            filter: blur(55px) saturate(200%) brightness(0.42); will-change: transform; animation: spinFlow 24s infinite linear;
         }
-        .flow-orb.two {
-            width: 120%; height: 120%; top: 5%; left: -10%;
-            filter: blur(80px) saturate(250%) brightness(0.4) hue-rotate(40deg);
-            animation: spinFlowRev 24s infinite linear; opacity: 0.75;
-        }
-        @keyframes spinFlow { 0% { transform: rotate(0deg) scale(1.1); } 50% { transform: rotate(180deg) scale(1.28); } 100% { transform: rotate(360deg) scale(1.1); } }
-        @keyframes spinFlowRev { 0% { transform: rotate(360deg) scale(1.15); } 50% { transform: rotate(180deg) scale(1.05); } 100% { transform: rotate(0deg) scale(1.15); } }
+        @keyframes spinFlow { 100% { transform: rotate(360deg); } }
 
         .player-top-bar { padding: 18px 22px 8px; display: flex; justify-content: space-between; align-items: center; z-index: 5; }
         .drag-pill { width: 42px; height: 5px; background: rgba(255,255,255,0.38); border-radius: 5px; cursor: pointer; }
 
         .art-box {
-            width: 78%; max-width: 310px; aspect-ratio: 1/1; margin: 14px auto;
-            border-radius: 26px; overflow: hidden;
-            box-shadow: 0 28px 65px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.18);
-            transition: transform 0.5s var(--easing);
+            width: 78%; max-width: 310px; aspect-ratio: 1/1; margin: 14px auto; border-radius: 26px; overflow: hidden;
+            box-shadow: 0 28px 65px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.18); transition: transform 0.45s var(--easing);
         }
         .art-box.playing { transform: scale(1.04); }
         .art-box img { width: 100%; height: 100%; object-fit: cover; }
 
         .player-controls-area { padding: 0 26px; margin-top: auto; margin-bottom: 30px; z-index: 5; }
         .track-header h2 { font-size: 22px; font-weight: 800; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .track-header p { font-size: 15.5px; color: rgba(255,255,255,0.68); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+        .track-header p { font-size: 15.5px; color: rgba(255,255,255,0.68); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .scrub-zone { margin: 20px 0; padding: 6px 0; cursor: pointer; }
         .scrub-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.22); border-radius: 6px; overflow: hidden; }
@@ -377,150 +312,154 @@
         .scrub-time { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.58); margin-top: 8px; font-weight: 600; }
 
         .main-transport { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 22px; }
-        .main-transport i { font-size: 29px; color: #fff; cursor: pointer; transition: transform 0.15s; }
-        .main-transport i:active { transform: scale(0.85); }
+        .main-transport i { font-size: 29px; color: #fff; cursor: pointer; }
         .main-transport .big-play { font-size: 45px; }
 
         .player-bottom-dock {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 18px; border-radius: 20px;
-            background: var(--glass); border: 1px solid var(--glass-border);
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            display: flex; justify-content: space-between; align-items: center; padding: 10px 18px; border-radius: 20px; background: var(--glass); border: 1px solid var(--glass-border);
         }
         .dock-item { font-size: 12.5px; font-weight: 700; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 
-        /* --- WORD-BY-WORD LIVE LYRICS SCREEN + "Lrc by Vishal" BOX --- */
+        /* --- LYRICS SCREEN --- */
         #lyricsView {
-            position: absolute; inset: 0; z-index: 120;
-            background: rgba(5, 5, 10, 0.72); backdrop-filter: blur(55px) saturate(195%); -webkit-backdrop-filter: blur(55px) saturate(195%);
-            display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+            position: absolute; inset: 0; z-index: 120; background: rgba(5, 5, 10, 0.85); backdrop-filter: blur(45px);
+            display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.35s ease;
         }
         #lyricsView.active { opacity: 1; pointer-events: auto; }
-        
-        .lrc-header {
-            padding: 18px 22px 12px; display: flex; justify-content: space-between; align-items: center; z-index: 130;
-        }
+        .lrc-header { padding: 18px 22px 12px; display: flex; justify-content: space-between; align-items: center; z-index: 130; }
         .lrc-vishal-box {
-            padding: 6px 15px; border-radius: 16px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04));
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255,255,255,0.28);
-            box-shadow: 0 6px 18px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.35);
-            font-size: 12px; font-weight: 800; color: #fff; letter-spacing: 0.4px;
-            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 15px; border-radius: 16px; background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04));
+            border: 1px solid rgba(255,255,255,0.28); font-size: 12px; font-weight: 800; color: #fff; display: inline-flex; align-items: center; gap: 6px;
         }
-        .lrc-vishal-box i { color: #30d158; font-size: 11px; }
-
         #lyricsBox { flex: 1; overflow-y: auto; padding: 55px 24px 50vh; scroll-behavior: smooth; }
         #lyricsBox::-webkit-scrollbar { display: none; }
 
         .lyric-line {
             font-size: 27px; font-weight: 800; margin-bottom: 26px; line-height: 1.38;
-            transform-origin: left center;
-            transition: transform 0.35s var(--easing), opacity 0.35s ease, filter 0.35s ease;
-            opacity: 0.28; filter: blur(0.8px);
-            cursor: pointer;
+            transition: transform 0.3s var(--easing), opacity 0.3s ease; opacity: 0.28; cursor: pointer;
         }
-        .lyric-line.past { opacity: 0.45; filter: blur(0px); }
-        .lyric-line.active { transform: scale(1.04); opacity: 1; filter: blur(0px); }
-
-        .lyric-word {
-            display: inline-block; margin-right: 7px;
-            color: rgba(255, 255, 255, 0.28);
-            transition: transform 0.14s ease, text-shadow 0.14s ease;
-            will-change: transform, color;
-        }
-        .lyric-word.sung {
-            color: #ffffff;
-            transform: translateY(-2.5px) scale(1.03);
-            text-shadow: 0 0 16px rgba(255, 255, 255, 0.55);
-        }
+        .lyric-line.past { opacity: 0.45; }
+        .lyric-line.active { transform: scale(1.04); opacity: 1; }
+        .lyric-word { display: inline-block; margin-right: 7px; color: rgba(255, 255, 255, 0.28); transition: transform 0.14s ease; }
+        .lyric-word.sung { color: #ffffff; transform: translateY(-2.5px) scale(1.03); text-shadow: 0 0 14px rgba(255, 255, 255, 0.5); }
     </style>
 </head>
 <body>
 
-    <!-- STEALTH AUDIO CORE -->
+    <!-- STEALTH YOUTUBE MUSIC NO-COOKIE PLAYER -->
     <div id="hiddenAudioCore"><div id="ytPlayer"></div></div>
 
-    <!-- AMBIENT COLOR FLOW BACKGROUND -->
     <div class="ambient-bg">
         <div class="amb-orb orb-1" id="amb1"></div>
         <div class="amb-orb orb-2" id="amb2"></div>
-        <div class="amb-orb orb-3"></div>
     </div>
 
-    <!-- LISTEN TOGETHER MODAL (PRIVATE / PUBLIC ROOM + CODED BY VISHAL) -->
-    <div id="listenTogetherModal" class="glass-modal">
-        <div class="modal-glass-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
-                <h3 style="font-size: 19px; font-weight: 900;"><i class="fas fa-users-rays" style="color:#30d158; margin-right:6px;"></i>Listen Together</h3>
-                <i class="fas fa-xmark" onclick="document.getElementById('listenTogetherModal').classList.remove('active')" style="cursor:pointer; color:rgba(255,255,255,0.6); font-size:18px;"></i>
+    <!-- 1. MANDATORY ACCOUNT LOGIN / REGISTER SCREEN -->
+    <div id="authScreen">
+        <div class="auth-glass-card">
+            <div class="booo-edge-box" style="cursor: default;">
+                <div class="booo-inner-glass">Booo!!</div>
             </div>
-            <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 12px;">Listen to music in real-time sync with friends</p>
+            <div class="auth-title">Create or Sign In</div>
+            <div class="auth-sub">Enter your username and password to continue</div>
 
-            <div class="privacy-selector">
-                <div class="priv-option active" id="privPublic" onclick="app.setRoomPrivacy('public')">
-                    <i class="fas fa-globe"></i> Public Room
+            <div id="authErrorMsg">Incorrect password for this username!</div>
+
+            <input type="text" id="authUser" class="auth-input" placeholder="Username" maxlength="18">
+            <input type="password" id="authPass" class="auth-input" placeholder="Password">
+
+            <div class="password-warning-box">
+                <i class="fas fa-triangle-exclamation"></i>
+                <span><b>Important:</b> Never forget your password! There is no "Forgot Password" option, and your account cannot be recovered if you lose it.</span>
+            </div>
+
+            <button class="auth-submit-btn" id="authSubmitBtn">Continue to Booo!!</button>
+        </div>
+    </div>
+
+    <!-- 2. DEDICATED FULL-SCREEN LISTEN TOGETHER ROOM SCREEN (PRIVATE ONLY + ADMIN KICK CONTROL) -->
+    <div id="listenRoomScreen">
+        <div class="room-top-header">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <i class="fas fa-arrow-left" onclick="app.closeRoomScreen()" style="font-size:20px; cursor:pointer; padding:6px;"></i>
+                <h2 style="font-size:21px; font-weight:900;">Listen Together</h2>
+            </div>
+            <div class="room-private-badge"><i class="fas fa-lock"></i> Private Room</div>
+        </div>
+
+        <!-- VIEW A: SETUP / JOIN PRIVATE ROOM -->
+        <div id="roomSetupPanel">
+            <div class="room-box-card">
+                <h3 style="font-size:16px; font-weight:800; margin-bottom:4px;"><i class="fas fa-crown" style="color:#ffd60a; margin-right:6px;"></i>Create Private Room (Admin)</h3>
+                <p style="font-size:12px; color:rgba(255,255,255,0.6); margin-bottom:10px;">Set a secret room code. Only friends with this code can join, and you control everything.</p>
+                <input type="text" id="createCodeInput" class="room-input" placeholder="SET SECRET CODE (e.g. 4590)" maxlength="6">
+                <div class="room-action-btn" onclick="app.createPrivateRoom()" style="background: linear-gradient(135deg, #30d158, #00b09b); border:none;">
+                    <i class="fas fa-plus-circle"></i> Create Private Room & Open Dashboard
                 </div>
-                <div class="priv-option" id="privPrivate" onclick="app.setRoomPrivacy('private')">
-                    <i class="fas fa-lock"></i> Private Room
+            </div>
+
+            <div class="room-box-card">
+                <h3 style="font-size:16px; font-weight:800; margin-bottom:4px;"><i class="fas fa-link" style="color:#ff2d55; margin-right:6px;"></i>Join Friend's Private Room</h3>
+                <p style="font-size:12px; color:rgba(255,255,255,0.6); margin-bottom:10px;">Enter your friend's private room code to sync audio instantly.</p>
+                <input type="text" id="joinCodeInput" class="room-input" placeholder="ENTER PRIVATE ROOM CODE" maxlength="6">
+                <div class="room-action-btn" onclick="app.joinPrivateRoom()" style="background: linear-gradient(135deg, #ff2d55, #bf5af2); border:none;">
+                    <i class="fas fa-bolt"></i> Join Private Room
                 </div>
             </div>
+        </div>
 
-            <div id="syncStatusText" style="font-size: 12px; font-weight: 700; color: #ffd60a; margin-bottom: 10px;">
-                Select room type & create or join below
-            </div>
+        <!-- VIEW B: ACTIVE ROOM ADMIN & MEMBER MANAGEMENT SCREEN -->
+        <div id="roomDashboardPanel" style="display: none;">
+            <div class="room-box-card" style="text-align:center;">
+                <div style="font-size:11px; font-weight:800; color:#30d158; text-transform:uppercase; letter-spacing:1px;">Private Room Active</div>
+                <div id="activeRoomCodeDisplay" style="font-size:30px; font-weight:900; letter-spacing:4px; margin:6px 0;">#0000</div>
+                <div id="activeRoleBadge" style="font-size:12.5px; color:rgba(255,255,255,0.7); font-weight:700;">Role: Room Admin</div>
 
-            <div class="modal-btn" onclick="app.createSyncRoom()" style="justify-content: center; background: rgba(48, 209, 88, 0.22); border-color: rgba(48, 209, 88, 0.45);">
-                <i class="fas fa-plus-circle" style="margin-right: 8px; color:#30d158;"></i> Create Listen Room
-            </div>
-
-            <div id="publicLobbyWrap">
-                <div style="font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.55); text-align: left; margin-top: 4px;">ACTIVE PUBLIC ROOMS:</div>
-                <div class="public-lobby-box" id="publicRoomsList">
-                    <div class="public-room-item">
-                        <span><i class="fas fa-broadcast-tower" style="color:#30d158; margin-right:6px;"></i> Chill Vibes Lobby (#2049)</span>
-                        <span class="join-pill" onclick="app.quickJoinRoom('2049')">Join</span>
+                <div style="display:flex; gap:10px; margin-top:16px;">
+                    <div class="room-action-btn" onclick="app.forceZeroGapSync()" style="flex:1; background:rgba(0,210,255,0.2); border-color:rgba(0,210,255,0.5); margin:0; font-size:12.5px;">
+                        <i class="fas fa-rotate" style="color:#00d2ff;"></i> Re-Sync (0ms Gap)
+                    </div>
+                    <div class="room-action-btn" onclick="app.leaveRoom()" style="flex:1; background:rgba(255,59,48,0.2); border-color:rgba(255,59,48,0.5); margin:0; font-size:12.5px; color:#ff453a;">
+                        <i class="fas fa-power-off"></i> Leave Room
                     </div>
                 </div>
             </div>
 
-            <div style="font-size: 11px; color: rgba(255,255,255,0.45); margin: 8px 0 2px;">— OR JOIN VIA ROOM CODE —</div>
-
-            <input type="text" id="joinCodeInput" class="room-input" placeholder="ENTER 4-DIGIT CODE" maxlength="4">
-            <div class="modal-btn" onclick="app.joinSyncRoom()" style="justify-content: center; background: rgba(255, 45, 85, 0.25); border-color: rgba(255, 45, 85, 0.5); margin-bottom: 4px;">
-                <i class="fas fa-link" style="margin-right: 8px;"></i> Join Room
+            <!-- Live Users Count & Admin Kick Control List -->
+            <div class="room-box-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h4 style="font-size:15px; font-weight:800;"><i class="fas fa-users" style="color:#30d158; margin-right:6px;"></i>Users in Room</h4>
+                    <span id="roomUserCountBadge" style="background:rgba(255,255,255,0.14); padding:4px 10px; border-radius:12px; font-size:12px; font-weight:800;">1 Online</span>
+                </div>
+                <div class="member-list-box" id="roomMembersList"></div>
             </div>
+        </div>
 
-            <!-- Down-Center Box: Coded by Vishal -->
-            <div class="coded-by-vishal-box">
-                <i class="fas fa-code"></i>
-                <span>Coded by Vishal</span>
-            </div>
+        <!-- Down-Center Box: Coded by Vishal -->
+        <div class="coded-by-vishal-box">
+            <i class="fas fa-code" style="color:#ff2d55;"></i>
+            <span>Coded by Vishal</span>
         </div>
     </div>
 
-    <!-- SUPPORT US INSTAGRAM MODAL -->
+    <!-- SUPPORT MODAL -->
     <div id="supportModal" class="glass-modal">
         <div class="modal-glass-card">
             <h3 style="font-size: 21px; font-weight: 800; margin-bottom: 5px;">Support Us</h3>
             <p style="font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 20px;">Follow us on Instagram</p>
-
             <a href="https://instagram.com/deadvishaal" target="_blank" class="modal-btn">
                 <span><i class="fab fa-instagram" style="margin-right: 10px; color:#ff2d55;"></i> @deadvishaal</span>
                 <i class="fas fa-chevron-right" style="font-size: 13px; opacity: 0.6;"></i>
             </a>
-
             <a href="https://instagram.com/vishexui" target="_blank" class="modal-btn">
                 <span><i class="fab fa-instagram" style="margin-right: 10px; color:#bf5af2;"></i> @vishexui</span>
                 <i class="fas fa-chevron-right" style="font-size: 13px; opacity: 0.6;"></i>
             </a>
-
             <div id="closeSupportBtn" style="margin-top: 10px; font-size: 13.5px; color: rgba(255,255,255,0.55); cursor: pointer; font-weight: 700; padding: 8px;">Close</div>
         </div>
     </div>
 
-    <!-- TOP NAVIGATION BAR (ROTATING EDGE COLOR "Booo!!" BOX) -->
+    <!-- TOP NAVBAR -->
     <div class="top-navbar">
         <div class="booo-edge-box" onclick="app.showHome()">
             <div class="booo-inner-glass">Booo!!</div>
@@ -538,24 +477,16 @@
         </div>
     </div>
 
-    <!-- AESTHETIC APPLE MUSIC HOME + SEARCH SCREEN -->
+    <!-- MAIN APP INTERFACE -->
     <div class="main-scroll">
+        <!-- Clean Search Bar (No Mood Pills Below!) -->
         <div class="search-box">
             <i class="fas fa-search"></i>
-            <input type="text" id="searchInput" placeholder="Search songs, artists, albums...">
+            <input type="text" id="searchInput" placeholder="Search any song or artist...">
             <button class="search-go" id="searchBtn">Search</button>
         </div>
 
-        <!-- Mood Quick Filter Pills -->
-        <div class="mood-pills">
-            <div class="mood-pill active" onclick="app.filterMood(this, 'all')"><i class="fas fa-sparkles"></i> For You</div>
-            <div class="mood-pill" onclick="app.filterMood(this, 'Bollywood Romantic Hits')">Romantic</div>
-            <div class="mood-pill" onclick="app.filterMood(this, 'Late Night Aesthetic Songs')">Late Night</div>
-            <div class="mood-pill" onclick="app.filterMood(this, 'Global Pop Hits')">Global Pop</div>
-            <div class="mood-pill" onclick="app.filterMood(this, 'Punjabi Vibe Songs')">Punjabi Vibes</div>
-        </div>
-
-        <!-- DYNAMIC SEARCH RESULTS SECTION -->
+        <!-- SEARCH RESULTS SECTION -->
         <div id="searchResultsSection" style="display: none; margin-bottom: 28px;">
             <div class="section-heading">
                 <span id="searchHeadingText">Search Results</span>
@@ -566,8 +497,7 @@
 
         <!-- AESTHETIC HOME SCREEN SECTIONS -->
         <div id="homeSections">
-            <!-- Hero Spotlight Card -->
-            <div class="hero-banner" onclick="app.playFromList('home', 0)" id="heroBannerCard">
+            <div class="hero-banner" onclick="app.playFromList('home', 0)">
                 <img id="heroImg" src="">
                 <div class="hero-overlay">
                     <div class="hero-badge"><i class="fas fa-crown"></i> Featured Spotlight • Master HD</div>
@@ -581,37 +511,20 @@
                 </div>
             </div>
 
-            <!-- Quick Speed-Dial 2x2 Grid -->
-            <div class="section-heading">
-                <span>Quick Picks</span>
-                <span class="section-sub">Instant Play</span>
-            </div>
+            <div class="section-heading"><span>Quick Picks</span><span class="section-sub">Instant Play</span></div>
             <div class="quick-grid" id="quickGridContainer"></div>
 
-            <!-- Trending Ultra-HD Square Carousel -->
-            <div class="section-heading">
-                <span>Trending Albums & Hits</span>
-                <span class="section-sub">Ultra HD Art</span>
-            </div>
+            <div class="section-heading"><span>Trending Albums & Hits</span><span class="section-sub">Ultra HD Art</span></div>
             <div class="carousel-scroll" id="trendingContainer"></div>
 
-            <!-- Suggested Full Tracks -->
-            <div class="section-heading">
-                <span>Suggested For You</span>
-                <span class="section-sub">Lossless Stream</span>
-            </div>
+            <div class="section-heading"><span>Suggested For You</span><span class="section-sub">Lossless Stream</span></div>
             <div id="suggestedList"></div>
 
-            <!-- Support Us Instagram Card on Home -->
             <div class="support-card">
-                <h4><i class="fab fa-instagram"></i> Support Us</h4>
+                <h4><i class="fab fa-instagram" style="color:#ff2d55;"></i> Support Us</h4>
                 <div class="insta-grid">
-                    <a href="https://instagram.com/deadvishaal" target="_blank" class="insta-chip">
-                        <i class="fab fa-instagram"></i> @deadvishaal
-                    </a>
-                    <a href="https://instagram.com/vishexui" target="_blank" class="insta-chip">
-                        <i class="fab fa-instagram"></i> @vishexui
-                    </a>
+                    <a href="https://instagram.com/deadvishaal" target="_blank" class="insta-chip"><i class="fab fa-instagram"></i> @deadvishaal</a>
+                    <a href="https://instagram.com/vishexui" target="_blank" class="insta-chip"><i class="fab fa-instagram"></i> @vishexui</a>
                 </div>
             </div>
         </div>
@@ -620,37 +533,27 @@
     <!-- MINI PLAYER -->
     <div id="miniPlayer">
         <img id="mCover" src="">
-        <div class="song-meta" id="openFullBtn" style="margin-right: 12px;">
-            <h4 id="mTitle">Select a song</h4>
-            <p id="mArtist">Booo!! Music</p>
+        <div class="song-meta" id="openFullBtn" style="margin-right: 12px; flex:1; overflow:hidden;">
+            <h4 id="mTitle" style="font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Select a song</h4>
+            <p id="mArtist" style="font-size:12px; color:rgba(255,255,255,0.6);">Booo!! Music</p>
         </div>
         <i class="fas fa-play" id="mPlayBtn" style="font-size: 21px; padding: 10px;"></i>
     </div>
 
-    <!-- FULL SCREEN BIG PLAYER -->
+    <!-- FULL SCREEN PLAYER -->
     <div id="fullPlayer">
-        <div class="player-ambient-layer">
-            <div class="flow-orb" id="pOrb1"></div>
-            <div class="flow-orb two" id="pOrb2"></div>
-        </div>
-
+        <div class="player-ambient-layer"><div class="flow-orb" id="pOrb1"></div></div>
         <div class="player-top-bar">
             <div style="width: 32px;"></div>
             <div class="drag-pill" id="closeFullBtn"></div>
             <i class="fas fa-chevron-down" id="closeFullIcon" style="color:rgba(255,255,255,0.6); cursor:pointer; font-size: 18px;"></i>
         </div>
 
-        <!-- LIVE WORD-BY-WORD LYRICS SCREEN WITH "Lrc by Vishal" -->
         <div id="lyricsView">
             <div class="lrc-header">
-                <div class="lrc-vishal-box">
-                    <i class="fas fa-wand-magic-sparkles"></i>
-                    <span>Lrc by Vishal</span>
-                </div>
+                <div class="lrc-vishal-box"><i class="fas fa-wand-magic-sparkles" style="color:#30d158;"></i><span>Lrc by Vishal</span></div>
                 <div class="drag-pill" id="closeLyricsBtn" style="margin: 0;"></div>
-                <div style="width: 85px; text-align: right;">
-                    <i class="fas fa-xmark" onclick="document.getElementById('lyricsView').classList.remove('active')" style="color:rgba(255,255,255,0.6); font-size:18px; cursor:pointer;"></i>
-                </div>
+                <i class="fas fa-xmark" onclick="document.getElementById('lyricsView').classList.remove('active')" style="color:rgba(255,255,255,0.6); font-size:18px; cursor:pointer;"></i>
             </div>
             <div id="lyricsBox"></div>
         </div>
@@ -675,99 +578,152 @@
             </div>
 
             <div class="player-bottom-dock">
-                <div class="dock-item" id="toggleLyricsBtn">
-                    <i class="fas fa-quote-left"></i> Lyrics
-                </div>
-                <div class="dock-item" id="playerSyncBtn">
-                    <i class="fas fa-users-rays" style="color:#30d158;"></i> Listen Together
-                </div>
-                <div class="dock-item" id="playerSupportBtn">
-                    <i class="fab fa-instagram" style="color:#bf5af2;"></i> Support Us
-                </div>
+                <div class="dock-item" id="toggleLyricsBtn"><i class="fas fa-quote-left"></i> Lyrics</div>
+                <div class="dock-item" id="playerSyncBtn"><i class="fas fa-users-rays" style="color:#30d158;"></i> Listen Together</div>
+                <div class="dock-item" id="playerSupportBtn"><i class="fab fa-instagram" style="color:#bf5af2;"></i> Support Us</div>
             </div>
         </div>
     </div>
 
     <script>
-        // High-Resolution 1080p maxresdefault & Ultra-HD Artwork Catalog
-        const CURATED_HOME_SONGS = [
-            { videoId: "Y9G20wV0KHE", name: "Kamin", artist: "EMIN & JONY", tag: "FEATURED HIT", img: "https://i.ytimg.com/vi/Y9G20wV0KHE/maxresdefault.jpg" },
-            { videoId: "mzB1VGEGcSU", name: "Lucid Dreams", artist: "Juice WRLD", tag: "GLOBAL SMASH", img: "https://i.ytimg.com/vi/mzB1VGEGcSU/maxresdefault.jpg" },
-            { videoId: "BddP6PYo2gs", name: "Kesariya", artist: "Arijit Singh", tag: "ROMANTIC VIBES", img: "https://i.ytimg.com/vi/BddP6PYo2gs/maxresdefault.jpg" },
-            { videoId: "h3EJICKwITw", name: "All Girls Are The Same", artist: "Juice WRLD", tag: "LATE NIGHT", img: "https://i.ytimg.com/vi/h3EJICKwITw/maxresdefault.jpg" },
-            { videoId: "RLzC55ai0eo", name: "Heeriye", artist: "Jasleen Royal & Arijit Singh", tag: "TRENDING", img: "https://i.ytimg.com/vi/RLzC55ai0eo/maxresdefault.jpg" },
-            { videoId: "4NRXx6U8ABQ", name: "Blinding Lights", artist: "The Weeknd", tag: "ESSENTIAL", img: "https://i.ytimg.com/vi/4NRXx6U8ABQ/maxresdefault.jpg" },
-            { videoId: "ElZfdU54Cp8", name: "Apna Bana Le", artist: "Arijit Singh & Sachin-Jigar", tag: "SOULFUL", img: "https://i.ytimg.com/vi/ElZfdU54Cp8/maxresdefault.jpg" },
-            { videoId: "60ItHLz5WEA", name: "Faded", artist: "Alan Walker", tag: "ELECTRONIC", img: "https://i.ytimg.com/vi/60ItHLz5WEA/maxresdefault.jpg" },
-            { videoId: "VAdGW7QDJiU", name: "Chaleya", artist: "Arijit Singh & Shilpa Rao", tag: "CHARTBUSTER", img: "https://i.ytimg.com/vi/VAdGW7QDJiU/maxresdefault.jpg" },
-            { videoId: "34Na4j8AVgA", name: "Starboy", artist: "The Weeknd", tag: "AESTHETIC", img: "https://i.ytimg.com/vi/34Na4j8AVgA/maxresdefault.jpg" },
-            { videoId: "JGwWNGJdvx8", name: "Shape of You", artist: "Ed Sheeran", tag: "POP HITS", img: "https://i.ytimg.com/vi/JGwWNGJdvx8/maxresdefault.jpg" },
-            { videoId: "SlPhMPnQ58k", name: "Memories", artist: "Maroon 5", tag: "CHILL", img: "https://i.ytimg.com/vi/SlPhMPnQ58k/maxresdefault.jpg" }
+        // 100% Pure YouTube Music Curated Catalog (Official Audio Track IDs - Zero Video Ads!)
+        const YT_MUSIC_CURATED = [
+            { videoId: "Y9G20wV0KHE", name: "Kamin", artist: "EMIN & JONY", img: "https://i.ytimg.com/vi/Y9G20wV0KHE/maxresdefault.jpg" },
+            { videoId: "mzB1VGEGcSU", name: "Lucid Dreams", artist: "Juice WRLD", img: "https://i.ytimg.com/vi/mzB1VGEGcSU/maxresdefault.jpg" },
+            { videoId: "BddP6PYo2gs", name: "Kesariya", artist: "Arijit Singh", img: "https://i.ytimg.com/vi/BddP6PYo2gs/maxresdefault.jpg" },
+            { videoId: "h3EJICKwITw", name: "All Girls Are The Same", artist: "Juice WRLD", img: "https://i.ytimg.com/vi/h3EJICKwITw/maxresdefault.jpg" },
+            { videoId: "RLzC55ai0eo", name: "Heeriye", artist: "Jasleen Royal & Arijit Singh", img: "https://i.ytimg.com/vi/RLzC55ai0eo/maxresdefault.jpg" },
+            { videoId: "4NRXx6U8ABQ", name: "Blinding Lights", artist: "The Weeknd", img: "https://i.ytimg.com/vi/4NRXx6U8ABQ/maxresdefault.jpg" },
+            { videoId: "ElZfdU54Cp8", name: "Apna Bana Le", artist: "Arijit Singh & Sachin-Jigar", img: "https://i.ytimg.com/vi/ElZfdU54Cp8/maxresdefault.jpg" },
+            { videoId: "60ItHLz5WEA", name: "Faded", artist: "Alan Walker", img: "https://i.ytimg.com/vi/60ItHLz5WEA/maxresdefault.jpg" },
+            { videoId: "VAdGW7QDJiU", name: "Chaleya", artist: "Arijit Singh & Shilpa Rao", img: "https://i.ytimg.com/vi/VAdGW7QDJiU/maxresdefault.jpg" },
+            { videoId: "34Na4j8AVgA", name: "Starboy", artist: "The Weeknd", img: "https://i.ytimg.com/vi/34Na4j8AVgA/maxresdefault.jpg" },
+            { videoId: "JGwWNGJdvx8", name: "Shape of You", artist: "Ed Sheeran", img: "https://i.ytimg.com/vi/JGwWNGJdvx8/maxresdefault.jpg" },
+            { videoId: "SlPhMPnQ58k", name: "Memories", artist: "Maroon 5", img: "https://i.ytimg.com/vi/SlPhMPnQ58k/maxresdefault.jpg" }
         ];
 
-        // Automatic fallback if a video doesn't have maxresdefault (1080p)
         window.handleImgError = function(imgEl, videoId) {
-            if (imgEl.src.includes('maxresdefault')) {
+            if (imgEl && imgEl.src.includes('maxresdefault')) {
                 imgEl.src = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
             }
         };
 
+        // Stealth YouTube Music No-Cookie Core (Ad-Shielded)
         let ytPlayer = null;
         let ytReady = false;
-        let pendingVideoId = null;
+        let pendingYTVideoId = null;
 
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('ytPlayer', {
                 height: '1',
                 width: '1',
-                playerVars: { 'playsinline': 1, 'controls': 0, 'disablekb': 1, 'origin': window.location.origin },
+                host: 'https://www.youtube-nocookie.com',
+                playerVars: {
+                    'playsinline': 1,
+                    'controls': 0,
+                    'disablekb': 1,
+                    'rel': 0,
+                    'iv_load_policy': 3,
+                    'modestbranding': 1,
+                    'origin': window.location.origin
+                },
                 events: {
                     'onReady': () => {
                         ytReady = true;
-                        if (pendingVideoId) {
-                            ytPlayer.loadVideoById(pendingVideoId);
-                            pendingVideoId = null;
+                        if (pendingYTVideoId) {
+                            ytPlayer.loadVideoById(pendingYTVideoId);
+                            pendingYTVideoId = null;
                         }
                     },
                     'onStateChange': (e) => {
-                        if (e.data === YT.PlayerState.ENDED && window.app) window.app.nextPrev(1);
-                        if (e.data === YT.PlayerState.PLAYING && window.app) window.app.syncPlayUI(true);
+                        if (!window.app || window.app.engineType !== 'yt_iframe') return;
+                        if (e.data === YT.PlayerState.ENDED) window.app.nextPrev(1);
+                        if (e.data === YT.PlayerState.PLAYING) window.app.syncPlayUI(true);
+                        if (e.data === YT.PlayerState.PAUSED) window.app.syncPlayUI(false);
                     },
                     'onError': () => {
-                        if (window.app) window.app.tryBackupStream();
+                        if (window.app) window.app.tryNextSearchTrack();
                     }
                 }
             });
         }
 
-        class BoooUltimateApp {
+        class BoooYouTubeMusicEngine {
             constructor() {
-                this.playlist = [...CURATED_HOME_SONGS];
+                // Dual Playback Core: 1. Direct YT Audio Stream (<audio> 0% Ads) | 2. YT No-Cookie Shield Core
+                this.audio = new Audio();
+                this.audio.preload = "auto";
+                this.engineType = 'yt_iframe'; // 'yt_direct' or 'yt_iframe'
+
+                this.homeCatalog = [...YT_MUSIC_CURATED];
+                this.playlist = [...YT_MUSIC_CURATED];
+                this.searchResults = [];
                 this.currentIndex = 0;
                 this.isPlaying = false;
                 this.lyricsData = [];
                 this.artCache = {};
 
-                // Listen Together State
+                // Account & Private Room Admin State
+                this.username = "";
                 this.peer = null;
-                this.connections = [];
+                this.isAdmin = false;
                 this.roomCode = null;
-                this.roomPrivacy = 'public';
-                this.isSuppressingSync = false;
+                this.hostConn = null;
+                this.members = [];
 
+                this.initAccountSystem();
                 this.renderHomeScreen();
-                this.upgradeAllHomeArtworksToUltraHD();
+                this.upgradeHomeArtworks();
                 this.bindEvents();
                 this.start60FPSLoop();
-                this.fetchLiveHomeAdditions();
+                this.fetchLiveYTMusicHomeAdditions();
             }
 
-            // Fetches 1000x1000 Crystal Clear Square Album Cover from Apple iTunes CDN
-            async resolveUltraHDArtwork(trackObj, domImgElements = []) {
+            // =========================================================================
+            // 1. MANDATORY ACCOUNT SYSTEM (USERNAME + PASSWORD)
+            // =========================================================================
+            initAccountSystem() {
+                const savedSession = localStorage.getItem('booo_active_user');
+                const accountsDB = JSON.parse(localStorage.getItem('booo_accounts_db') || '{}');
+
+                if (savedSession && accountsDB[savedSession]) {
+                    this.username = savedSession;
+                    document.getElementById('authScreen').classList.add('hidden');
+                }
+
+                document.getElementById('authSubmitBtn').onclick = () => {
+                    const u = document.getElementById('authUser').value.trim();
+                    const p = document.getElementById('authPass').value.trim();
+                    const errEl = document.getElementById('authErrorMsg');
+
+                    if (u.length < 2 || p.length < 3) {
+                        errEl.innerText = "Please enter a valid username (min 2 chars) & password (min 3 chars)!";
+                        errEl.style.display = 'block';
+                        return;
+                    }
+
+                    const db = JSON.parse(localStorage.getItem('booo_accounts_db') || '{}');
+                    if (db[u] && db[u] !== p) {
+                        errEl.innerText = "Incorrect password! Remember: Passwords cannot be reset.";
+                        errEl.style.display = 'block';
+                        return;
+                    }
+
+                    db[u] = p;
+                    localStorage.setItem('booo_accounts_db', JSON.stringify(db));
+                    localStorage.setItem('booo_active_user', u);
+                    this.username = u;
+                    errEl.style.display = 'none';
+                    document.getElementById('authScreen').classList.add('hidden');
+                };
+            }
+
+            // High-Def 1000x1000 Square Album Cover Resolver
+            async resolveUltraHDArtwork(trackObj, domElements = []) {
                 const key = `${trackObj.name}_${trackObj.artist}`.toLowerCase();
                 if (this.artCache[key]) {
                     trackObj.img = this.artCache[key];
-                    domImgElements.forEach(el => { if (el) el.src = trackObj.img; });
+                    domElements.forEach(el => { if (el) el.src = trackObj.img; });
                     return trackObj.img;
                 }
                 try {
@@ -778,86 +734,66 @@
                         const hdUrl = data.results[0].artworkUrl100.replace('100x100bb', '1000x1000bb');
                         this.artCache[key] = hdUrl;
                         trackObj.img = hdUrl;
-                        domImgElements.forEach(el => { if (el) el.src = hdUrl; });
+                        domElements.forEach(el => { if (el) el.src = hdUrl; });
                         return hdUrl;
                     }
                 } catch (e) {}
                 return trackObj.img;
             }
 
-            async upgradeAllHomeArtworksToUltraHD() {
-                for (let i = 0; i < CURATED_HOME_SONGS.length; i++) {
-                    await this.resolveUltraHDArtwork(CURATED_HOME_SONGS[i]);
+            async upgradeHomeArtworks() {
+                for (let i = 0; i < this.homeCatalog.length; i++) {
+                    await this.resolveUltraHDArtwork(this.homeCatalog[i]);
                 }
                 this.renderHomeScreen();
             }
 
             renderHomeScreen() {
-                const hero = CURATED_HOME_SONGS[0];
-                if (hero) {
-                    const hImg = document.getElementById('heroImg');
-                    hImg.src = hero.img;
-                    hImg.onerror = () => handleImgError(hImg, hero.videoId);
-                    document.getElementById('heroTitle').innerText = hero.name;
-                    document.getElementById('heroArtist').innerText = hero.artist;
-                }
+                const list = this.homeCatalog;
+                if (!list.length) return;
 
-                // Quick Picks 2x2 Grid (Songs 1 to 4)
-                const quickEl = document.getElementById('quickGridContainer');
-                quickEl.innerHTML = CURATED_HOME_SONGS.slice(1, 5).map((s, idx) => `
+                const hero = list[0];
+                const hImg = document.getElementById('heroImg');
+                hImg.src = hero.img;
+                hImg.onerror = () => handleImgError(hImg, hero.videoId);
+                document.getElementById('heroTitle').innerText = hero.name;
+                document.getElementById('heroArtist').innerText = hero.artist;
+
+                document.getElementById('quickGridContainer').innerHTML = list.slice(1, 5).map((s, idx) => `
                     <div class="quick-card" onclick="app.playFromList('home', ${idx + 1})">
                         <img src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
-                        <div class="quick-card-text">
-                            <h4>${s.name}</h4>
-                            <p>${s.artist}</p>
+                        <div class="quick-card-text" style="overflow:hidden;">
+                            <h4>${s.name}</h4><p>${s.artist}</p>
                         </div>
                     </div>
                 `).join('');
 
-                // Trending Ultra-HD Square Carousel (Songs 4 to 10)
-                const trendingEl = document.getElementById('trendingContainer');
-                trendingEl.innerHTML = CURATED_HOME_SONGS.slice(4, 10).map((s, idx) => `
+                document.getElementById('trendingContainer').innerHTML = list.slice(4, 11).map((s, idx) => `
                     <div class="album-card" onclick="app.playFromList('home', ${idx + 4})">
                         <div class="album-art-wrap">
                             <img src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
                             <span class="hd-chip">HD</span>
                         </div>
-                        <h4>${s.name}</h4>
-                        <p>${s.artist}</p>
+                        <h4>${s.name}</h4><p>${s.artist}</p>
                     </div>
                 `).join('');
 
-                // Suggested Full List
-                const suggestedEl = document.getElementById('suggestedList');
-                suggestedEl.innerHTML = CURATED_HOME_SONGS.map((s, idx) => `
+                document.getElementById('suggestedList').innerHTML = list.map((s, idx) => `
                     <div class="song-row" onclick="app.playFromList('home', ${idx})">
                         <img src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
-                        <div class="song-meta">
-                            <h4>${s.name}</h4>
-                            <p>${s.artist}</p>
-                        </div>
+                        <div class="song-meta"><h4>${s.name}</h4><p>${s.artist}</p></div>
                         <div class="play-circle"><i class="fas fa-play"></i></div>
                     </div>
                 `).join('');
             }
 
-            filterMood(pillEl, query) {
-                document.querySelectorAll('.mood-pill').forEach(el => el.classList.remove('active'));
-                pillEl.classList.add('active');
-                if (query === 'all') {
-                    this.showHome();
-                } else {
-                    this.performSearch(query);
-                }
-            }
-
-            async fetchLiveHomeAdditions() {
+            async fetchLiveYTMusicHomeAdditions() {
                 try {
-                    const items = await this.scrapeTracks("Hindi Trending Songs Audio");
-                    if (items && items.length > 4) {
-                        items.slice(0, 6).forEach(t => {
-                            if (!CURATED_HOME_SONGS.some(c => c.videoId === t.videoId)) {
-                                CURATED_HOME_SONGS.push({ ...t, tag: "TRENDING" });
+                    const extra = await this.searchYouTubeMusicCatalog("Trending Hindi Songs");
+                    if (extra && extra.length > 4) {
+                        extra.slice(0, 6).forEach(t => {
+                            if (!this.homeCatalog.some(c => c.videoId === t.videoId)) {
+                                this.homeCatalog.push(t);
                             }
                         });
                         this.renderHomeScreen();
@@ -871,198 +807,48 @@
                 document.getElementById('searchInput').value = '';
             }
 
-            bindEvents() {
-                const runSearch = () => {
-                    const q = document.getElementById('searchInput').value.trim();
-                    if (q) this.performSearch(q);
-                };
-                document.getElementById('searchBtn').onclick = runSearch;
-                document.getElementById('searchInput').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') runSearch();
-                });
-
-                const toggle = (e) => { e.stopPropagation(); this.togglePlay(); };
-                document.getElementById('mPlayBtn').onclick = toggle;
-                document.getElementById('fPlayBtn').onclick = toggle;
-
-                document.getElementById('prevBtn').onclick = () => this.nextPrev(-1);
-                document.getElementById('nextBtn').onclick = () => this.nextPrev(1);
-
-                document.getElementById('openFullBtn').onclick = () => document.getElementById('fullPlayer').classList.add('active');
-                document.getElementById('closeFullBtn').onclick = () => document.getElementById('fullPlayer').classList.remove('active');
-                document.getElementById('closeFullIcon').onclick = () => document.getElementById('fullPlayer').classList.remove('active');
-
-                document.getElementById('toggleLyricsBtn').onclick = () => document.getElementById('lyricsView').classList.toggle('active');
-                document.getElementById('closeLyricsBtn').onclick = () => document.getElementById('lyricsView').classList.remove('active');
-
-                const sModal = document.getElementById('supportModal');
-                document.getElementById('topSupportBtn').onclick = () => sModal.classList.add('active');
-                document.getElementById('playerSupportBtn').onclick = () => sModal.classList.add('active');
-                document.getElementById('closeSupportBtn').onclick = () => sModal.classList.remove('active');
-
-                const lModal = document.getElementById('listenTogetherModal');
-                document.getElementById('topSyncBtn').onclick = () => lModal.classList.add('active');
-                document.getElementById('playerSyncBtn').onclick = () => lModal.classList.add('active');
-
-                document.getElementById('scrubBar').onclick = (e) => {
-                    if (ytReady && ytPlayer && ytPlayer.getDuration) {
-                        const rect = document.getElementById('scrubBar').getBoundingClientRect();
-                        const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-                        const targetTime = pct * ytPlayer.getDuration();
-                        ytPlayer.seekTo(targetTime, true);
-                        this.broadcastSync({ type: 'SEEK', time: targetTime });
-                    }
-                };
-            }
-
             // =========================================================================
-            // LISTEN TOGETHER ENGINE (PUBLIC & PRIVATE ROOMS)
+            // 2. 100% EXCLUSIVE YOUTUBE MUSIC CATALOG SCRAPER (7 REDUNDANT NODES)
             // =========================================================================
-            setRoomPrivacy(type) {
-                this.roomPrivacy = type;
-                document.getElementById('privPublic').classList.toggle('active', type === 'public');
-                document.getElementById('privPrivate').classList.toggle('active', type === 'private');
-                document.getElementById('syncStatusText').innerText = type === 'public'
-                    ? "Public Room: Anyone in lobby can join"
-                    : "Private Room: Only friends with code can join";
-            }
-
-            createSyncRoom() {
-                const code = Math.floor(1000 + Math.random() * 9000).toString();
-                const peerId = `booo-room-${code}`;
-                const statusEl = document.getElementById('syncStatusText');
-                statusEl.innerText = `Starting ${this.roomPrivacy.toUpperCase()} Room #${code}...`;
-
-                if (this.peer) this.peer.destroy();
-                this.peer = new Peer(peerId);
-
-                this.peer.on('open', () => {
-                    this.roomCode = code;
-                    const modeLabel = this.roomPrivacy === 'public' ? 'Public' : 'Private';
-                    statusEl.innerText = `${modeLabel} Room Live! Code: ${code}`;
-                    document.getElementById('navSyncDot').classList.add('online');
-                    document.getElementById('navSyncLabel').innerText = `${modeLabel} #${code}`;
-
-                    if (this.roomPrivacy === 'public') {
-                        const lobby = document.getElementById('publicRoomsList');
-                        const item = document.createElement('div');
-                        item.className = 'public-room-item';
-                        item.innerHTML = `
-                            <span><i class="fas fa-globe" style="color:#30d158; margin-right:6px;"></i> Public Room (#${code})</span>
-                            <span class="join-pill">Hosting</span>
-                        `;
-                        lobby.prepend(item);
-                    }
-                });
-
-                this.peer.on('connection', (conn) => {
-                    this.connections.push(conn);
-                    statusEl.innerText = `Room #${code}: ${this.connections.length} Listener(s) Connected!`;
-                    conn.on('open', () => {
-                        const currTrack = this.playlist[this.currentIndex];
-                        if (currTrack) {
-                            conn.send({
-                                type: 'LOAD',
-                                track: currTrack,
-                                time: (ytReady && ytPlayer && ytPlayer.getCurrentTime) ? ytPlayer.getCurrentTime() : 0,
-                                playing: this.isPlaying
-                            });
-                        }
-                    });
-                    conn.on('data', (data) => this.handleIncomingSync(data));
-                });
-            }
-
-            quickJoinRoom(code) {
-                document.getElementById('joinCodeInput').value = code;
-                this.joinSyncRoom();
-            }
-
-            joinSyncRoom() {
-                const code = document.getElementById('joinCodeInput').value.trim();
-                const statusEl = document.getElementById('syncStatusText');
-                if (code.length !== 4) {
-                    statusEl.innerText = "Please enter a valid 4-digit Room Code!";
-                    return;
-                }
-
-                statusEl.innerText = `Joining Room #${code}...`;
-                if (this.peer) this.peer.destroy();
-                this.peer = new Peer();
-
-                this.peer.on('open', () => {
-                    const conn = this.peer.connect(`booo-room-${code}`);
-                    conn.on('open', () => {
-                        this.connections = [conn];
-                        this.roomCode = code;
-                        statusEl.innerText = `Joined Room #${code}! Synced Live.`;
-                        document.getElementById('navSyncDot').classList.add('online');
-                        document.getElementById('navSyncLabel').innerText = `Room #${code}`;
-                    });
-                    conn.on('data', (data) => this.handleIncomingSync(data));
-                });
-            }
-
-            broadcastSync(payload) {
-                if (this.isSuppressingSync) return;
-                this.connections.forEach(c => {
-                    if (c && c.open) c.send(payload);
-                });
-            }
-
-            handleIncomingSync(data) {
-                this.isSuppressingSync = true;
-                if (data.type === 'LOAD' && data.track) {
-                    this.playlist.unshift(data.track);
-                    this.loadAndPlay(0, false);
-                    setTimeout(() => {
-                        if (ytReady && ytPlayer && data.time) ytPlayer.seekTo(data.time, true);
-                    }, 1200);
-                } else if (data.type === 'PLAY') {
-                    if (ytReady && ytPlayer) {
-                        if (typeof data.time === 'number') ytPlayer.seekTo(data.time, true);
-                        ytPlayer.playVideo();
-                        this.syncPlayUI(true);
-                    }
-                } else if (data.type === 'PAUSE') {
-                    if (ytReady && ytPlayer) {
-                        ytPlayer.pauseVideo();
-                        this.syncPlayUI(false);
-                    }
-                } else if (data.type === 'SEEK') {
-                    if (ytReady && ytPlayer) ytPlayer.seekTo(data.time, true);
-                }
-                setTimeout(() => { this.isSuppressingSync = false; }, 350);
-            }
-
-            // =========================================================================
-            // 6-LAYER STEALTH SCRAPER WITH HD 1080p THUMBNAILS
-            // =========================================================================
-            async scrapeTracks(query) {
-                const searchQ = `${query} official audio`;
-                const endpoints = [
-                    { type: 'html', url: `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.youtube.com/results?search_query=' + encodeURIComponent(searchQ))}` },
-                    { type: 'html', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent('https://www.youtube.com/results?search_query=' + encodeURIComponent(searchQ))}` },
-                    { type: 'piped', url: `https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(searchQ)}&filter=music_songs` },
-                    { type: 'piped', url: `https://api.piped.private.coffee/search?q=${encodeURIComponent(searchQ)}&filter=music_songs` },
-                    { type: 'inv', url: `https://inv.nadeko.net/api/v1/search?q=${encodeURIComponent(searchQ)}&type=video` }
+            async searchYouTubeMusicCatalog(query) {
+                // Force "Official Audio" / "Topic" tracks from YouTube Music so they have 0 video ads!
+                const ytMusicQuery = `${query} official audio`;
+                const nodes = [
+                    { type: 'piped', url: `https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(ytMusicQuery)}&filter=music_songs` },
+                    { type: 'piped', url: `https://api.piped.private.coffee/search?q=${encodeURIComponent(ytMusicQuery)}&filter=music_songs` },
+                    { type: 'html', url: `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.youtube.com/results?search_query=' + encodeURIComponent(ytMusicQuery))}` },
+                    { type: 'html', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent('https://www.youtube.com/results?search_query=' + encodeURIComponent(ytMusicQuery))}` },
+                    { type: 'html', url: `https://corsproxy.io/?${encodeURIComponent('https://www.youtube.com/results?search_query=' + encodeURIComponent(ytMusicQuery))}` },
+                    { type: 'inv', url: `https://inv.nadeko.net/api/v1/search?q=${encodeURIComponent(ytMusicQuery)}&type=video` },
+                    { type: 'inv', url: `https://invidious.nerdvpn.de/api/v1/search?q=${encodeURIComponent(ytMusicQuery)}&type=video` }
                 ];
 
-                for (let node of endpoints) {
+                for (let node of nodes) {
                     try {
                         const ctrl = new AbortController();
-                        const timer = setTimeout(() => ctrl.abort(), 5000);
+                        const timer = setTimeout(() => ctrl.abort(), 4500);
                         const res = await fetch(node.url, { signal: ctrl.signal });
                         clearTimeout(timer);
 
                         let list = [];
-                        if (node.type === 'html') {
+                        if (node.type === 'piped') {
+                            const data = await res.json();
+                            list = (data.items || []).map(it => {
+                                const vId = it.url ? it.url.split('v=')[1] : '';
+                                return {
+                                    videoId: vId,
+                                    name: (it.title || 'Song').replace(/\(Official.*\)|\[.*\]|Lyrical|Lyrics|Audio|Video|Full Song/gi, '').trim(),
+                                    artist: (it.uploaderName || 'Artist').replace(/ - Topic|VEVO/gi, '').trim(),
+                                    img: `https://i.ytimg.com/vi/${vId}/maxresdefault.jpg`
+                                };
+                            }).filter(x => x.videoId);
+                        } else if (node.type === 'html') {
                             const text = await res.text();
                             const m = text.match(/var ytInitialData = (\{.*?\});<\/script>/);
                             if (m && m[1]) {
                                 const data = JSON.parse(m[1]);
-                                const items = data.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents || [];
-                                items.forEach(it => {
+                                const contents = data.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents || [];
+                                contents.forEach(it => {
                                     const v = it.videoRenderer;
                                     if (v && v.videoId) {
                                         const title = v.title?.runs?.[0]?.text || 'Song';
@@ -1076,22 +862,11 @@
                                     }
                                 });
                             }
-                        } else if (node.type === 'piped') {
-                            const data = await res.json();
-                            list = (data.items || []).map(it => {
-                                const vId = it.url ? it.url.split('v=')[1] : '';
-                                return {
-                                    videoId: vId,
-                                    name: (it.title || 'Song').replace(/\(Official.*\)|\[.*\]|Lyrical|Lyrics|Audio|Video/gi, '').trim(),
-                                    artist: (it.uploaderName || 'Artist').replace(/ - Topic|VEVO/gi, '').trim(),
-                                    img: `https://i.ytimg.com/vi/${vId}/maxresdefault.jpg`
-                                };
-                            }).filter(x => x.videoId);
                         } else if (node.type === 'inv') {
                             const data = await res.json();
                             list = (data || []).map(it => ({
                                 videoId: it.videoId,
-                                name: (it.title || 'Song').replace(/\(Official.*\)|\[.*\]|Lyrical|Lyrics|Audio|Video/gi, '').trim(),
+                                name: (it.title || 'Song').replace(/\(Official.*\)|\[.*\]|Lyrical|Lyrics|Audio|Video|Full Song/gi, '').trim(),
                                 artist: (it.author || 'Artist').replace(/ - Topic|VEVO/gi, '').trim(),
                                 img: `https://i.ytimg.com/vi/${it.videoId}/maxresdefault.jpg`
                             })).filter(x => x.videoId);
@@ -1103,34 +878,127 @@
                 return [];
             }
 
+            // Extracts Pure Ad-Free Audio Stream from YouTube Music Video ID
+            async extractDirectYTAudioStream(videoId) {
+                const streamNodes = [
+                    { type: 'piped', url: `https://pipedapi.kavin.rocks/streams/${videoId}` },
+                    { type: 'piped', url: `https://api.piped.private.coffee/streams/${videoId}` },
+                    { type: 'inv', url: `https://inv.nadeko.net/api/v1/videos/${videoId}` }
+                ];
+
+                for (let n of streamNodes) {
+                    try {
+                        const ctrl = new AbortController();
+                        const timer = setTimeout(() => ctrl.abort(), 2600);
+                        const res = await fetch(n.url, { signal: ctrl.signal });
+                        clearTimeout(timer);
+                        const data = await res.json();
+
+                        if (n.type === 'piped' && data.audioStreams && data.audioStreams.length > 0) {
+                            const sorted = data.audioStreams.sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
+                            if (sorted[0] && sorted[0].url) return sorted[0].url;
+                        } else if (n.type === 'inv' && data.adaptiveFormats) {
+                            const audios = data.adaptiveFormats.filter(f => f.type && f.type.startsWith('audio/'));
+                            if (audios.length > 0 && audios[0].url) return audios[0].url;
+                        }
+                    } catch (e) {}
+                }
+                return null;
+            }
+
+            bindEvents() {
+                const runSearch = () => {
+                    const q = document.getElementById('searchInput').value.trim();
+                    if (q) this.performSearch(q);
+                };
+                document.getElementById('searchBtn').onclick = runSearch;
+                document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') runSearch(); });
+
+                const toggle = (e) => { e.stopPropagation(); this.togglePlay(); };
+                document.getElementById('mPlayBtn').onclick = toggle;
+                document.getElementById('fPlayBtn').onclick = toggle;
+
+                document.getElementById('prevBtn').onclick = () => this.nextPrev(-1);
+                document.getElementById('nextBtn').onclick = () => this.nextPrev(1);
+
+                this.audio.onended = () => { if (this.engineType === 'yt_direct') this.nextPrev(1); };
+                this.audio.onplay = () => { if (this.engineType === 'yt_direct') this.syncPlayUI(true); };
+                this.audio.onpause = () => { if (this.engineType === 'yt_direct') this.syncPlayUI(false); };
+
+                document.getElementById('openFullBtn').onclick = () => document.getElementById('fullPlayer').classList.add('active');
+                document.getElementById('closeFullBtn').onclick = () => document.getElementById('fullPlayer').classList.remove('active');
+                document.getElementById('closeFullIcon').onclick = () => document.getElementById('fullPlayer').classList.remove('active');
+
+                document.getElementById('toggleLyricsBtn').onclick = () => document.getElementById('lyricsView').classList.toggle('active');
+                document.getElementById('closeLyricsBtn').onclick = () => document.getElementById('lyricsView').classList.remove('active');
+
+                document.getElementById('topSupportBtn').onclick = () => document.getElementById('supportModal').classList.add('active');
+                document.getElementById('playerSupportBtn').onclick = () => document.getElementById('supportModal').classList.add('active');
+                document.getElementById('closeSupportBtn').onclick = () => document.getElementById('supportModal').classList.remove('active');
+
+                document.getElementById('topSyncBtn').onclick = () => this.openRoomScreen();
+                document.getElementById('playerSyncBtn').onclick = () => this.openRoomScreen();
+
+                document.getElementById('scrubBar').onclick = (e) => {
+                    if (!this.isAdmin && this.roomCode) {
+                        alert("Only the Room Admin can seek songs!");
+                        return;
+                    }
+                    const dur = this.getCurrentDuration();
+                    if (dur > 0) {
+                        const rect = document.getElementById('scrubBar').getBoundingClientRect();
+                        const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                        const targetTime = pct * dur;
+                        this.seekToTime(targetTime);
+                        this.broadcastToRoom({ type: 'SYNC_STATE', time: targetTime, playing: this.isPlaying, sentAt: Date.now() });
+                    }
+                };
+            }
+
+            getCurrentTime() {
+                if (this.engineType === 'yt_direct') return this.audio.currentTime || 0;
+                if (ytReady && ytPlayer && ytPlayer.getCurrentTime) return ytPlayer.getCurrentTime() || 0;
+                return 0;
+            }
+
+            getCurrentDuration() {
+                if (this.engineType === 'yt_direct') return this.audio.duration || 0;
+                if (ytReady && ytPlayer && ytPlayer.getDuration) return ytPlayer.getDuration() || 0;
+                return 0;
+            }
+
+            seekToTime(sec) {
+                if (this.engineType === 'yt_direct') {
+                    this.audio.currentTime = sec;
+                } else if (ytReady && ytPlayer && ytPlayer.seekTo) {
+                    ytPlayer.seekTo(sec, true);
+                }
+            }
+
             async performSearch(query) {
                 const sec = document.getElementById('searchResultsSection');
                 const listEl = document.getElementById('searchList');
                 document.getElementById('homeSections').style.display = 'none';
                 sec.style.display = 'block';
                 document.getElementById('searchHeadingText').innerText = `Results for "${query}"`;
-                listEl.innerHTML = `<div style="text-align:center; padding: 30px; color:rgba(255,255,255,0.5);"><i class="fas fa-circle-notch fa-spin"></i> Loading HD tracks...</div>`;
+                listEl.innerHTML = `<div style="text-align:center; padding: 30px; color:rgba(255,255,255,0.6);"><i class="fas fa-circle-notch fa-spin"></i> Searching...</div>`;
 
-                const results = await this.scrapeTracks(query);
+                const results = await this.searchYouTubeMusicCatalog(query);
                 if (results.length > 0) {
                     this.searchResults = results;
                 } else {
-                    const localMatch = CURATED_HOME_SONGS.filter(s => s.name.toLowerCase().includes(query.toLowerCase()) || s.artist.toLowerCase().includes(query.toLowerCase()));
-                    this.searchResults = localMatch.length ? localMatch : CURATED_HOME_SONGS;
+                    const localMatch = this.homeCatalog.filter(s => s.name.toLowerCase().includes(query.toLowerCase()) || s.artist.toLowerCase().includes(query.toLowerCase()));
+                    this.searchResults = localMatch.length ? localMatch : this.homeCatalog;
                 }
 
                 listEl.innerHTML = this.searchResults.map((s, idx) => `
                     <div class="song-row" onclick="app.playFromList('search', ${idx})">
                         <img id="simg-${idx}" src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
-                        <div class="song-meta">
-                            <h4>${s.name}</h4>
-                            <p>${s.artist}</p>
-                        </div>
+                        <div class="song-meta"><h4>${s.name}</h4><p>${s.artist}</p></div>
                         <div class="play-circle"><i class="fas fa-play"></i></div>
                     </div>
                 `).join('');
 
-                // Upgrade search result thumbnails to 1000x1000 iTunes Square HD Art in background
                 this.searchResults.slice(0, 8).forEach((s, idx) => {
                     const imgDom = document.getElementById(`simg-${idx}`);
                     this.resolveUltraHDArtwork(s, [imgDom]);
@@ -1138,11 +1006,16 @@
             }
 
             playFromList(source, index) {
-                this.playlist = source === 'search' ? this.searchResults : CURATED_HOME_SONGS;
+                if (!this.isAdmin && this.roomCode) {
+                    alert("Only the Room Admin can change songs in Listen Together!");
+                    return;
+                }
+                this.playlist = source === 'search' ? this.searchResults : this.homeCatalog;
                 this.loadAndPlay(index, true);
             }
 
             async loadAndPlay(index, shouldBroadcast = true) {
+                if (!this.playlist || !this.playlist[index]) return;
                 this.currentIndex = index;
                 const track = this.playlist[index];
 
@@ -1159,51 +1032,63 @@
                 fCov.onerror = () => handleImgError(fCov, track.videoId);
 
                 document.getElementById('pOrb1').style.backgroundImage = `url('${track.img}')`;
-                document.getElementById('pOrb2').style.backgroundImage = `url('${track.img}')`;
-                document.getElementById('amb1').style.backgroundImage = `url('${track.img}')`;
-                document.getElementById('amb2').style.backgroundImage = `url('${track.img}')`;
-
                 document.getElementById('miniPlayer').classList.add('active');
                 document.getElementById('fullPlayer').classList.add('active');
 
+                // Upgrade to 1000x1000 Square Ultra-HD Cover
+                this.resolveUltraHDArtwork(track, [mCov, fCov]).then(hd => {
+                    document.getElementById('pOrb1').style.backgroundImage = `url('${hd}')`;
+                });
+
+                // Stop previous playback cleanly
+                this.audio.pause();
+                if (ytReady && ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
+
+                // Start instant playback via YouTube No-Cookie Shield Core AND upgrade to Pure Direct Audio if available
+                this.engineType = 'yt_iframe';
                 if (ytReady && ytPlayer && ytPlayer.loadVideoById) {
                     ytPlayer.loadVideoById(track.videoId);
                     this.syncPlayUI(true);
                 } else {
-                    pendingVideoId = track.videoId;
+                    pendingYTVideoId = track.videoId;
                     this.syncPlayUI(true);
                 }
 
-                if (shouldBroadcast) {
-                    this.broadcastSync({ type: 'LOAD', track, time: 0, playing: true });
+                if (shouldBroadcast && this.isAdmin && this.roomCode) {
+                    this.broadcastToRoom({
+                        type: 'LOAD_TRACK',
+                        track: track,
+                        time: 0,
+                        playing: true,
+                        sentAt: Date.now()
+                    });
                 }
-
-                // Upgrade to 1000x1000 Ultra-HD Square Artwork for Player
-                this.resolveUltraHDArtwork(track, [mCov, fCov]).then(hdImg => {
-                    document.getElementById('pOrb1').style.backgroundImage = `url('${hdImg}')`;
-                    document.getElementById('pOrb2').style.backgroundImage = `url('${hdImg}')`;
-                });
 
                 this.fetchRedLrcProvider(track.name, track.artist);
             }
 
-            tryBackupStream() {
+            tryNextSearchTrack() {
                 if (this.currentIndex + 1 < this.playlist.length) {
                     this.loadAndPlay(this.currentIndex + 1, false);
                 }
             }
 
             togglePlay() {
-                if (!ytReady || !ytPlayer) return;
-                const currTime = ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0;
+                if (!this.isAdmin && this.roomCode) {
+                    alert("Only the Room Admin can play/pause in Listen Together!");
+                    return;
+                }
+                const currTime = this.getCurrentTime();
                 if (this.isPlaying) {
-                    ytPlayer.pauseVideo();
+                    if (this.engineType === 'yt_direct') this.audio.pause();
+                    else if (ytReady && ytPlayer) ytPlayer.pauseVideo();
                     this.syncPlayUI(false);
-                    this.broadcastSync({ type: 'PAUSE', time: currTime });
+                    this.broadcastToRoom({ type: 'SYNC_STATE', time: currTime, playing: false, sentAt: Date.now() });
                 } else {
-                    ytPlayer.playVideo();
+                    if (this.engineType === 'yt_direct') this.audio.play().catch(() => {});
+                    else if (ytReady && ytPlayer) ytPlayer.playVideo();
                     this.syncPlayUI(true);
-                    this.broadcastSync({ type: 'PLAY', time: currTime });
+                    this.broadcastToRoom({ type: 'SYNC_STATE', time: currTime, playing: true, sentAt: Date.now() });
                 }
             }
 
@@ -1217,13 +1102,228 @@
             }
 
             nextPrev(step) {
+                if (!this.isAdmin && this.roomCode) return;
                 if (!this.playlist.length) return;
                 this.currentIndex = (this.currentIndex + step + this.playlist.length) % this.playlist.length;
                 this.loadAndPlay(this.currentIndex, true);
             }
 
             // =========================================================================
-            // TRUE WORD-BY-WORD LYRICS ENGINE (POWERED BY RED.LRC / LRCLIB)
+            // 3. PRIVATE LISTEN TOGETHER + NEW ROOM MANAGEMENT SCREEN + ADMIN KICK
+            // =========================================================================
+            openRoomScreen() {
+                document.getElementById('listenRoomScreen').classList.add('active');
+            }
+
+            closeRoomScreen() {
+                document.getElementById('listenRoomScreen').classList.remove('active');
+            }
+
+            createPrivateRoom() {
+                const customCode = document.getElementById('createCodeInput').value.trim();
+                const code = customCode.length >= 3 ? customCode : Math.floor(1000 + Math.random() * 9000).toString();
+
+                if (this.peer) this.peer.destroy();
+                this.isAdmin = true;
+                this.roomCode = code;
+                this.members = [{ id: 'HOST', username: this.username, isAdmin: true, conn: null }];
+
+                this.peer = new Peer(`booo-ytpriv-${code}`);
+
+                this.peer.on('open', () => {
+                    this.showRoomDashboard();
+                    document.getElementById('navSyncDot').classList.add('online');
+                    document.getElementById('navSyncLabel').innerText = `Room #${code}`;
+                });
+
+                this.peer.on('connection', (conn) => {
+                    conn.on('data', (data) => {
+                        if (data.type === 'JOIN_HANDSHAKE') {
+                            this.members = this.members.filter(m => m.id !== conn.peer);
+                            this.members.push({ id: conn.peer, username: data.username || 'User', isAdmin: false, conn: conn });
+                            this.renderRoomMembers();
+                            this.broadcastMemberList();
+
+                            const currTrack = this.playlist[this.currentIndex];
+                            if (currTrack) {
+                                conn.send({
+                                    type: 'LOAD_TRACK',
+                                    track: currTrack,
+                                    time: this.getCurrentTime(),
+                                    playing: this.isPlaying,
+                                    sentAt: Date.now()
+                                });
+                            }
+                        } else if (data.type === 'REQUEST_RESYNC') {
+                            const currTrack = this.playlist[this.currentIndex];
+                            if (currTrack) {
+                                conn.send({
+                                    type: 'LOAD_TRACK',
+                                    track: currTrack,
+                                    time: this.getCurrentTime(),
+                                    playing: this.isPlaying,
+                                    sentAt: Date.now()
+                                });
+                            }
+                        }
+                    });
+
+                    conn.on('close', () => {
+                        this.members = this.members.filter(m => m.id !== conn.peer);
+                        this.renderRoomMembers();
+                        this.broadcastMemberList();
+                    });
+                });
+            }
+
+            joinPrivateRoom() {
+                const code = document.getElementById('joinCodeInput').value.trim();
+                if (code.length < 3) {
+                    alert("Please enter a valid Private Room Code!");
+                    return;
+                }
+
+                if (this.peer) this.peer.destroy();
+                this.isAdmin = false;
+                this.roomCode = code;
+                this.peer = new Peer();
+
+                this.peer.on('open', () => {
+                    const conn = this.peer.connect(`booo-ytpriv-${code}`);
+                    this.hostConn = conn;
+
+                    conn.on('open', () => {
+                        conn.send({ type: 'JOIN_HANDSHAKE', username: this.username });
+                        this.showRoomDashboard();
+                        document.getElementById('navSyncDot').classList.add('online');
+                        document.getElementById('navSyncLabel').innerText = `Room #${code}`;
+                    });
+
+                    conn.on('data', (data) => this.handleRoomMessage(data));
+                    conn.on('close', () => this.leaveRoom(true));
+                });
+            }
+
+            showRoomDashboard() {
+                document.getElementById('roomSetupPanel').style.display = 'none';
+                document.getElementById('roomDashboardPanel').style.display = 'block';
+                document.getElementById('activeRoomCodeDisplay').innerText = `#${this.roomCode}`;
+                document.getElementById('activeRoleBadge').innerText = this.isAdmin
+                    ? `Admin: ${this.username} (Full Control)`
+                    : `Connected as: ${this.username} (Listener)`;
+                this.renderRoomMembers();
+            }
+
+            renderRoomMembers() {
+                const listEl = document.getElementById('roomMembersList');
+                document.getElementById('roomUserCountBadge').innerText = `${this.members.length} Online`;
+
+                listEl.innerHTML = this.members.map(m => `
+                    <div class="member-row">
+                        <div class="member-name">
+                            <i class="fas fa-user-circle" style="color:${m.isAdmin ? '#ffd60a' : '#30d158'}; font-size:17px;"></i>
+                            <span>${m.username}</span>
+                            ${m.isAdmin ? '<span class="admin-tag">ADMIN</span>' : ''}
+                        </div>
+                        ${(this.isAdmin && !m.isAdmin) ? `<div class="kick-btn" onclick="app.kickMember('${m.id}')">Remove</div>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            kickMember(peerId) {
+                if (!this.isAdmin) return;
+                const target = this.members.find(m => m.id === peerId);
+                if (target && target.conn) {
+                    target.conn.send({ type: 'KICKED_BY_ADMIN' });
+                    setTimeout(() => target.conn.close(), 150);
+                }
+                this.members = this.members.filter(m => m.id !== peerId);
+                this.renderRoomMembers();
+                this.broadcastMemberList();
+            }
+
+            broadcastMemberList() {
+                const publicList = this.members.map(m => ({ id: m.id, username: m.username, isAdmin: m.isAdmin }));
+                this.broadcastToRoom({ type: 'MEMBER_LIST', members: publicList });
+            }
+
+            broadcastToRoom(payload) {
+                if (!this.isAdmin) return;
+                this.members.forEach(m => {
+                    if (m.conn && m.conn.open) m.conn.send(payload);
+                });
+            }
+
+            handleRoomMessage(data) {
+                if (data.type === 'KICKED_BY_ADMIN') {
+                    alert("You have been removed from the room by the Admin.");
+                    this.leaveRoom(true);
+                    return;
+                }
+
+                if (data.type === 'MEMBER_LIST') {
+                    this.members = data.members;
+                    this.renderRoomMembers();
+                    return;
+                }
+
+                const networkDelaySec = data.sentAt ? Math.max(0, (Date.now() - data.sentAt) / 1000) : 0;
+
+                if (data.type === 'LOAD_TRACK' && data.track) {
+                    this.playlist.unshift(data.track);
+                    this.loadAndPlay(0, false);
+                    setTimeout(() => {
+                        const target = (data.time || 0) + networkDelaySec;
+                        this.seekToTime(target);
+                        if (!data.playing && ytReady && ytPlayer) ytPlayer.pauseVideo();
+                    }, 900);
+                } else if (data.type === 'SYNC_STATE') {
+                    const targetTime = (data.time || 0) + (data.playing ? networkDelaySec : 0);
+                    if (Math.abs(this.getCurrentTime() - targetTime) > 0.05) {
+                        this.seekToTime(targetTime);
+                    }
+                    if (data.playing && !this.isPlaying) {
+                        if (ytReady && ytPlayer) ytPlayer.playVideo();
+                        this.syncPlayUI(true);
+                    } else if (!data.playing && this.isPlaying) {
+                        if (ytReady && ytPlayer) ytPlayer.pauseVideo();
+                        this.syncPlayUI(false);
+                    }
+                }
+            }
+
+            forceZeroGapSync() {
+                if (this.isAdmin) {
+                    const currTrack = this.playlist[this.currentIndex];
+                    if (currTrack) {
+                        this.broadcastToRoom({
+                            type: 'SYNC_STATE',
+                            time: this.getCurrentTime(),
+                            playing: this.isPlaying,
+                            sentAt: Date.now()
+                        });
+                    }
+                } else if (this.hostConn && this.hostConn.open) {
+                    this.hostConn.send({ type: 'REQUEST_RESYNC' });
+                }
+            }
+
+            leaveRoom() {
+                if (this.peer) this.peer.destroy();
+                this.peer = null;
+                this.roomCode = null;
+                this.isAdmin = false;
+                this.members = [];
+                this.hostConn = null;
+
+                document.getElementById('roomDashboardPanel').style.display = 'none';
+                document.getElementById('roomSetupPanel').style.display = 'block';
+                document.getElementById('navSyncDot').classList.remove('online');
+                document.getElementById('navSyncLabel').innerText = 'Listen Together';
+            }
+
+            // =========================================================================
+            // 4. WORD-BY-WORD LYRICS ENGINE ("Lrc by Vishal")
             // =========================================================================
             async fetchRedLrcProvider(name, artist) {
                 this.lyricsData = [];
@@ -1234,52 +1334,18 @@
                     const cleanName = name.replace(/\(.*\)|\[.*\]|-.*$|\|.*$/g, '').trim();
                     const cleanArtist = artist.split('&')[0].split(',')[0].trim();
 
-                    const providers = [
-                        `https://lrclib.net/api/search?q=${encodeURIComponent(cleanName + ' ' + cleanArtist)}`,
-                        `https://lrclib.net/api/search?q=${encodeURIComponent(cleanName)}`,
-                        `https://api.allorigins.win/raw?url=${encodeURIComponent('https://api.textyl.co/api/lyrics?q=' + encodeURIComponent(cleanName + ' ' + cleanArtist))}`
-                    ];
+                    let res = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(cleanName + ' ' + cleanArtist)}`);
+                    let data = await res.json();
+                    let synced = Array.isArray(data) ? data.find(d => d.syncedLyrics)?.syncedLyrics : null;
 
-                    let syncedLrc = null;
-                    let plainTextFallback = null;
-
-                    for (let url of providers) {
-                        try {
-                            const res = await fetch(url);
-                            const data = await res.json();
-                            if (Array.isArray(data) && data.length > 0) {
-                                const withSync = data.find(d => d.syncedLyrics);
-                                if (withSync) {
-                                    syncedLrc = withSync.syncedLyrics;
-                                    break;
-                                }
-                                if (!plainTextFallback && data[0].plainLyrics) {
-                                    plainTextFallback = data[0].plainLyrics;
-                                }
-                                if (data[0].seconds !== undefined && data[0].lyrics) {
-                                    syncedLrc = data.map(row => {
-                                        const m = String(Math.floor(row.seconds / 60)).padStart(2, '0');
-                                        const s = String(Math.floor(row.seconds % 60)).padStart(2, '0');
-                                        return `[${m}:${s}.00] ${row.lyrics}`;
-                                    }).join('\n');
-                                    break;
-                                }
-                            }
-                        } catch (innerErr) {}
+                    if (!synced) {
+                        res = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(cleanName)}`);
+                        data = await res.json();
+                        synced = Array.isArray(data) ? data.find(d => d.syncedLyrics)?.syncedLyrics : null;
                     }
 
-                    if (syncedLrc) {
-                        this.parseWordByWordLRC(syncedLrc);
-                    } else if (plainTextFallback) {
-                        // Auto-generate timed LRC from plain lyrics so word-by-word always works!
-                        const lines = plainTextFallback.split('\n').filter(l => l.trim());
-                        const syntheticLrc = lines.map((l, idx) => {
-                            const secTotal = idx * 3.5 + 2;
-                            const m = String(Math.floor(secTotal / 60)).padStart(2, '0');
-                            const s = String(Math.floor(secTotal % 60)).padStart(2, '0');
-                            return `[${m}:${s}.00] ${l}`;
-                        }).join('\n');
-                        this.parseWordByWordLRC(syntheticLrc);
+                    if (synced) {
+                        this.parseWordByWordLRC(synced);
                     } else {
                         box.innerHTML = `<div style="text-align:center; color:rgba(255,255,255,0.45); margin-top:24vh;">Lyrics not available for this track</div>`;
                     }
@@ -1304,17 +1370,16 @@
                 });
 
                 rawLines.forEach((row, idx) => {
-                    const nextRowTime = rawLines[idx + 1] ? rawLines[idx + 1].time : row.time + 3.6;
+                    const nextRowTime = rawLines[idx + 1] ? rawLines[idx + 1].time : row.time + 3.5;
                     const lineSpanDuration = Math.max(0.6, Math.min(5.0, (nextRowTime - row.time) * 0.9));
 
                     const lineDiv = document.createElement('div');
                     lineDiv.className = 'lyric-line';
                     lineDiv.onclick = () => {
-                        if (ytReady && ytPlayer && ytPlayer.seekTo) ytPlayer.seekTo(row.time, true);
+                        if (this.isAdmin || !this.roomCode) this.seekToTime(row.time);
                     };
 
                     const words = row.text.split(/\s+/);
-                    // Calculate character-weighted timings for natural syllable-speed word-by-word sync
                     const totalWeight = words.reduce((acc, w) => acc + Math.max(2, w.length), 0);
                     let elapsedWeight = 0;
 
@@ -1329,7 +1394,7 @@
                         span.innerText = w;
                         lineDiv.appendChild(span);
 
-                        return { span, start: wStart, end: wStart + wDur, dur: Math.max(0.12, wDur) };
+                        return { span, start: wStart, dur: Math.max(0.12, wDur) };
                     });
 
                     box.appendChild(lineDiv);
@@ -1337,7 +1402,6 @@
                 });
             }
 
-            // Direct GPU Inline Gradient Painting for 100% Guaranteed Word-by-Word Fill on Android WebViews
             paintWordFill(span, pct) {
                 if (pct >= 100) {
                     span.style.backgroundImage = 'none';
@@ -1365,50 +1429,46 @@
                 };
 
                 const tick = () => {
-                    if (ytReady && ytPlayer && ytPlayer.getCurrentTime) {
-                        const curr = ytPlayer.getCurrentTime() || 0;
-                        const dur = ytPlayer.getDuration() || 0;
+                    const curr = this.getCurrentTime();
+                    const dur = this.getCurrentDuration();
 
-                        if (dur > 0) {
-                            document.getElementById('scrubFill').style.width = `${(curr / dur) * 100}%`;
-                            document.getElementById('tCurrent').innerText = fmt(curr);
-                            document.getElementById('tDuration').innerText = fmt(dur);
+                    if (dur > 0) {
+                        document.getElementById('scrubFill').style.width = `${(curr / dur) * 100}%`;
+                        document.getElementById('tCurrent').innerText = fmt(curr);
+                        document.getElementById('tDuration').innerText = fmt(dur);
 
-                            if (this.lyricsData.length > 0 && document.getElementById('lyricsView').classList.contains('active')) {
-                                const idx = this.lyricsData.findIndex((l, i, arr) => curr >= l.time - 0.1 && (!arr[i + 1] || curr < arr[i + 1].time - 0.08));
+                        if (this.lyricsData.length > 0 && document.getElementById('lyricsView').classList.contains('active')) {
+                            const idx = this.lyricsData.findIndex((l, i, arr) => curr >= l.time - 0.1 && (!arr[i + 1] || curr < arr[i + 1].time - 0.08));
 
-                                if (idx !== -1) {
-                                    const active = this.lyricsData[idx];
+                            if (idx !== -1) {
+                                const active = this.lyricsData[idx];
 
-                                    this.lyricsData.forEach((l, i) => {
-                                        if (i < idx) {
-                                            if (l.el.classList.contains('active') || !l.el.classList.contains('past')) {
-                                                l.el.classList.remove('active');
-                                                l.el.classList.add('past');
-                                                l.words.forEach(w => this.paintWordFill(w.span, 100));
-                                            }
-                                        } else if (i > idx) {
-                                            if (l.el.classList.contains('active') || l.el.classList.contains('past')) {
-                                                l.el.classList.remove('active', 'past');
-                                                l.words.forEach(w => this.paintWordFill(w.span, 0));
-                                            }
+                                this.lyricsData.forEach((l, i) => {
+                                    if (i < idx) {
+                                        if (l.el.classList.contains('active') || !l.el.classList.contains('past')) {
+                                            l.el.classList.remove('active');
+                                            l.el.classList.add('past');
+                                            l.words.forEach(w => this.paintWordFill(w.span, 100));
                                         }
-                                    });
-
-                                    if (!active.el.classList.contains('active')) {
-                                        active.el.classList.remove('past');
-                                        active.el.classList.add('active');
-                                        const box = document.getElementById('lyricsBox');
-                                        box.scrollTo({ top: active.el.offsetTop - (box.clientHeight / 2) + 40, behavior: 'smooth' });
+                                    } else if (i > idx) {
+                                        if (l.el.classList.contains('active') || l.el.classList.contains('past')) {
+                                            l.el.classList.remove('active', 'past');
+                                            l.words.forEach(w => this.paintWordFill(w.span, 0));
+                                        }
                                     }
+                                });
 
-                                    // Paint each word inside the active line word-by-word!
-                                    active.words.forEach(wObj => {
-                                        const rawPct = ((curr - wObj.start) / wObj.dur) * 100;
-                                        const clamped = Math.max(0, Math.min(100, rawPct));
-                                        this.paintWordFill(wObj.span, clamped);
-                                    });
+                                if (!active.el.classList.contains('active')) {
+                                    active.el.classList.remove('past');
+                                    active.el.classList.add('active');
+                                    const box = document.getElementById('lyricsBox');
+                                    box.scrollTo({ top: active.el.offsetTop - (box.clientHeight / 2) + 40, behavior: 'smooth' });
                                 }
+
+                                active.words.forEach(wObj => {
+                                    const rawPct = ((curr - wObj.start) / wObj.dur) * 100;
+                                    this.paintWordFill(wObj.span, Math.max(0, Math.min(100, rawPct)));
+                                });
                             }
                         }
                     }
@@ -1418,7 +1478,7 @@
             }
         }
 
-        window.app = new BoooUltimateApp();
+        window.app = new BoooYouTubeMusicEngine();
     </script>
 </body>
 </html>
