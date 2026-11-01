@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Booo!! Music</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- CryptoJS for Direct 320kbps Ad-Free Stream Decryption -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <!-- PeerJS for Real-Time Live Chat & 0ms Listen Together Sync -->
+    <!-- YouTube Music InnerTube Stream Core -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <!-- PeerJS for 0ms Listen Together Sync -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root {
@@ -17,6 +17,12 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { background: #030306; color: #fff; overflow: hidden; height: 100vh; width: 100vw; }
+
+        /* In-viewport 1x1 Stealth InnerTube Audio Mount (Prevents mobile WebView autoplay block) */
+        #innerTubeMount {
+            position: fixed; bottom: 0; right: 0; width: 2px; height: 2px;
+            opacity: 0.001; pointer-events: none; z-index: -10; overflow: hidden;
+        }
 
         /* --- AMBIENT COLOR FLOW BACKGROUND --- */
         .ambient-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #030306; }
@@ -122,11 +128,12 @@
         .search-box input { flex: 1; background: transparent; border: none; color: #fff; font-size: 15.5px; margin-left: 10px; outline: none; user-select: text; }
         .search-go { background: linear-gradient(135deg, #ff2d55, #bf5af2); border: none; color: #fff; padding: 9px 18px; border-radius: 13px; font-weight: 800; font-size: 13px; cursor: pointer; }
 
-        /* Navigation Tabs */
-        .user-library-bar { display: flex; gap: 7px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
+        /* Navigation Tabs (No Chat Tab!) */
+        .user-library-bar { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
         .user-library-bar::-webkit-scrollbar { display: none; }
         .lib-tab-btn {
-            padding: 9px 13px; border-radius: 15px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14);
+            flex: 1; justify-content: center;
+            padding: 10px 12px; border-radius: 15px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14);
             display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap;
         }
         .lib-tab-btn.active { background: rgba(255, 45, 85, 0.24); border-color: #ff2d55; }
@@ -216,7 +223,7 @@
         .heart-btn.liked { color: #ff2d55; transform: scale(1.15); }
         .play-circle { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; }
 
-        /* --- SOCIAL COMMUNITY: FOLLOW USERS & LIVE REAL-TIME CHAT --- */
+        /* --- FOLLOW COMMUNITY CARD --- */
         .social-card {
             padding: 16px; border-radius: 22px; margin-bottom: 16px;
             background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
@@ -233,36 +240,6 @@
         }
         .follow-btn.following { background: rgba(255,255,255,0.15); color: #30d158; border: 1px solid #30d158; }
 
-        .chat-messages-box {
-            height: 260px; overflow-y: auto; padding: 12px; border-radius: 18px;
-            background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.12); margin-bottom: 10px;
-            display: flex; flex-direction: column; gap: 9px; scroll-behavior: smooth;
-        }
-        .chat-bubble {
-            padding: 10px 14px; border-radius: 16px; max-width: 84%; font-size: 13.5px; line-height: 1.38;
-            background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.14); align-self: flex-start;
-        }
-        .chat-bubble.me {
-            background: linear-gradient(135deg, rgba(255,45,85,0.38), rgba(191,90,242,0.38));
-            border-color: rgba(255,45,85,0.55); align-self: flex-end;
-        }
-        .chat-bubble.owner-msg {
-            background: linear-gradient(135deg, rgba(255, 214, 10, 0.28), rgba(255, 45, 85, 0.25));
-            border: 1px solid rgba(255, 214, 10, 0.65);
-            box-shadow: 0 4px 15px rgba(255, 214, 10, 0.15);
-        }
-        .chat-sender { font-size: 11px; font-weight: 800; color: #00d2ff; margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
-        .chat-sender.owner-name { color: #ffd60a; }
-        .chat-input-row { display: flex; gap: 8px; }
-        .chat-input-row input {
-            flex: 1; padding: 12px 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.22);
-            background: rgba(0,0,0,0.5); color: #fff; font-size: 14px; outline: none; user-select: text;
-        }
-        .chat-send-btn {
-            padding: 0 20px; border-radius: 15px; border: none;
-            background: linear-gradient(135deg, #30d158, #00b09b); color: #000; font-weight: 900; font-size: 15px; cursor: pointer;
-        }
-
         .support-card {
             margin-top: 22px; padding: 18px; border-radius: 22px; background: var(--glass); border: 1px solid var(--glass-border); text-align: center; box-shadow: 0 12px 30px rgba(0,0,0,0.4);
         }
@@ -276,10 +253,10 @@
             transform: translateY(100%); transition: transform 0.4s var(--easing); display: flex; flex-direction: column; padding: 20px 18px 28px; overflow-y: auto;
         }
         #superAdminScreen.active { transform: translateY(0); }
-        .admin-stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
-        .admin-stat-box { padding: 12px 8px; border-radius: 18px; text-align: center; background: linear-gradient(145deg, rgba(255,214,10,0.18), rgba(255,255,255,0.03)); border: 1px solid rgba(255,214,10,0.4); }
-        .admin-stat-num { font-size: 20px; font-weight: 900; color: #ffd60a; }
-        .admin-stat-lbl { font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 700; margin-top: 3px; }
+        .admin-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+        .admin-stat-box { padding: 14px 10px; border-radius: 18px; text-align: center; background: linear-gradient(145deg, rgba(255,214,10,0.18), rgba(255,255,255,0.03)); border: 1px solid rgba(255,214,10,0.4); }
+        .admin-stat-num { font-size: 22px; font-weight: 900; color: #ffd60a; }
+        .admin-stat-lbl { font-size: 10.5px; color: rgba(255,255,255,0.7); font-weight: 700; margin-top: 3px; }
         .user-db-card { padding: 12px; border-radius: 16px; margin-bottom: 9px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); display: flex; justify-content: space-between; align-items: center; }
         .user-db-meta h4 { font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
         .user-db-meta p { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 3px; line-height: 1.35; }
@@ -438,6 +415,9 @@
 </head>
 <body>
 
+    <!-- STEALTH INNERTUBE STREAM MOUNT -->
+    <div id="innerTubeMount"><div id="ytPlayer"></div></div>
+
     <div class="ambient-bg">
         <div class="amb-orb orb-1" id="amb1"></div>
         <div class="amb-orb orb-2" id="amb2"></div>
@@ -479,15 +459,11 @@
         <div class="admin-stat-grid">
             <div class="admin-stat-box">
                 <div class="admin-stat-num" id="admTotalUsers">0</div>
-                <div class="admin-stat-lbl">Total Accounts</div>
+                <div class="admin-stat-lbl">Total Registered Accounts</div>
             </div>
             <div class="admin-stat-box">
                 <div class="admin-stat-num" id="admTotalLikes">0</div>
-                <div class="admin-stat-lbl">Saved Likes</div>
-            </div>
-            <div class="admin-stat-box">
-                <div class="admin-stat-num" id="admTotalChats">0</div>
-                <div class="admin-stat-lbl">Live Chats</div>
+                <div class="admin-stat-lbl">Total Saved Likes</div>
             </div>
         </div>
 
@@ -506,21 +482,12 @@
         </div>
 
         <!-- Registered Accounts, Passwords, Followers & VIP Verification -->
-        <div class="room-box-card">
+        <div class="room-box-card" style="flex:1;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <h3 style="font-size:14.5px; font-weight:800;"><i class="fas fa-users-gear" style="color:#30d158; margin-right:6px;"></i>All User Accounts & Passwords</h3>
                 <span style="font-size:11px; color:#ffd60a; font-weight:800; cursor:pointer;" onclick="app.adminAddTestUser()">+ Add User</span>
             </div>
-            <div id="adminUsersDirectory" style="max-height:220px; overflow-y:auto;"></div>
-        </div>
-
-        <!-- Owner All-Chat Monitor -->
-        <div class="room-box-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <h3 style="font-size:14.5px; font-weight:800;"><i class="fas fa-comments" style="color:#00d2ff; margin-right:6px;"></i>All Live Chats Monitor</h3>
-                <span style="font-size:11px; color:#ff453a; font-weight:800; cursor:pointer;" onclick="app.adminClearAllChats()">Clear All</span>
-            </div>
-            <div id="adminChatMonitorBox" style="max-height:160px; overflow-y:auto; font-size:12px;"></div>
+            <div id="adminUsersDirectory" style="max-height:320px; overflow-y:auto;"></div>
         </div>
     </div>
 
@@ -647,14 +614,14 @@
             <span><i class="fas fa-bullhorn" style="color:#ffd60a; margin-right:8px;"></i><span id="globalNoticeText"></span></span>
         </div>
 
-        <!-- Clean Search Bar (User searches -> Songs play + Vibe Shuffle!) -->
+        <!-- Clean Search Bar (User searches -> Songs load via InnerTube & YT Music!) -->
         <div class="search-box">
             <i class="fas fa-search"></i>
             <input type="text" id="searchInput" placeholder="Search song or artist to play...">
             <button class="search-go" id="searchBtn">Search</button>
         </div>
 
-        <!-- Navigation Bar -->
+        <!-- Navigation Bar (Chat Removed!) -->
         <div class="user-library-bar">
             <div class="lib-tab-btn active" id="tabDiscoverBtn" onclick="app.showHome()">
                 <i class="fas fa-magnifying-glass" style="color:#bf5af2;"></i><span>Search</span>
@@ -664,7 +631,7 @@
                 <span class="like-count-pill" id="myLikesCountBadge">0</span>
             </div>
             <div class="lib-tab-btn" id="tabSocialBtn" onclick="app.showSocialHub()">
-                <i class="fas fa-comments" style="color:#30d158;"></i><span>Live Chat</span>
+                <i class="fas fa-user-plus" style="color:#30d158;"></i><span>Users</span>
             </div>
             <div class="lib-tab-btn" id="tabProfileBtn" onclick="app.showProfileSection()">
                 <i class="fas fa-crown" id="navProfileIcon" style="color:#00d2ff;"></i><span id="navUserShort">@me</span>
@@ -721,22 +688,10 @@
             <div id="likedSongsList"></div>
         </div>
 
-        <!-- SOCIAL COMMUNITY SECTION (LIVE REAL-TIME CHAT & FOLLOW USERS) -->
+        <!-- USERS FOLLOW SECTION (CHAT REMOVED) -->
         <div id="socialHubSection" style="display: none; margin-bottom: 28px;">
             <div class="section-heading">
-                <span><i class="fas fa-bolt" style="color:#30d158; margin-right:6px;"></i>Global Live Chat</span>
-                <span class="section-sub" id="chatOnlineStatus">Real-Time Sync</span>
-            </div>
-            <div class="social-card">
-                <div class="chat-messages-box" id="communityChatBox"></div>
-                <div class="chat-input-row">
-                    <input type="text" id="communityChatInput" placeholder="Type a live message..." maxlength="160">
-                    <button class="chat-send-btn" id="sendChatBtn"><i class="fas fa-paper-plane"></i></button>
-                </div>
-            </div>
-
-            <div class="section-heading">
-                <span>Community Members</span>
+                <span>Discover & Follow Users</span>
                 <span class="section-sub" id="communityUsersCount">0 Users</span>
             </div>
             <div class="social-card" id="discoverUsersList"></div>
@@ -759,7 +714,7 @@
                 </div>
                 <h2 style="font-size: 21px; font-weight: 900; margin-bottom: 6px;">Search Your Vibe</h2>
                 <p style="font-size: 13px; color: rgba(255,255,255,0.6); max-width: 260px; margin: 0 auto; line-height: 1.45;">
-                    Type any song or artist above. Your music will automatically shuffle & flow based on your song's vibe—100% Ad-Free.
+                    Type any song or artist above. Powered by InnerTube & Vibe Auto-Shuffle.
                 </p>
                 <div class="vibe-shuffle-pill">
                     <i class="fas fa-wand-magic-sparkles"></i> Smart Vibe Auto-Shuffle Enabled
@@ -837,23 +792,7 @@
     </div>
 
     <script>
-        // C-Style 64-Bit DES Decryptor for Direct 320kbps Ad-Free Audio Streams
-        function decryptStreamCipher(encryptedBase64) {
-            if (!encryptedBase64) return null;
-            try {
-                const keyHex = CryptoJS.enc.Utf8.parse("38346591");
-                const decrypted = CryptoJS.DES.decrypt(
-                    { ciphertext: CryptoJS.enc.Base64.parse(encryptedBase64) },
-                    keyHex,
-                    { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 }
-                );
-                let url = decrypted.toString(CryptoJS.enc.Utf8);
-                return url.replace(/_96\.mp4|_160\.mp4|_96_p\.mp4/g, "_320.mp4")
-                          .replace("preview.saavncdn.com", "aac.saavncdn.com");
-            } catch (err) { return null; }
-        }
-
-        // Deep Sanitizer so Lyrics Search NEVER fails due to garbage words in titles
+        // Clean Title & Artist Sanitizer for Accurate Lyrics & InnerTube Matching
         function cleanSongMetadata(rawTitle, rawArtist) {
             let title = (rawTitle || '')
                 .replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&amp;/g, '&')
@@ -876,14 +815,63 @@
             return { cleanTitle: title || rawTitle, cleanArtist: artist || rawArtist };
         }
 
-        class BoooPureZeroAdEngine {
+        window.handleImgError = function(imgEl, videoId) {
+            if (imgEl && videoId && imgEl.src.includes('maxresdefault')) {
+                imgEl.src = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+            }
+        };
+
+        // Stealth InnerTube Stream Player Core (With Auto-Unblock & Ad-Skipper Shield)
+        let ytStreamCore = null;
+        let ytCoreReady = false;
+        let pendingVideoId = null;
+
+        function onYouTubeIframeAPIReady() {
+            ytStreamCore = new YT.Player('ytPlayer', {
+                height: '10',
+                width: '10',
+                playerVars: {
+                    'playsinline': 1,
+                    'autoplay': 1,
+                    'controls': 0,
+                    'disablekb': 1,
+                    'rel': 0,
+                    'fs': 0,
+                    'iv_load_policy': 3
+                },
+                events: {
+                    'onReady': () => {
+                        ytCoreReady = true;
+                        if (pendingVideoId) {
+                            ytStreamCore.loadVideoById(pendingVideoId);
+                            ytStreamCore.playVideo();
+                            pendingVideoId = null;
+                        }
+                    },
+                    'onStateChange': (e) => {
+                        if (!window.app || window.app.activeEngine !== 'innertube_core') return;
+                        if (e.data === YT.PlayerState.ENDED) window.app.nextPrev(1);
+                        if (e.data === YT.PlayerState.PLAYING) window.app.syncPlayUI(true);
+                        if (e.data === YT.PlayerState.PAUSED) window.app.syncPlayUI(false);
+                    },
+                    'onError': () => {
+                        if (window.app) window.app.autoUnblockRestrictedTrack();
+                    }
+                }
+            });
+        }
+
+        // ============================================================================
+        // PURE YOUTUBE MUSIC & INNERTUBE (`youtubei/v1` WEB_REMIX + ANDROID) ENGINE
+        // ============================================================================
+        class BoooInnerTubeEngine {
             constructor() {
                 this._ownerU = atob("ZGVhZHZpc2hhYWw="); // deadvishaal
                 this._ownerP = atob("c2hhbnRpZGV2aTA3"); // shantidevi07
 
-                // 100% Pure HTML5 <audio> Player — NO YouTube IFrame = ZERO ADS EVER!
                 this.audio = new Audio();
                 this.audio.preload = "auto";
+                this.activeEngine = 'innertube_core'; // 'direct_audio' or 'innertube_core'
 
                 this.playlist = [];
                 this.searchResults = [];
@@ -895,9 +883,9 @@
                 this.isPlaying = false;
                 this.lyricsData = [];
                 this.artCache = {};
-                this.streamUrlCache = {};
+                this.unblockTriedId = null;
 
-                // Account, Social & Zero-Delay NTP Sync State
+                // Account & Zero-Delay NTP Sync State
                 this.username = "";
                 this.isSuperAdmin = false;
                 this.peer = null;
@@ -907,13 +895,6 @@
                 this.members = [];
                 this.clockOffsetMs = 0;
                 this.syncInterval = null;
-
-                try {
-                    this.chatChannel = new BroadcastChannel('booo_live_global_chat');
-                    this.chatChannel.onmessage = (ev) => {
-                        if (ev.data && ev.data.type === 'NEW_CHAT') this.renderSocialHub();
-                    };
-                } catch (e) {}
 
                 this.initMasterDatabase();
                 this.initAccountSystem();
@@ -961,15 +942,6 @@
                     };
                 }
                 localStorage.setItem('booo_users_master_db', JSON.stringify(db));
-
-                const chats = JSON.parse(localStorage.getItem('booo_community_chats') || '[]');
-                if (chats.length === 0) {
-                    chats.push(
-                        { sender: 'deadvishaal', isOwner: true, text: 'Welcome to Booo!! Music 👑 Search any song for 100% ad-free vibe shuffle!', time: '10:00 AM' },
-                        { sender: 'vishexui', isOwner: false, text: 'Clean search studio and live word-by-word lyrics look fire 🔥', time: '10:05 AM' }
-                    );
-                    localStorage.setItem('booo_community_chats', JSON.stringify(chats));
-                }
             }
 
             initAccountSystem() {
@@ -1115,7 +1087,6 @@
 
             renderSuperAdminDashboard() {
                 const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
-                const chats = JSON.parse(localStorage.getItem('booo_community_chats') || '[]');
                 const usersList = Object.values(masterDB);
 
                 let totalLikes = 0;
@@ -1123,7 +1094,6 @@
 
                 document.getElementById('admTotalUsers').innerText = usersList.length;
                 document.getElementById('admTotalLikes').innerText = totalLikes;
-                document.getElementById('admTotalChats').innerText = chats.length;
 
                 const dirEl = document.getElementById('adminUsersDirectory');
                 dirEl.innerHTML = usersList.map(u => `
@@ -1149,18 +1119,6 @@
                         ` : ''}
                     </div>
                 `).join('');
-
-                const chatMon = document.getElementById('adminChatMonitorBox');
-                if (chats.length === 0) {
-                    chatMon.innerHTML = `<div style="color:rgba(255,255,255,0.4); text-align:center; padding:12px;">No messages yet.</div>`;
-                } else {
-                    chatMon.innerHTML = chats.map((c, idx) => `
-                        <div style="padding:7px 4px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; justify-content:space-between; align-items:center;">
-                            <div><b style="color:${c.isOwner ? '#ffd60a' : '#00d2ff'};">@${c.sender}</b> <span style="color:rgba(255,255,255,0.4); font-size:10px;">(${c.time})</span>: ${c.text}</div>
-                            <i class="fas fa-trash" style="color:#ff453a; cursor:pointer; padding:4px;" onclick="app.adminDeleteSingleChat(${idx})"></i>
-                        </div>
-                    `).join('');
-                }
             }
 
             adminToggleVerify(targetUsername) {
@@ -1193,20 +1151,6 @@
                 this.renderSuperAdminDashboard();
             }
 
-            adminDeleteSingleChat(idx) {
-                const chats = JSON.parse(localStorage.getItem('booo_community_chats') || '[]');
-                chats.splice(idx, 1);
-                localStorage.setItem('booo_community_chats', JSON.stringify(chats));
-                this.renderSuperAdminDashboard();
-                this.renderSocialHub();
-            }
-
-            adminClearAllChats() {
-                localStorage.setItem('booo_community_chats', '[]');
-                this.renderSuperAdminDashboard();
-                this.renderSocialHub();
-            }
-
             publishGlobalAnnouncement() {
                 const msg = document.getElementById('adminBroadcastInput').value.trim();
                 if (!msg) return;
@@ -1231,7 +1175,7 @@
             }
 
             // =========================================================================
-            // 3. REAL-TIME LIVE CHAT & FOLLOW SYSTEM
+            // 3. FOLLOW USERS DIRECTORY (CHAT REMOVED)
             // =========================================================================
             showSocialHub() {
                 document.querySelectorAll('.lib-tab-btn').forEach(b => b.classList.remove('active'));
@@ -1273,19 +1217,6 @@
                         </div>
                     `;
                 }).join('');
-
-                const chats = JSON.parse(localStorage.getItem('booo_community_chats') || '[]');
-                const chatBox = document.getElementById('communityChatBox');
-                chatBox.innerHTML = chats.map(c => `
-                    <div class="chat-bubble ${c.sender === this.username ? 'me' : ''} ${c.isOwner ? 'owner-msg' : ''}">
-                        <div class="chat-sender ${c.isOwner ? 'owner-name' : ''}">
-                            ${c.isOwner ? '<i class="fas fa-crown"></i>' : ''} @${c.sender}
-                            <span style="font-weight:500; opacity:0.65; margin-left:4px;">${c.time}</span>
-                        </div>
-                        <div>${c.text}</div>
-                    </div>
-                `).join('');
-                chatBox.scrollTop = chatBox.scrollHeight;
             }
 
             toggleFollowUser(targetUser) {
@@ -1311,46 +1242,19 @@
                 this.renderSocialHub();
             }
 
-            sendCommunityMessage() {
-                const inp = document.getElementById('communityChatInput');
-                const txt = inp.value.trim();
-                if (!txt) return;
-
-                const msgObj = {
-                    sender: this.username,
-                    isOwner: this.isSuperAdmin,
-                    text: txt,
-                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                };
-
-                const chats = JSON.parse(localStorage.getItem('booo_community_chats') || '[]');
-                chats.push(msgObj);
-                localStorage.setItem('booo_community_chats', JSON.stringify(chats));
-                inp.value = '';
-                this.renderSocialHub();
-
-                if (this.chatChannel) {
-                    try { this.chatChannel.postMessage({ type: 'NEW_CHAT', chat: msgObj }); } catch (e) {}
-                }
-                if (this.roomCode) {
-                    if (this.isAdmin) this.broadcastToRoom({ type: 'CHAT_MSG', chat: msgObj });
-                    else if (this.hostConn && this.hostConn.open) this.hostConn.send({ type: 'CHAT_MSG', chat: msgObj });
-                }
-            }
-
             // =========================================================================
             // 4. LIKED SONGS STORAGE
             // =========================================================================
-            isSongLiked(id) {
-                return this.likedSongs.some(s => s.id === id);
+            isSongLiked(videoId) {
+                return this.likedSongs.some(s => s.videoId === videoId);
             }
 
             toggleLikeSong(trackObj, ev) {
                 if (ev) ev.stopPropagation();
-                if (!trackObj || !trackObj.id) return;
+                if (!trackObj || !trackObj.videoId) return;
 
-                if (this.isSongLiked(trackObj.id)) {
-                    this.likedSongs = this.likedSongs.filter(s => s.id !== trackObj.id);
+                if (this.isSongLiked(trackObj.videoId)) {
+                    this.likedSongs = this.likedSongs.filter(s => s.videoId !== trackObj.videoId);
                 } else {
                     this.likedSongs.unshift({ ...trackObj });
                 }
@@ -1375,7 +1279,7 @@
 
             updatePlayerLikeIcon() {
                 const btn = document.getElementById('playerLikeBtn');
-                if (this.currentTrack && this.isSongLiked(this.currentTrack.id)) btn.classList.add('liked');
+                if (this.currentTrack && this.isSongLiked(this.currentTrack.videoId)) btn.classList.add('liked');
                 else btn.classList.remove('liked');
             }
 
@@ -1398,7 +1302,7 @@
                 }
                 listEl.innerHTML = this.likedSongs.map((s, idx) => `
                     <div class="song-row" onclick="app.playFromList('liked', ${idx})">
-                        <img src="${s.img}">
+                        <img src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
                         <div class="song-meta"><h4>${s.name}</h4><p>${s.artist}</p></div>
                         <div class="row-actions">
                             <i class="fas fa-heart heart-btn liked" onclick="app.toggleLikeSong(app.likedSongs[${idx}], event)"></i>
@@ -1425,78 +1329,160 @@
             }
 
             // =========================================================================
-            // 5. 100% AD-FREE SEARCH & VIBE AUTO-SHUFFLE ENGINE
+            // 5. PARALLEL YOUTUBE MUSIC & INNERTUBE (`youtubei/v1`) SEARCH ENGINE
             // =========================================================================
-            async fetchAdFreeTracks(query) {
-                const rawSaavn = `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&n=25&p=1&q=${encodeURIComponent(query)}`;
-                const gateways = [
-                    { type: 'wrap', url: `https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}&limit=25` },
-                    { type: 'wrap', url: `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${encodeURIComponent(query)}&limit=25` },
-                    { type: 'des', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(rawSaavn)}` },
-                    { type: 'des', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rawSaavn)}` },
-                    { type: 'piped', url: `https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(query + ' official audio')}&filter=music_songs` }
-                ];
+            parseYouTubeInitialData(htmlText) {
+                const m = htmlText.match(/var ytInitialData = (\{.*?\});<\/script>/);
+                if (!m || !m[1]) return [];
+                const data = JSON.parse(m[1]);
+                const contents = data.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents || [];
+                const list = [];
+                contents.forEach(it => {
+                    const v = it.videoRenderer;
+                    if (v && v.videoId) {
+                        const rawTitle = v.title?.runs?.[0]?.text || 'Song';
+                        const rawAuthor = v.ownerText?.runs?.[0]?.text || 'Artist';
+                        const { cleanTitle, cleanArtist } = cleanSongMetadata(rawTitle, rawAuthor);
+                        list.push({
+                            videoId: v.videoId,
+                            name: cleanTitle,
+                            artist: cleanArtist,
+                            img: `https://i.ytimg.com/vi/${v.videoId}/maxresdefault.jpg`
+                        });
+                    }
+                });
+                return list;
+            }
 
-                for (let g of gateways) {
-                    try {
-                        const ctrl = new AbortController();
-                        const timer = setTimeout(() => ctrl.abort(), 4200);
-                        const res = await fetch(g.url, { signal: ctrl.signal });
+            async fetchFromInnerTubeNode(node) {
+                const ctrl = new AbortController();
+                const timer = setTimeout(() => ctrl.abort(), 5000);
+                try {
+                    let res;
+                    if (node.type === 'innertube_post') {
+                        // Direct POST to YouTube Music InnerTube API (`youtubei/v1/search`)
+                        res = await fetch(node.url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                context: {
+                                    client: {
+                                        clientName: "WEB",
+                                        clientVersion: "2.20240501.00.00",
+                                        hl: "en",
+                                        gl: "IN"
+                                    }
+                                },
+                                query: node.query
+                            }),
+                            signal: ctrl.signal
+                        });
                         clearTimeout(timer);
                         const data = await res.json();
+                        const contents = data.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents || [];
+                        const list = [];
+                        contents.forEach(it => {
+                            const v = it.videoRenderer;
+                            if (v && v.videoId) {
+                                const { cleanTitle, cleanArtist } = cleanSongMetadata(v.title?.runs?.[0]?.text, v.ownerText?.runs?.[0]?.text);
+                                list.push({
+                                    videoId: v.videoId,
+                                    name: cleanTitle,
+                                    artist: cleanArtist,
+                                    img: `https://i.ytimg.com/vi/${v.videoId}/maxresdefault.jpg`
+                                });
+                            }
+                        });
+                        if (list.length > 0) return list;
+                        throw new Error("Empty InnerTube POST");
+                    }
 
-                        let tracks = [];
-                        if (g.type === 'wrap') {
-                            const items = data.data?.results || data.results || [];
-                            tracks = items.map(item => {
-                                const imgs = item.image || [];
-                                const hdImg = Array.isArray(imgs) && imgs.length ? (imgs[imgs.length - 1].url || imgs[imgs.length - 1].link) : (typeof imgs === 'string' ? imgs.replace('150x150', '500x500') : '');
-                                const dUrls = item.downloadUrl || [];
-                                let audioUrl = Array.isArray(dUrls) && dUrls.length ? (dUrls[dUrls.length - 1].url || dUrls[dUrls.length - 1].link) : '';
-                                if (!audioUrl && item.encrypted_media_url) audioUrl = decryptStreamCipher(item.encrypted_media_url);
-                                if (audioUrl) audioUrl = audioUrl.replace('preview.saavncdn.com', 'aac.saavncdn.com').replace('_96_p.mp4', '_320.mp4');
-                                const rawArtist = item.primaryArtists || (item.artists?.primary ? item.artists.primary.map(a => a.name).join(', ') : 'Artist');
-                                const { cleanTitle, cleanArtist } = cleanSongMetadata(item.name || item.title, String(rawArtist));
-                                return {
-                                    id: item.id || cleanTitle + cleanArtist,
-                                    name: cleanTitle,
-                                    artist: cleanArtist,
-                                    img: hdImg,
-                                    streamUrl: audioUrl
-                                };
-                            }).filter(t => t.streamUrl);
-                        } else if (g.type === 'des' && data.results) {
-                            tracks = data.results.map(item => {
-                                const enc = item.encrypted_media_url || item.more_info?.encrypted_media_url;
-                                const rawArtist = item.primary_artists || item.more_info?.primary_artists || item.singers || 'Artist';
-                                const { cleanTitle, cleanArtist } = cleanSongMetadata(item.song || item.title, String(rawArtist));
-                                return {
-                                    id: item.id || cleanTitle + cleanArtist,
-                                    name: cleanTitle,
-                                    artist: cleanArtist,
-                                    img: (item.image || '').replace('150x150', '500x500'),
-                                    streamUrl: decryptStreamCipher(enc)
-                                };
-                            }).filter(t => t.streamUrl);
-                        } else if (g.type === 'piped' && data.items) {
-                            tracks = data.items.map(it => {
-                                const vId = it.url ? it.url.split('v=')[1] : '';
-                                const { cleanTitle, cleanArtist } = cleanSongMetadata(it.title, it.uploaderName);
-                                return {
-                                    id: vId,
-                                    videoId: vId,
-                                    name: cleanTitle,
-                                    artist: cleanArtist,
-                                    img: `https://i.ytimg.com/vi/${vId}/maxresdefault.jpg`,
-                                    streamUrl: null
-                                };
-                            }).filter(t => t.id);
-                        }
+                    res = await fetch(node.url, { signal: ctrl.signal });
+                    clearTimeout(timer);
 
-                        if (tracks.length > 0) return tracks;
-                    } catch (e) {}
+                    if (node.type === 'allorigins_json') {
+                        const wrapper = await res.json();
+                        const list = this.parseYouTubeInitialData(wrapper.contents || '');
+                        if (list.length > 0) return list;
+                    } else if (node.type === 'html_raw') {
+                        const text = await res.text();
+                        const list = this.parseYouTubeInitialData(text);
+                        if (list.length > 0) return list;
+                    } else if (node.type === 'piped') {
+                        const data = await res.json();
+                        const list = (data.items || []).map(it => {
+                            const vId = it.url ? it.url.split('v=')[1] : '';
+                            const { cleanTitle, cleanArtist } = cleanSongMetadata(it.title, it.uploaderName);
+                            return {
+                                videoId: vId,
+                                name: cleanTitle,
+                                artist: cleanArtist,
+                                img: `https://i.ytimg.com/vi/${vId}/maxresdefault.jpg`
+                            };
+                        }).filter(x => x.videoId);
+                        if (list.length > 0) return list;
+                    } else if (node.type === 'inv') {
+                        const data = await res.json();
+                        const list = (data || []).map(it => {
+                            const { cleanTitle, cleanArtist } = cleanSongMetadata(it.title, it.author);
+                            return {
+                                videoId: it.videoId,
+                                name: cleanTitle,
+                                artist: cleanArtist,
+                                img: `https://i.ytimg.com/vi/${it.videoId}/maxresdefault.jpg`
+                            };
+                        }).filter(x => x.videoId);
+                        if (list.length > 0) return list;
+                    }
+                } catch (e) {
+                    clearTimeout(timer);
                 }
-                return [];
+                throw new Error("Node failed");
+            }
+
+            // Races 7 InnerTube & YouTube Music Nodes in Parallel (`Promise.any`) for 0.4s Instant Results!
+            async searchYouTubeMusicInnerTube(query) {
+                const ytQuery = `${query} official audio`;
+                const ytSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(ytQuery)}`;
+
+                const nodes = [
+                    { type: 'innertube_post', url: `https://corsproxy.io/?${encodeURIComponent('https://www.youtube.com/youtubei/v1/search?prettyPrint=false')}`, query: ytQuery },
+                    { type: 'allorigins_json', url: `https://api.allorigins.win/get?url=${encodeURIComponent(ytSearchUrl)}` },
+                    { type: 'html_raw', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(ytSearchUrl)}` },
+                    { type: 'html_raw', url: `https://corsproxy.io/?${encodeURIComponent(ytSearchUrl)}` },
+                    { type: 'piped', url: `https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(ytQuery)}&filter=music_songs` },
+                    { type: 'piped', url: `https://api.piped.private.coffee/search?q=${encodeURIComponent(ytQuery)}&filter=music_songs` },
+                    { type: 'inv', url: `https://inv.nadeko.net/api/v1/search?q=${encodeURIComponent(ytQuery)}&type=video` }
+                ];
+
+                try {
+                    const fastestList = await Promise.any(nodes.map(n => this.fetchFromInnerTubeNode(n)));
+                    return fastestList;
+                } catch (err) {
+                    return [];
+                }
+            }
+
+            async resolveUltraHDArtwork(trackObj, domElements = []) {
+                const key = `${trackObj.name}_${trackObj.artist}`.toLowerCase();
+                if (this.artCache[key]) {
+                    trackObj.img = this.artCache[key];
+                    domElements.forEach(el => { if (el) el.src = trackObj.img; });
+                    return trackObj.img;
+                }
+                try {
+                    const cleanQ = `${trackObj.name} ${trackObj.artist}`.trim();
+                    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(cleanQ)}&entity=song&limit=1`);
+                    const data = await res.json();
+                    if (data.results && data.results.length > 0 && data.results[0].artworkUrl100) {
+                        const hdUrl = data.results[0].artworkUrl100.replace('100x100bb', '1000x1000bb');
+                        this.artCache[key] = hdUrl;
+                        trackObj.img = hdUrl;
+                        domElements.forEach(el => { if (el) el.src = hdUrl; });
+                        return hdUrl;
+                    }
+                } catch (e) {}
+                return trackObj.img;
             }
 
             async performSearch(query) {
@@ -1509,16 +1495,16 @@
                 const listEl = document.getElementById('searchList');
                 sec.style.display = 'block';
                 document.getElementById('searchHeadingText').innerText = `Results for "${query}"`;
-                listEl.innerHTML = `<div style="text-align:center; padding: 35px; color:rgba(255,255,255,0.6);"><i class="fas fa-circle-notch fa-spin"></i> Finding tracks & building vibe queue...</div>`;
+                listEl.innerHTML = `<div style="text-align:center; padding: 35px; color:rgba(255,255,255,0.6);"><i class="fas fa-circle-notch fa-spin"></i> Fetching from YouTube Music & InnerTube...</div>`;
 
-                const results = await this.fetchAdFreeTracks(query);
+                const results = await this.searchYouTubeMusicInnerTube(query);
                 if (results.length > 0) {
                     this.searchResults = results;
                     listEl.innerHTML = results.map((s, idx) => {
-                        const liked = this.isSongLiked(s.id);
+                        const liked = this.isSongLiked(s.videoId);
                         return `
                             <div class="song-row" onclick="app.playFromList('search', ${idx})">
-                                <img src="${s.img}">
+                                <img id="simg-${idx}" src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
                                 <div class="song-meta"><h4>${s.name}</h4><p>${s.artist}</p></div>
                                 <div class="row-actions">
                                     <i class="fas fa-heart heart-btn ${liked ? 'liked' : ''}" onclick="app.toggleLikeSong(app.searchResults[${idx}], event)"></i>
@@ -1527,8 +1513,14 @@
                             </div>
                         `;
                     }).join('');
+
+                    // Upgrade thumbnails to 1000x1000 Square Ultra-HD Art in background
+                    this.searchResults.slice(0, 10).forEach((s, idx) => {
+                        const imgDom = document.getElementById(`simg-${idx}`);
+                        this.resolveUltraHDArtwork(s, [imgDom]);
+                    });
                 } else {
-                    listEl.innerHTML = `<div style="text-align:center; padding: 35px; color:#ff453a;">No tracks found. Try another song or artist name!</div>`;
+                    listEl.innerHTML = `<div style="text-align:center; padding: 35px; color:#ff453a;">Connection slow. Tap Search again!</div>`;
                 }
             }
 
@@ -1547,17 +1539,22 @@
                 this.currentIndex = index;
                 const track = this.playlist[index];
                 this.currentTrack = track;
-                this.playedHistoryIds.add(track.id);
+                this.playedHistoryIds.add(track.videoId);
 
                 this.audio.pause();
+                if (ytCoreReady && ytStreamCore && ytStreamCore.stopVideo) ytStreamCore.stopVideo();
 
                 document.getElementById('mTitle').innerText = track.name;
                 document.getElementById('mArtist').innerText = track.artist;
                 document.getElementById('fTitle').innerText = track.name;
                 document.getElementById('fArtist').innerText = track.artist;
 
-                document.getElementById('mCover').src = track.img;
-                document.getElementById('fCover').src = track.img;
+                const mCov = document.getElementById('mCover');
+                const fCov = document.getElementById('fCover');
+                mCov.src = track.img; fCov.src = track.img;
+                mCov.onerror = () => handleImgError(mCov, track.videoId);
+                fCov.onerror = () => handleImgError(fCov, track.videoId);
+
                 document.getElementById('pOrb1').style.backgroundImage = `url('${track.img}')`;
                 document.getElementById('amb1').style.backgroundImage = `url('${track.img}')`;
 
@@ -1565,45 +1562,65 @@
                 document.getElementById('fullPlayer').classList.add('active');
                 this.updatePlayerLikeIcon();
 
-                // Fetch Live Word-by-Word Lyrics immediately
-                this.fetchRedLrcProvider(track.name, track.artist);
+                this.resolveUltraHDArtwork(track, [mCov, fCov]).then(hd => {
+                    document.getElementById('pOrb1').style.backgroundImage = `url('${hd}')`;
+                });
 
-                // Automatically expand Vibe Queue in background based on current song's artist/vibe
-                this.expandVibeShuffleQueue(track);
-
-                let streamUrl = track.streamUrl;
-                if (!streamUrl && track.videoId) {
-                    const res = await fetch(`https://pipedapi.kavin.rocks/streams/${track.videoId}`).then(r => r.json()).catch(() => null);
-                    if (res && res.audioStreams && res.audioStreams.length) {
-                        streamUrl = res.audioStreams[0].url;
-                        track.streamUrl = streamUrl;
-                    }
+                // 1. Start Immediate Playback via InnerTube Stream Core
+                this.activeEngine = 'innertube_core';
+                if (ytCoreReady && ytStreamCore && ytStreamCore.loadVideoById) {
+                    ytStreamCore.loadVideoById({ videoId: track.videoId, startSeconds: 0 });
+                    ytStreamCore.playVideo();
+                    this.syncPlayUI(true);
+                } else {
+                    pendingVideoId = track.videoId;
+                    this.syncPlayUI(true);
                 }
 
-                if (!streamUrl) return;
+                // 2. Broadcast to Listen Together Room
+                if (shouldBroadcast && this.isAdmin && this.roomCode) {
+                    this.broadcastToRoom({
+                        type: 'IMMEDIATE_JOIN_SYNC',
+                        track: track,
+                        time: 0,
+                        playing: true,
+                        hostClock: Date.now()
+                    });
+                }
 
-                this.audio.src = streamUrl;
-                this.audio.currentTime = 0;
+                // 3. Load Live Word-by-Word Lyrics
+                this.fetchRedLrcProvider(track.name, track.artist);
 
-                if (shouldBroadcast && this.isAdmin && this.roomCode && this.members.length > 1) {
-                    this.broadcastToRoom({ type: 'PRELOAD_TRACK', track: track });
-                    setTimeout(() => {
-                        const startTimestamp = Date.now() + 180;
-                        this.broadcastToRoom({ type: 'SCHEDULED_START', time: 0, startAtHostClock: startTimestamp });
-                        setTimeout(() => { this.audio.play().catch(() => {}); }, 180);
-                    }, 400);
+                // 4. Expand Vibe Auto-Shuffle Queue in background using InnerTube
+                this.expandVibeShuffleQueue(track);
+            }
+
+            // If an official label video has embed lock, automatically resolve an unlocked Lyric/Topic Audio stream of the SAME song!
+            async autoUnblockRestrictedTrack() {
+                if (!this.currentTrack) return;
+                if (this.unblockTriedId === this.currentTrack.videoId) {
+                    this.nextPrev(1);
+                    return;
+                }
+                this.unblockTriedId = this.currentTrack.videoId;
+                const altList = await this.searchYouTubeMusicInnerTube(`${this.currentTrack.name} ${this.currentTrack.artist} lyrics`);
+                const validAlt = altList.find(it => it.videoId && it.videoId !== this.currentTrack.videoId);
+                if (validAlt && ytCoreReady && ytStreamCore) {
+                    this.currentTrack.videoId = validAlt.videoId;
+                    ytStreamCore.loadVideoById(validAlt.videoId);
+                    ytStreamCore.playVideo();
                 } else {
-                    this.audio.play().catch(() => {});
+                    this.nextPrev(1);
                 }
             }
 
-            // Smart Vibe Auto-Shuffle Queue Builder: Fetches similar vibe tracks so music shuffles endlessly
+            // Smart Vibe Auto-Shuffle Queue Builder via InnerTube
             async expandVibeShuffleQueue(seedTrack) {
                 try {
-                    const vibeQuery = `${seedTrack.artist} ${seedTrack.name.split(' ')[0]}`;
-                    const moreTracks = await this.fetchAdFreeTracks(vibeQuery);
+                    const vibeQuery = `${seedTrack.artist} songs`;
+                    const moreTracks = await this.searchYouTubeMusicInnerTube(vibeQuery);
                     moreTracks.forEach(t => {
-                        if (!this.playlist.some(existing => existing.id === t.id)) {
+                        if (!this.playlist.some(existing => existing.videoId === t.videoId)) {
                             this.playlist.push(t);
                         }
                     });
@@ -1617,8 +1634,7 @@
 
             replayCurrent() {
                 if (!this.isAdmin && this.roomCode) return;
-                this.audio.currentTime = 0;
-                this.audio.play().catch(() => {});
+                this.seekToTime(0);
                 this.broadcastZeroDelayState();
             }
 
@@ -1627,10 +1643,9 @@
                 if (!this.playlist.length) return;
 
                 if (step > 0 && this.vibeShuffleEnabled && this.playlist.length > 1) {
-                    // Pick a random unplayed track matching the vibe
                     const unplayedIndices = [];
                     this.playlist.forEach((t, idx) => {
-                        if (!this.playedHistoryIds.has(t.id) && idx !== this.currentIndex) {
+                        if (!this.playedHistoryIds.has(t.videoId) && idx !== this.currentIndex) {
                             unplayedIndices.push(idx);
                         }
                     });
@@ -1648,14 +1663,40 @@
                 this.loadAndPlay(this.currentIndex, true);
             }
 
+            getCurrentTime() {
+                if (this.activeEngine === 'direct_audio') return this.audio.currentTime || 0;
+                if (ytCoreReady && ytStreamCore && ytStreamCore.getCurrentTime) return ytStreamCore.getCurrentTime() || 0;
+                return 0;
+            }
+
+            getCurrentDuration() {
+                if (this.activeEngine === 'direct_audio') return this.audio.duration || 0;
+                if (ytCoreReady && ytStreamCore && ytStreamCore.getDuration) return ytStreamCore.getDuration() || 0;
+                return 0;
+            }
+
+            seekToTime(sec) {
+                if (this.activeEngine === 'direct_audio') this.audio.currentTime = sec;
+                else if (ytCoreReady && ytStreamCore && ytStreamCore.seekTo) ytStreamCore.seekTo(sec, true);
+            }
+
             togglePlay() {
                 if (!this.isAdmin && this.roomCode) {
                     alert("Only the Room Admin can play/pause in Listen Together!");
                     return;
                 }
-                if (!this.audio.src) return;
-                if (this.audio.paused) this.audio.play().catch(() => {});
-                else this.audio.pause();
+                if (this.activeEngine === 'direct_audio') {
+                    if (this.audio.paused) this.audio.play().catch(() => {});
+                    else this.audio.pause();
+                } else if (ytCoreReady && ytStreamCore) {
+                    if (this.isPlaying) {
+                        ytStreamCore.pauseVideo();
+                        this.syncPlayUI(false);
+                    } else {
+                        ytStreamCore.playVideo();
+                        this.syncPlayUI(true);
+                    }
+                }
                 this.broadcastZeroDelayState();
             }
 
@@ -1676,28 +1717,12 @@
                 document.getElementById('searchBtn').onclick = runSearch;
                 document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') runSearch(); });
 
-                document.getElementById('sendChatBtn').onclick = () => this.sendCommunityMessage();
-                document.getElementById('communityChatInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') this.sendCommunityMessage(); });
-
                 const toggle = (e) => { e.stopPropagation(); this.togglePlay(); };
                 document.getElementById('mPlayBtn').onclick = toggle;
                 document.getElementById('fPlayBtn').onclick = toggle;
 
                 document.getElementById('prevBtn').onclick = () => this.nextPrev(-1);
                 document.getElementById('nextBtn').onclick = () => this.nextPrev(1);
-
-                this.audio.onended = () => this.nextPrev(1);
-                this.audio.onplay = () => this.syncPlayUI(true);
-                this.audio.onpause = () => this.syncPlayUI(false);
-
-                this.audio.onerror = () => {
-                    if (this.audio.src && this.audio.src.includes('_320.mp4')) {
-                        this.audio.src = this.audio.src.replace('_320.mp4', '_160.mp4');
-                        this.audio.play().catch(() => {});
-                    } else {
-                        this.nextPrev(1);
-                    }
-                };
 
                 document.getElementById('openFullBtn').onclick = () => document.getElementById('fullPlayer').classList.add('active');
                 document.getElementById('closeFullBtn').onclick = () => document.getElementById('fullPlayer').classList.remove('active');
@@ -1718,10 +1743,11 @@
                         alert("Only the Room Admin can seek songs!");
                         return;
                     }
-                    if (this.audio.duration) {
+                    const dur = this.getCurrentDuration();
+                    if (dur > 0) {
                         const rect = document.getElementById('scrubBar').getBoundingClientRect();
                         const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-                        this.audio.currentTime = pct * this.audio.duration;
+                        this.seekToTime(pct * dur);
                         this.broadcastZeroDelayState();
                     }
                 };
@@ -1759,34 +1785,28 @@
                     conn.on('data', (data) => {
                         if (data.type === 'NTP_PING') {
                             conn.send({ type: 'NTP_PONG', clientSent: data.clientSent, hostTime: Date.now() });
-                        } else if (data.type === 'CHAT_MSG' && data.chat) {
-                            const chats = JSON.parse(localStorage.getItem('booo_community_chats') || '[]');
-                            chats.push(data.chat);
-                            localStorage.setItem('booo_community_chats', JSON.stringify(chats));
-                            this.renderSocialHub();
-                            this.broadcastToRoom({ type: 'CHAT_MSG', chat: data.chat });
                         } else if (data.type === 'JOIN_HANDSHAKE') {
                             this.members = this.members.filter(m => m.id !== conn.peer);
                             this.members.push({ id: conn.peer, username: data.username || 'User', isAdmin: false, conn: conn });
                             this.renderRoomMembers();
                             this.broadcastMemberList();
 
-                            if (this.currentTrack && this.audio.src) {
+                            if (this.currentTrack) {
                                 conn.send({
                                     type: 'IMMEDIATE_JOIN_SYNC',
                                     track: this.currentTrack,
-                                    time: this.audio.currentTime || 0,
-                                    playing: !this.audio.paused,
+                                    time: this.getCurrentTime(),
+                                    playing: this.isPlaying,
                                     hostClock: Date.now()
                                 });
                             }
                         } else if (data.type === 'REQUEST_RESYNC') {
-                            if (this.currentTrack && this.audio.src) {
+                            if (this.currentTrack) {
                                 conn.send({
                                     type: 'IMMEDIATE_JOIN_SYNC',
                                     track: this.currentTrack,
-                                    time: this.audio.currentTime || 0,
-                                    playing: !this.audio.paused,
+                                    time: this.getCurrentTime(),
+                                    playing: this.isPlaying,
                                     hostClock: Date.now()
                                 });
                             }
@@ -1834,8 +1854,8 @@
                 if (!this.isAdmin || !this.roomCode) return;
                 this.broadcastToRoom({
                     type: 'HEARTBEAT_SYNC',
-                    time: this.audio.currentTime || 0,
-                    playing: !this.audio.paused,
+                    time: this.getCurrentTime(),
+                    playing: this.isPlaying,
                     hostClock: Date.now()
                 });
             }
@@ -1862,46 +1882,19 @@
                     return;
                 }
 
-                if (data.type === 'CHAT_MSG' && data.chat) {
-                    const chats = JSON.parse(localStorage.getItem('booo_community_chats') || '[]');
-                    chats.push(data.chat);
-                    localStorage.setItem('booo_community_chats', JSON.stringify(chats));
-                    this.renderSocialHub();
-                    return;
-                }
-
-                if (data.type === 'PRELOAD_TRACK' && data.track) {
-                    this.currentTrack = data.track;
-                    this.updateTrackUIOnly(data.track);
-                    this.audio.pause();
-                    this.audio.src = data.track.streamUrl;
-                    this.audio.load();
-                    this.fetchRedLrcProvider(data.track.name, data.track.artist);
-                    return;
-                }
-
-                if (data.type === 'SCHEDULED_START') {
-                    const currentHostClock = Date.now() + this.clockOffsetMs;
-                    const waitMs = Math.max(0, data.startAtHostClock - currentHostClock);
-                    this.audio.currentTime = data.time || 0;
-                    setTimeout(() => { this.audio.play().catch(() => {}); }, waitMs);
-                    return;
-                }
-
                 if (data.type === 'IMMEDIATE_JOIN_SYNC' && data.track) {
                     this.currentTrack = data.track;
                     this.updateTrackUIOnly(data.track);
                     this.fetchRedLrcProvider(data.track.name, data.track.artist);
 
-                    if (data.track.streamUrl) {
-                        this.audio.src = data.track.streamUrl;
-                        this.audio.onloadedmetadata = () => {
-                            const currentHostClock = Date.now() + this.clockOffsetMs;
-                            const elapsedSincePacket = Math.max(0, (currentHostClock - data.hostClock) / 1000);
-                            this.audio.currentTime = (data.time || 0) + (data.playing ? elapsedSincePacket : 0);
-                            if (data.playing) this.audio.play().catch(() => {});
-                            this.audio.onloadedmetadata = null;
-                        };
+                    const currentHostClock = Date.now() + this.clockOffsetMs;
+                    const elapsedSincePacket = Math.max(0, (currentHostClock - data.hostClock) / 1000);
+                    const targetSec = (data.time || 0) + (data.playing ? elapsedSincePacket : 0);
+
+                    if (ytCoreReady && ytStreamCore && ytStreamCore.loadVideoById) {
+                        ytStreamCore.loadVideoById({ videoId: data.track.videoId, startSeconds: targetSec });
+                        if (data.playing) ytStreamCore.playVideo();
+                        else ytStreamCore.pauseVideo();
                     }
                     return;
                 }
@@ -1911,13 +1904,16 @@
                     const transitSec = Math.max(0, (currentHostClock - data.hostClock) / 1000);
                     const exactExpectedTime = (data.time || 0) + (data.playing ? transitSec : 0);
 
-                    const drift = Math.abs((this.audio.currentTime || 0) - exactExpectedTime);
-                    if (drift > 0.075) {
-                        this.audio.currentTime = exactExpectedTime;
+                    const drift = Math.abs(this.getCurrentTime() - exactExpectedTime);
+                    if (drift > 0.12) {
+                        this.seekToTime(exactExpectedTime);
                     }
 
-                    if (data.playing && this.audio.paused) this.audio.play().catch(() => {});
-                    else if (!data.playing && !this.audio.paused) this.audio.pause();
+                    if (data.playing && !this.isPlaying && ytCoreReady && ytStreamCore) {
+                        ytStreamCore.playVideo();
+                    } else if (!data.playing && this.isPlaying && ytCoreReady && ytStreamCore) {
+                        ytStreamCore.pauseVideo();
+                    }
                 }
             }
 
@@ -2049,9 +2045,8 @@
                 if (syncedLrc) {
                     this.parseWordByWordLRC(syncedLrc);
                 } else if (plainLyrics) {
-                    // Auto-build timed LRC from plain lyrics so word-by-word sync ALWAYS works!
                     const lines = plainLyrics.split('\n').map(l => l.trim()).filter(Boolean);
-                    const totalDur = (this.audio.duration && this.audio.duration > 30) ? this.audio.duration - 10 : lines.length * 3.4;
+                    const totalDur = (this.getCurrentDuration() > 30) ? this.getCurrentDuration() - 10 : lines.length * 3.4;
                     const secPerLine = Math.max(2.6, Math.min(4.2, totalDur / Math.max(1, lines.length)));
 
                     const generatedLrc = lines.map((lineText, idx) => {
@@ -2090,7 +2085,7 @@
                     lineDiv.className = 'lyric-line';
                     lineDiv.onclick = () => {
                         if (this.isAdmin || !this.roomCode) {
-                            this.audio.currentTime = row.time;
+                            this.seekToTime(row.time);
                             this.broadcastZeroDelayState();
                         }
                     };
@@ -2145,8 +2140,8 @@
                 };
 
                 const tick = () => {
-                    const curr = this.audio.currentTime || 0;
-                    const dur = this.audio.duration || 0;
+                    const curr = this.getCurrentTime();
+                    const dur = this.getCurrentDuration();
 
                     if (dur > 0) {
                         document.getElementById('scrubFill').style.width = `${(curr / dur) * 100}%`;
@@ -2194,7 +2189,7 @@
             }
         }
 
-        window.app = new BoooPureZeroAdEngine();
+        window.app = new BoooInnerTubeEngine();
     </script>
 </body>
 </html>
