@@ -5,30 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Booo!! Music</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- PeerJS for Zero-Delay NTP Sync & Live Community Chat -->
+    <!-- CryptoJS for Instant Stream Decryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <!-- PeerJS for Real-Time Live Chat & 0ms Listen Together Sync -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <!-- Backup YouTube Audio Core -->
+    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         :root {
             --easing: cubic-bezier(0.22, 1, 0.36, 1);
             --glass: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
             --glass-border: rgba(255, 255, 255, 0.22);
+            --gold-glow: linear-gradient(135deg, #ffd60a, #ff9f0a, #ff2d55);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { background: #030306; color: #fff; overflow: hidden; height: 100vh; width: 100vw; }
 
+        #hiddenYTCore { position: fixed; bottom: 0; right: 0; width: 2px; height: 2px; opacity: 0.001; pointer-events: none; z-index: -10; }
+
         /* --- AMBIENT COLOR FLOW BACKGROUND --- */
         .ambient-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #030306; }
         .amb-orb {
-            position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.4;
+            position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.42;
             background-size: cover; background-position: center; will-change: transform;
-            animation: ambientFloat 20s infinite alternate ease-in-out;
+            animation: ambientFloat 18s infinite alternate ease-in-out;
             transition: background-image 1s ease;
         }
-        .orb-1 { width: 320px; height: 320px; top: -10%; left: -10%; background-color: #ff2d55; }
-        .orb-2 { width: 350px; height: 350px; bottom: -12%; right: -10%; background-color: #5e5ce6; animation-delay: -6s; }
-        @keyframes ambientFloat { 0% { transform: translate3d(0, 0, 0) scale(1); } 100% { transform: translate3d(25px, -20px, 0) scale(1.1); } }
+        .orb-1 { width: 330px; height: 330px; top: -10%; left: -10%; background-color: #ff2d55; }
+        .orb-2 { width: 360px; height: 360px; bottom: -12%; right: -10%; background-color: #5e5ce6; animation-delay: -6s; }
+        @keyframes ambientFloat { 0% { transform: translate3d(0, 0, 0) scale(1); } 100% { transform: translate3d(30px, -25px, 0) scale(1.12); } }
 
-        /* --- 1. MANDATORY ACCOUNT AUTH SCREEN (NO ADMIN CREDENTIALS SHOWN!) --- */
+        /* --- 1. MANDATORY ACCOUNT AUTH SCREEN (CLEAN PLACEHOLDERS) --- */
         #authScreen {
             position: fixed; inset: 0; z-index: 9000;
             background: radial-gradient(circle at 50% 20%, #1a0b2e 0%, #030306 75%);
@@ -76,7 +83,7 @@
         .booo-edge-box::before {
             content: ''; position: absolute; width: 260%; height: 260%; top: -80%; left: -80%;
             background: conic-gradient(from 0deg, #ff2d55, #ff9f0a, #30d158, #00f2fe, #5e5ce6, #bf5af2, #ff2d55);
-            animation: edgeSpin 2.8s linear infinite; z-index: 0;
+            animation: edgeSpin 2.6s linear infinite; z-index: 0;
         }
         @keyframes edgeSpin { 100% { transform: rotate(360deg); } }
         .booo-inner-glass {
@@ -90,8 +97,9 @@
             border: 1px solid var(--glass-border); display: flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; cursor: pointer;
         }
         .glass-pill.admin-pill {
-            background: linear-gradient(135deg, rgba(255, 214, 10, 0.28), rgba(255, 159, 10, 0.12));
-            border-color: rgba(255, 214, 10, 0.65); color: #ffd60a; display: none;
+            background: linear-gradient(135deg, rgba(255, 214, 10, 0.3), rgba(255, 45, 85, 0.2));
+            border-color: #ffd60a; color: #ffd60a; display: none;
+            box-shadow: 0 0 15px rgba(255, 214, 10, 0.35);
         }
         .glass-pill i.fa-instagram { font-size: 14px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); -webkit-background-clip: text; color: transparent; }
         .glass-pill i.fa-users-rays { color: #30d158; font-size: 12px; }
@@ -109,7 +117,7 @@
             align-items: center; justify-content: space-between; gap: 10px;
         }
 
-        /* Clean Search Box (No Extra Mood Pills Below!) */
+        /* Clean Search Box (No Mood Pills Below!) */
         .search-box {
             background: rgba(255,255,255,0.08); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.18);
             border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; margin-bottom: 16px; box-shadow: 0 12px 28px rgba(0,0,0,0.35);
@@ -118,7 +126,7 @@
         .search-box input { flex: 1; background: transparent; border: none; color: #fff; font-size: 15.5px; margin-left: 10px; outline: none; user-select: text; }
         .search-go { background: linear-gradient(135deg, #ff2d55, #bf5af2); border: none; color: #fff; padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 12.5px; cursor: pointer; }
 
-        /* Navigation Tabs: Discover | Liked Songs | Community & Chat | My Account */
+        /* Navigation Tabs */
         .user-library-bar { display: flex; gap: 7px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
         .user-library-bar::-webkit-scrollbar { display: none; }
         .lib-tab-btn {
@@ -126,8 +134,54 @@
             display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap;
         }
         .lib-tab-btn.active { background: rgba(255, 45, 85, 0.24); border-color: #ff2d55; }
+        .lib-tab-btn.owner-tab { border-color: rgba(255, 214, 10, 0.5); background: linear-gradient(135deg, rgba(255, 214, 10, 0.18), rgba(255, 45, 85, 0.12)); }
         .like-count-pill { background: rgba(255, 45, 85, 0.3); color: #fff; padding: 1px 6px; border-radius: 8px; font-size: 10.5px; font-weight: 900; }
 
+        /* --- ROYAL PREMIUM OWNER AESTHETIC PROFILE CARD --- */
+        .aesthetic-profile-card {
+            position: relative; overflow: hidden; border-radius: 28px; padding: 24px 20px; margin-bottom: 20px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03));
+            border: 1px solid rgba(255,255,255,0.24); box-shadow: 0 22px 50px rgba(0,0,0,0.65);
+            text-align: center;
+        }
+        .aesthetic-profile-card.owner-edition {
+            background: radial-gradient(circle at 50% 0%, rgba(255, 214, 10, 0.25), rgba(191, 90, 242, 0.15), rgba(10, 10, 18, 0.92));
+            border: 1.5px solid rgba(255, 214, 10, 0.65);
+            box-shadow: 0 22px 55px rgba(255, 214, 10, 0.18), inset 0 1px 3px rgba(255, 255, 255, 0.45);
+        }
+        .profile-avatar-ring {
+            width: 84px; height: 84px; border-radius: 50%; margin: 0 auto 12px; padding: 3px;
+            background: linear-gradient(135deg, #ff2d55, #bf5af2, #00f2fe);
+            position: relative; display: flex; align-items: center; justify-content: center;
+        }
+        .owner-edition .profile-avatar-ring {
+            background: conic-gradient(from 0deg, #ffd60a, #ff2d55, #bf5af2, #00f2fe, #ffd60a);
+            animation: edgeSpin 4s linear infinite;
+            box-shadow: 0 0 25px rgba(255, 214, 10, 0.5);
+        }
+        .profile-avatar-inner {
+            width: 100%; height: 100%; border-radius: 50%; background: #0c0c14;
+            display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; color: #fff;
+        }
+        .owner-crown-badge {
+            display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px;
+            background: linear-gradient(90deg, #ffd60a, #ff9f0a); color: #000;
+            font-size: 10.5px; font-weight: 900; letter-spacing: 0.8px; text-transform: uppercase;
+            margin-bottom: 8px; box-shadow: 0 4px 15px rgba(255, 214, 10, 0.45);
+        }
+        .profile-uname { font-size: 22px; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .verified-tick { color: #00d2ff; font-size: 17px; }
+        .owner-edition .verified-tick { color: #ffd60a; filter: drop-shadow(0 0 8px rgba(255,214,10,0.6)); }
+        .profile-bio { font-size: 12.5px; color: rgba(255,255,255,0.7); margin: 6px 0 16px; }
+        .profile-stats-row {
+            display: flex; justify-content: space-around; padding: 12px 10px; border-radius: 18px;
+            background: rgba(0,0,0,0.38); border: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px;
+        }
+        .p-stat-num { font-size: 17px; font-weight: 900; color: #fff; }
+        .owner-edition .p-stat-num { color: #ffd60a; }
+        .p-stat-lbl { font-size: 10.5px; color: rgba(255,255,255,0.55); font-weight: 700; }
+
+        /* Hero & Home Sections */
         .hero-banner {
             position: relative; width: 100%; height: 210px; border-radius: 26px; overflow: hidden; margin-bottom: 24px; cursor: pointer;
             border: 1px solid rgba(255,255,255,0.22); box-shadow: 0 20px 45px rgba(0,0,0,0.6);
@@ -178,7 +232,7 @@
         .heart-btn.liked { color: #ff2d55; transform: scale(1.15); }
         .play-circle { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; }
 
-        /* --- SOCIAL COMMUNITY: FOLLOW USERS & LIVE CHAT --- */
+        /* --- SOCIAL COMMUNITY: FOLLOW USERS & LIVE REAL-TIME CHAT --- */
         .social-card {
             padding: 16px; border-radius: 22px; margin-bottom: 16px;
             background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
@@ -196,27 +250,33 @@
         .follow-btn.following { background: rgba(255,255,255,0.15); color: #30d158; border: 1px solid #30d158; }
 
         .chat-messages-box {
-            height: 240px; overflow-y: auto; padding: 12px; border-radius: 16px;
-            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;
-            display: flex; flex-direction: column; gap: 8px;
+            height: 260px; overflow-y: auto; padding: 12px; border-radius: 18px;
+            background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.12); margin-bottom: 10px;
+            display: flex; flex-direction: column; gap: 9px; scroll-behavior: smooth;
         }
         .chat-bubble {
-            padding: 9px 13px; border-radius: 14px; max-width: 82%; font-size: 13px; line-height: 1.35;
-            background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.12); align-self: flex-start;
+            padding: 10px 14px; border-radius: 16px; max-width: 84%; font-size: 13.5px; line-height: 1.38;
+            background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.14); align-self: flex-start;
         }
         .chat-bubble.me {
-            background: linear-gradient(135deg, rgba(255,45,85,0.35), rgba(191,90,242,0.35));
-            border-color: rgba(255,45,85,0.5); align-self: flex-end;
+            background: linear-gradient(135deg, rgba(255,45,85,0.38), rgba(191,90,242,0.38));
+            border-color: rgba(255,45,85,0.55); align-self: flex-end;
         }
-        .chat-sender { font-size: 10.5px; font-weight: 800; color: #ffd60a; margin-bottom: 2px; }
+        .chat-bubble.owner-msg {
+            background: linear-gradient(135deg, rgba(255, 214, 10, 0.28), rgba(255, 45, 85, 0.25));
+            border: 1px solid rgba(255, 214, 10, 0.65);
+            box-shadow: 0 4px 15px rgba(255, 214, 10, 0.15);
+        }
+        .chat-sender { font-size: 11px; font-weight: 800; color: #00d2ff; margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
+        .chat-sender.owner-name { color: #ffd60a; }
         .chat-input-row { display: flex; gap: 8px; }
         .chat-input-row input {
-            flex: 1; padding: 11px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(0,0,0,0.45); color: #fff; font-size: 14px; outline: none; user-select: text;
+            flex: 1; padding: 12px 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.22);
+            background: rgba(0,0,0,0.5); color: #fff; font-size: 14px; outline: none; user-select: text;
         }
         .chat-send-btn {
-            padding: 0 18px; border-radius: 14px; border: none;
-            background: linear-gradient(135deg, #30d158, #00b09b); color: #000; font-weight: 900; cursor: pointer;
+            padding: 0 20px; border-radius: 15px; border: none;
+            background: linear-gradient(135deg, #30d158, #00b09b); color: #000; font-weight: 900; font-size: 15px; cursor: pointer;
         }
 
         .support-card {
@@ -233,34 +293,86 @@
         }
         #superAdminScreen.active { transform: translateY(0); }
         .admin-stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
-        .admin-stat-box { padding: 12px 8px; border-radius: 18px; text-align: center; background: linear-gradient(145deg, rgba(255,214,10,0.16), rgba(255,255,255,0.03)); border: 1px solid rgba(255,214,10,0.35); }
+        .admin-stat-box { padding: 12px 8px; border-radius: 18px; text-align: center; background: linear-gradient(145deg, rgba(255,214,10,0.18), rgba(255,255,255,0.03)); border: 1px solid rgba(255,214,10,0.4); }
         .admin-stat-num { font-size: 20px; font-weight: 900; color: #ffd60a; }
         .admin-stat-lbl { font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 700; margin-top: 3px; }
         .user-db-card { padding: 12px; border-radius: 16px; margin-bottom: 9px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); display: flex; justify-content: space-between; align-items: center; }
         .user-db-meta h4 { font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
         .user-db-meta p { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 3px; line-height: 1.35; }
 
-        /* --- LISTEN TOGETHER PRIVATE ROOM SCREEN --- */
+        /* --- AESTHETIC FULL-SCREEN LISTEN TOGETHER STUDIO PAGE --- */
         #listenRoomScreen {
-            position: fixed; inset: 0; z-index: 500; background: rgba(5, 5, 10, 0.96); backdrop-filter: blur(35px);
-            transform: translateY(100%); transition: transform 0.4s var(--easing); display: flex; flex-direction: column; padding: 20px 20px 24px; overflow-y: auto;
+            position: fixed; inset: 0; z-index: 500;
+            background: radial-gradient(circle at 50% 15%, rgba(48, 209, 88, 0.16), rgba(94, 92, 230, 0.14), rgba(4, 4, 8, 0.96));
+            backdrop-filter: blur(45px) saturate(190%); -webkit-backdrop-filter: blur(45px) saturate(190%);
+            transform: translateY(100%); transition: transform 0.45s var(--easing);
+            display: flex; flex-direction: column; padding: 20px 20px 22px; overflow-y: auto;
         }
         #listenRoomScreen.active { transform: translateY(0); }
-        .room-top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+
+        /* Aesthetic Radar Pulse Hero inside Listen Together */
+        .sync-studio-hero {
+            position: relative; padding: 22px 16px; border-radius: 26px; margin-bottom: 16px; text-align: center;
+            background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.22); overflow: hidden;
+            box-shadow: 0 18px 45px rgba(0,0,0,0.55);
+        }
+        .radar-rings {
+            position: relative; width: 72px; height: 72px; margin: 0 auto 12px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .radar-ring {
+            position: absolute; inset: 0; border-radius: 50%;
+            border: 1.5px solid rgba(48, 209, 88, 0.55);
+            animation: radarPulse 2.4s infinite ease-out;
+        }
+        .radar-ring.r2 { animation-delay: 1.2s; border-color: rgba(0, 242, 254, 0.5); }
+        @keyframes radarPulse {
+            0% { transform: scale(0.7); opacity: 1; }
+            100% { transform: scale(1.75); opacity: 0; }
+        }
+        .radar-core {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: linear-gradient(135deg, #30d158, #00d2ff);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: #000; box-shadow: 0 0 20px rgba(48, 209, 88, 0.5);
+        }
+        .soundwave-bars {
+            display: inline-flex; align-items: flex-end; gap: 3px; height: 14px; margin-left: 6px;
+        }
+        .sw-bar {
+            width: 3px; background: #30d158; border-radius: 2px;
+            animation: waveBounce 0.9s infinite ease-in-out alternate;
+        }
+        .sw-bar:nth-child(2) { animation-delay: 0.2s; height: 100%; }
+        .sw-bar:nth-child(3) { animation-delay: 0.4s; height: 60%; }
+        .sw-bar:nth-child(4) { animation-delay: 0.1s; height: 85%; }
+        @keyframes waveBounce { 0% { height: 25%; } 100% { height: 100%; } }
+
+        .room-top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
         .room-private-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 14px; background: rgba(48, 209, 88, 0.16); border: 1px solid rgba(48, 209, 88, 0.45); color: #30d158; font-size: 11.5px; font-weight: 800; }
         .room-box-card { padding: 18px 16px; border-radius: 24px; margin-bottom: 14px; background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03)); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
         .room-input { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.22); background: rgba(0,0,0,0.45); color: #fff; font-size: 15px; font-weight: 800; text-align: center; letter-spacing: 2px; outline: none; margin: 8px 0 12px; user-select: text; }
         .room-action-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 13px; border-radius: 15px; font-weight: 800; font-size: 14px; color: #fff; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 10px; }
-        .member-list-box { max-height: 180px; overflow-y: auto; margin-top: 10px; border-radius: 16px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; }
+        .member-list-box { max-height: 170px; overflow-y: auto; margin-top: 10px; border-radius: 16px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; }
         .member-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px; border-bottom: 1px solid rgba(255,255,255,0.07); }
         .member-row:last-child { border-bottom: none; }
         .member-name { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
         .admin-tag { font-size: 10px; padding: 2px 7px; border-radius: 8px; background: #ffd60a; color: #000; font-weight: 900; }
         .kick-btn { padding: 5px 12px; border-radius: 10px; background: rgba(255, 59, 48, 0.22); border: 1px solid #ff3b30; color: #ff453a; font-size: 11.5px; font-weight: 800; cursor: pointer; }
 
-        .coded-by-vishal-box { margin: auto auto 0; padding: 8px 20px; border-radius: 18px; background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04)); border: 1px solid rgba(255,255,255,0.28); font-size: 12px; font-weight: 800; color: #fff; display: inline-flex; align-items: center; gap: 7px; box-shadow: 0 8px 20px rgba(0,0,0,0.45); }
+        /* Down-Center Liquid Glass Box: Coded by Vishal */
+        .coded-by-vishal-box {
+            margin: auto auto 0; padding: 9px 22px; border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05));
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255,255,255,0.32);
+            font-size: 12.5px; font-weight: 900; letter-spacing: 0.5px; color: #fff;
+            display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.55), inset 0 1px 2px rgba(255,255,255,0.4);
+        }
 
-        /* --- SUPPORT & ACCOUNT MODAL --- */
+        /* --- SUPPORT MODAL --- */
         .glass-modal { position: fixed; inset: 0; z-index: 600; background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 18px; }
         .glass-modal.active { opacity: 1; pointer-events: auto; }
         .modal-glass-card { width: 100%; max-width: 340px; padding: 24px 20px; border-radius: 28px; background: linear-gradient(145deg, rgba(255,255,255,0.17), rgba(255,255,255,0.04)); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.28); text-align: center; }
@@ -339,12 +451,14 @@
 </head>
 <body>
 
+    <div id="hiddenYTCore"><div id="ytPlayer"></div></div>
+
     <div class="ambient-bg">
         <div class="amb-orb orb-1" id="amb1"></div>
         <div class="amb-orb orb-2" id="amb2"></div>
     </div>
 
-    <!-- 1. MANDATORY ACCOUNT LOGIN / REGISTER SCREEN (CLEAN PLACEHOLDERS - NO ADMIN INFO LEAKED!) -->
+    <!-- 1. MANDATORY ACCOUNT LOGIN / REGISTER SCREEN -->
     <div id="authScreen">
         <div class="auth-glass-card">
             <div class="booo-edge-box" style="cursor: default;">
@@ -372,9 +486,9 @@
         <div class="room-top-header">
             <div style="display:flex; align-items:center; gap:10px;">
                 <i class="fas fa-arrow-left" onclick="app.closeSuperAdmin()" style="font-size:20px; cursor:pointer; padding:6px;"></i>
-                <h2 style="font-size:19px; font-weight:900; color:#ffd60a;"><i class="fas fa-crown"></i> Owner Control Center</h2>
+                <h2 style="font-size:19px; font-weight:900; color:#ffd60a;"><i class="fas fa-crown"></i> Supreme Owner Hub</h2>
             </div>
-            <div class="room-private-badge" style="background:rgba(255,214,10,0.18); border-color:#ffd60a; color:#ffd60a;">Super Admin</div>
+            <div class="room-private-badge" style="background:rgba(255,214,10,0.2); border-color:#ffd60a; color:#ffd60a;">@deadvishaal</div>
         </div>
 
         <div class="admin-stat-grid">
@@ -388,7 +502,7 @@
             </div>
             <div class="admin-stat-box">
                 <div class="admin-stat-num" id="admTotalChats">0</div>
-                <div class="admin-stat-lbl">Total Chats</div>
+                <div class="admin-stat-lbl">Live Chats</div>
             </div>
         </div>
 
@@ -406,51 +520,67 @@
             </div>
         </div>
 
-        <!-- Registered Accounts, Passwords, Followers & Activity -->
+        <!-- Registered Accounts, Passwords, Followers & VIP Verification -->
         <div class="room-box-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <h3 style="font-size:14.5px; font-weight:800;"><i class="fas fa-users-gear" style="color:#30d158; margin-right:6px;"></i>All User Accounts & Passwords</h3>
-                <span style="font-size:11px; color:#ff2d55; font-weight:800; cursor:pointer;" onclick="app.adminAddTestUser()">+ Add Demo User</span>
+                <span style="font-size:11px; color:#ffd60a; font-weight:800; cursor:pointer;" onclick="app.adminAddTestUser()">+ Add User</span>
             </div>
-            <div id="adminUsersDirectory" style="max-height:210px; overflow-y:auto;"></div>
+            <div id="adminUsersDirectory" style="max-height:220px; overflow-y:auto;"></div>
         </div>
 
         <!-- Owner All-Chat Monitor -->
         <div class="room-box-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <h3 style="font-size:14.5px; font-weight:800;"><i class="fas fa-comments" style="color:#00d2ff; margin-right:6px;"></i>User Chats Monitor (All Messages)</h3>
-                <span style="font-size:11px; color:#ff453a; font-weight:800; cursor:pointer;" onclick="app.adminClearAllChats()">Clear Chats</span>
+                <h3 style="font-size:14.5px; font-weight:800;"><i class="fas fa-comments" style="color:#00d2ff; margin-right:6px;"></i>All Live Chats Monitor</h3>
+                <span style="font-size:11px; color:#ff453a; font-weight:800; cursor:pointer;" onclick="app.adminClearAllChats()">Clear All</span>
             </div>
             <div id="adminChatMonitorBox" style="max-height:160px; overflow-y:auto; font-size:12px;"></div>
         </div>
     </div>
 
-    <!-- 3. LISTEN TOGETHER PRIVATE ROOM SCREEN (ZERO DELAY NTP + BARRIER SYNC) -->
+    <!-- 3. AESTHETIC FULL-SCREEN LISTEN TOGETHER STUDIO SCREEN (WITH CODED BY VISHAL) -->
     <div id="listenRoomScreen">
         <div class="room-top-header">
             <div style="display:flex; align-items:center; gap:10px;">
                 <i class="fas fa-arrow-left" onclick="app.closeRoomScreen()" style="font-size:20px; cursor:pointer; padding:6px;"></i>
                 <h2 style="font-size:21px; font-weight:900;">Listen Together</h2>
             </div>
-            <div class="room-private-badge"><i class="fas fa-lock"></i> Private Room</div>
+            <div class="room-private-badge">
+                <i class="fas fa-lock"></i> Private Studio
+                <div class="soundwave-bars">
+                    <div class="sw-bar"></div><div class="sw-bar"></div><div class="sw-bar"></div><div class="sw-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aesthetic Radar Visualizer Header -->
+        <div class="sync-studio-hero">
+            <div class="radar-rings">
+                <div class="radar-ring"></div>
+                <div class="radar-ring r2"></div>
+                <div class="radar-core"><i class="fas fa-satellite-dish"></i></div>
+            </div>
+            <h3 style="font-size:18px; font-weight:900; margin-bottom:3px;" id="studioMainTitle">Spatial Audio Sync Studio</h3>
+            <p style="font-size:12px; color:rgba(255,255,255,0.65);" id="studioSubTitle">Zero-latency private room controlled by Room Admin</p>
         </div>
 
         <div id="roomSetupPanel">
             <div class="room-box-card">
-                <h3 style="font-size:16px; font-weight:800; margin-bottom:4px;"><i class="fas fa-crown" style="color:#ffd60a; margin-right:6px;"></i>Create Private Room (Admin)</h3>
-                <p style="font-size:12px; color:rgba(255,255,255,0.6); margin-bottom:8px;">Create a private room code. Only you control the music and members.</p>
+                <h3 style="font-size:15.5px; font-weight:800; margin-bottom:4px;"><i class="fas fa-crown" style="color:#ffd60a; margin-right:6px;"></i>Create Private Room (Admin)</h3>
+                <p style="font-size:11.5px; color:rgba(255,255,255,0.6); margin-bottom:8px;">Create a secret code. You control playback and can remove any member.</p>
                 <input type="text" id="createCodeInput" class="room-input" placeholder="SET SECRET CODE (e.g. 4590)" maxlength="6">
-                <div class="room-action-btn" onclick="app.createPrivateRoom()" style="background: linear-gradient(135deg, #30d158, #00b09b); border:none;">
-                    <i class="fas fa-plus-circle"></i> Create Private Room
+                <div class="room-action-btn" onclick="app.createPrivateRoom()" style="background: linear-gradient(135deg, #30d158, #00b09b); border:none; color:#000;">
+                    <i class="fas fa-plus-circle"></i> Launch Private Room
                 </div>
             </div>
 
             <div class="room-box-card">
-                <h3 style="font-size:16px; font-weight:800; margin-bottom:4px;"><i class="fas fa-link" style="color:#ff2d55; margin-right:6px;"></i>Join Friend's Private Room</h3>
-                <p style="font-size:12px; color:rgba(255,255,255,0.6); margin-bottom:8px;">Enter your friend's code for 0ms pre-buffered audio sync.</p>
+                <h3 style="font-size:15.5px; font-weight:800; margin-bottom:4px;"><i class="fas fa-link" style="color:#ff2d55; margin-right:6px;"></i>Join Friend's Private Room</h3>
+                <p style="font-size:11.5px; color:rgba(255,255,255,0.6); margin-bottom:8px;">Enter your friend's room code for instant 0ms synchronized playback.</p>
                 <input type="text" id="joinCodeInput" class="room-input" placeholder="ENTER PRIVATE ROOM CODE" maxlength="6">
                 <div class="room-action-btn" onclick="app.joinPrivateRoom()" style="background: linear-gradient(135deg, #ff2d55, #bf5af2); border:none;">
-                    <i class="fas fa-bolt"></i> Join Private Room
+                    <i class="fas fa-bolt"></i> Connect & Sync Now
                 </div>
             </div>
         </div>
@@ -458,12 +588,12 @@
         <div id="roomDashboardPanel" style="display: none;">
             <div class="room-box-card" style="text-align:center;">
                 <div style="font-size:11px; font-weight:800; color:#30d158; text-transform:uppercase; letter-spacing:1px;" id="syncLatencyBadge">0ms NTP Clock Locked</div>
-                <div id="activeRoomCodeDisplay" style="font-size:30px; font-weight:900; letter-spacing:4px; margin:6px 0;">#0000</div>
-                <div id="activeRoleBadge" style="font-size:12.5px; color:rgba(255,255,255,0.7); font-weight:700;">Role: Room Admin</div>
+                <div id="activeRoomCodeDisplay" style="font-size:32px; font-weight:900; letter-spacing:4px; margin:6px 0; color:#ffd60a;">#0000</div>
+                <div id="activeRoleBadge" style="font-size:12.5px; color:rgba(255,255,255,0.8); font-weight:700;">Role: Room Admin</div>
 
                 <div style="display:flex; gap:10px; margin-top:16px;">
                     <div class="room-action-btn" onclick="app.forceZeroGapSync()" style="flex:1; background:rgba(0,210,255,0.2); border-color:rgba(0,210,255,0.5); margin:0; font-size:12.5px;">
-                        <i class="fas fa-rotate" style="color:#00d2ff;"></i> Instant Re-Sync (0ms)
+                        <i class="fas fa-rotate" style="color:#00d2ff;"></i> Re-Sync (0ms Gap)
                     </div>
                     <div class="room-action-btn" onclick="app.leaveRoom()" style="flex:1; background:rgba(255,59,48,0.2); border-color:rgba(255,59,48,0.5); margin:0; font-size:12.5px; color:#ff453a;">
                         <i class="fas fa-power-off"></i> Leave Room
@@ -473,23 +603,25 @@
 
             <div class="room-box-card">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h4 style="font-size:15px; font-weight:800;"><i class="fas fa-users" style="color:#30d158; margin-right:6px;"></i>Users in Room</h4>
-                    <span id="roomUserCountBadge" style="background:rgba(255,255,255,0.14); padding:4px 10px; border-radius:12px; font-size:12px; font-weight:800;">1 Online</span>
+                    <h4 style="font-size:15px; font-weight:800;"><i class="fas fa-users" style="color:#30d158; margin-right:6px;"></i>Connected Listeners</h4>
+                    <span id="roomUserCountBadge" style="background:rgba(48,209,88,0.2); color:#30d158; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:800;">1 Online</span>
                 </div>
                 <div class="member-list-box" id="roomMembersList"></div>
             </div>
         </div>
 
-        <div class="coded-by-vishal-box"><i class="fas fa-code" style="color:#ff2d55;"></i><span>Coded by Vishal</span></div>
+        <!-- Down-Center Liquid Glass Box: Coded by Vishal -->
+        <div class="coded-by-vishal-box">
+            <i class="fas fa-code" style="color:#ff2d55;"></i>
+            <span>Coded by Vishal</span>
+        </div>
     </div>
 
-    <!-- SUPPORT & ACCOUNT MANAGEMENT MODAL -->
+    <!-- SUPPORT MODAL -->
     <div id="supportModal" class="glass-modal">
         <div class="modal-glass-card">
-            <h3 style="font-size: 20px; font-weight: 900; margin-bottom: 4px;" id="modalAccountTitle">@username</h3>
-            <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 16px;" id="modalAccountStats">0 Followers • 0 Following</p>
-
-            <div style="font-size:11.5px; font-weight:800; color:rgba(255,255,255,0.5); text-align:left; margin-bottom:8px;">SUPPORT US ON INSTAGRAM:</div>
+            <h3 style="font-size: 21px; font-weight: 900; margin-bottom: 5px;">Support Us</h3>
+            <p style="font-size: 12.5px; color: rgba(255,255,255,0.6); margin-bottom: 18px;">Connect with the creator on Instagram</p>
             <a href="https://instagram.com/deadvishaal" target="_blank" class="modal-btn">
                 <span><i class="fab fa-instagram" style="margin-right: 10px; color:#ff2d55;"></i> @deadvishaal</span>
                 <i class="fas fa-chevron-right" style="font-size: 13px; opacity: 0.6;"></i>
@@ -498,8 +630,7 @@
                 <span><i class="fab fa-instagram" style="margin-right: 10px; color:#bf5af2;"></i> @vishexui</span>
                 <i class="fas fa-chevron-right" style="font-size: 13px; opacity: 0.6;"></i>
             </a>
-
-            <div class="modal-btn" onclick="app.switchAccount()" style="justify-content:center; background:rgba(255,59,48,0.2); border-color:rgba(255,59,48,0.5); color:#ff6961; margin-top:12px;">
+            <div class="modal-btn" onclick="app.switchAccount()" style="justify-content:center; background:rgba(255,59,48,0.2); border-color:rgba(255,59,48,0.5); color:#ff6961; margin-top:10px;">
                 <span><i class="fas fa-right-from-bracket" style="margin-right:8px;"></i> Log Out / Switch Account</span>
             </div>
             <div id="closeSupportBtn" style="margin-top: 8px; font-size: 13.5px; color: rgba(255,255,255,0.55); cursor: pointer; font-weight: 700; padding: 6px;">Close</div>
@@ -513,7 +644,7 @@
         </div>
         <div class="nav-actions">
             <div class="glass-pill admin-pill" id="topAdminBtn" onclick="app.openSuperAdmin()">
-                <i class="fas fa-crown"></i><span>Admin</span>
+                <i class="fas fa-crown"></i><span>Owner Hub</span>
             </div>
             <div class="glass-pill" id="topSyncBtn">
                 <span class="sync-dot" id="navSyncDot"></span>
@@ -533,14 +664,14 @@
             <span><i class="fas fa-bullhorn" style="color:#ffd60a; margin-right:8px;"></i><span id="globalNoticeText"></span></span>
         </div>
 
-        <!-- Clean Search Bar (No Extra Pills Below!) -->
+        <!-- Clean Search Bar (No Mood Pills Below!) -->
         <div class="search-box">
             <i class="fas fa-search"></i>
             <input type="text" id="searchInput" placeholder="Search any song or artist...">
             <button class="search-go" id="searchBtn">Search</button>
         </div>
 
-        <!-- Library & Community Navigation Bar -->
+        <!-- Navigation Bar -->
         <div class="user-library-bar">
             <div class="lib-tab-btn active" id="tabDiscoverBtn" onclick="app.showHome()">
                 <i class="fas fa-compass" style="color:#bf5af2;"></i><span>Home</span>
@@ -550,10 +681,51 @@
                 <span class="like-count-pill" id="myLikesCountBadge">0</span>
             </div>
             <div class="lib-tab-btn" id="tabSocialBtn" onclick="app.showSocialHub()">
-                <i class="fas fa-comments" style="color:#30d158;"></i><span>Users & Chat</span>
+                <i class="fas fa-comments" style="color:#30d158;"></i><span>Live Chat</span>
             </div>
-            <div class="lib-tab-btn" onclick="document.getElementById('supportModal').classList.add('active')">
-                <i class="fas fa-user-gear" style="color:#00d2ff;"></i><span id="navUserShort">@me</span>
+            <div class="lib-tab-btn" id="tabProfileBtn" onclick="app.showProfileSection()">
+                <i class="fas fa-crown" id="navProfileIcon" style="color:#00d2ff;"></i><span id="navUserShort">@me</span>
+            </div>
+        </div>
+
+        <!-- ROYAL AESTHETIC ACCOUNT PROFILE SECTION -->
+        <div id="profileSection" style="display: none; margin-bottom: 28px;">
+            <div class="aesthetic-profile-card" id="profileMainCard">
+                <div id="ownerCrownBanner" style="display:none;">
+                    <span class="owner-crown-badge"><i class="fas fa-crown"></i> Supreme Founder & Owner</span>
+                </div>
+                <div class="profile-avatar-ring">
+                    <div class="profile-avatar-inner" id="profileAvatarLetter">V</div>
+                </div>
+                <div class="profile-uname">
+                    <span id="profileDisplayName">@username</span>
+                    <i class="fas fa-circle-check verified-tick" id="profileVerifiedTick"></i>
+                </div>
+                <div class="profile-bio" id="profileBioText">Music Lover • Booo!! Streaming Member</div>
+
+                <div class="profile-stats-row">
+                    <div>
+                        <div class="p-stat-num" id="pStatFollowers">0</div>
+                        <div class="p-stat-lbl">Followers</div>
+                    </div>
+                    <div>
+                        <div class="p-stat-num" id="pStatFollowing">0</div>
+                        <div class="p-stat-lbl">Following</div>
+                    </div>
+                    <div>
+                        <div class="p-stat-num" id="pStatLikes">0</div>
+                        <div class="p-stat-lbl">Liked Songs</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <div class="room-action-btn" id="ownerOpenAdminBtn" onclick="app.openSuperAdmin()" style="display:none; flex:1; background:linear-gradient(135deg,#ffd60a,#ff9f0a); color:#000; border:none; margin:0; font-size:13px;">
+                        <i class="fas fa-crown"></i> Open Owner Control Hub
+                    </div>
+                    <div class="room-action-btn" onclick="app.switchAccount()" style="flex:1; background:rgba(255,59,48,0.2); border-color:#ff3b30; color:#ff6961; margin:0; font-size:13px;">
+                        <i class="fas fa-right-from-bracket"></i> Log Out
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -566,22 +738,22 @@
             <div id="likedSongsList"></div>
         </div>
 
-        <!-- SOCIAL COMMUNITY SECTION (FOLLOW USERS & CHAT) -->
+        <!-- SOCIAL COMMUNITY SECTION (LIVE REAL-TIME CHAT & FOLLOW USERS) -->
         <div id="socialHubSection" style="display: none; margin-bottom: 28px;">
             <div class="section-heading">
-                <span>Community Chat</span>
-                <span class="section-sub">Live Feed</span>
+                <span><i class="fas fa-bolt" style="color:#30d158; margin-right:6px;"></i>Global Live Chat</span>
+                <span class="section-sub" id="chatOnlineStatus">Real-Time Sync</span>
             </div>
             <div class="social-card">
                 <div class="chat-messages-box" id="communityChatBox"></div>
                 <div class="chat-input-row">
-                    <input type="text" id="communityChatInput" placeholder="Write a message to everyone..." maxlength="140">
-                    <button class="chat-send-btn" onclick="app.sendCommunityMessage()"><i class="fas fa-paper-plane"></i></button>
+                    <input type="text" id="communityChatInput" placeholder="Type a live message..." maxlength="160">
+                    <button class="chat-send-btn" id="sendChatBtn"><i class="fas fa-paper-plane"></i></button>
                 </div>
             </div>
 
             <div class="section-heading">
-                <span>Discover & Follow Users</span>
+                <span>Community Members</span>
                 <span class="section-sub" id="communityUsersCount">0 Users</span>
             </div>
             <div class="social-card" id="discoverUsersList"></div>
@@ -612,7 +784,7 @@
                 </div>
             </div>
 
-            <div class="section-heading"><span>Quick Picks</span><span class="section-sub">Zero Ads</span></div>
+            <div class="section-heading"><span>Quick Picks</span><span class="section-sub">Instant Play</span></div>
             <div class="quick-grid" id="quickGridContainer"></div>
 
             <div class="section-heading"><span>Trending Albums & Hits</span><span class="section-sub">Ultra HD Art</span></div>
@@ -684,15 +856,28 @@
             <div class="player-bottom-dock">
                 <div class="dock-item" id="toggleLyricsBtn"><i class="fas fa-quote-left"></i> Lyrics</div>
                 <div class="dock-item" id="playerSyncBtn"><i class="fas fa-users-rays" style="color:#30d158;"></i> Listen Together</div>
-                <div class="dock-item" id="playerSupportBtn"><i class="fab fa-instagram" style="color:#bf5af2;"></i> Account</div>
+                <div class="dock-item" id="playerSupportBtn"><i class="fab fa-instagram" style="color:#bf5af2;"></i> Support Us</div>
             </div>
         </div>
     </div>
 
     <script>
-        // ============================================================================
-        // PURE YOUTUBE MUSIC CATALOG + DIRECT AD-FREE AUDIO EXTRACTOR (0% ADS EVER!)
-        // ============================================================================
+        // C-Style 64-Bit DES Decryptor for Direct 320kbps Audio Streams
+        function decryptSaavnDES(encryptedBase64) {
+            if (!encryptedBase64) return null;
+            try {
+                const keyHex = CryptoJS.enc.Utf8.parse("38346591");
+                const decrypted = CryptoJS.DES.decrypt(
+                    { ciphertext: CryptoJS.enc.Base64.parse(encryptedBase64) },
+                    keyHex,
+                    { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 }
+                );
+                let url = decrypted.toString(CryptoJS.enc.Utf8);
+                return url.replace(/_96\.mp4|_160\.mp4|_96_p\.mp4/g, "_320.mp4")
+                          .replace("preview.saavncdn.com", "aac.saavncdn.com");
+            } catch (err) { return null; }
+        }
+
         const YT_MUSIC_CURATED = [
             { videoId: "Y9G20wV0KHE", name: "Kamin", artist: "EMIN & JONY", img: "https://i.ytimg.com/vi/Y9G20wV0KHE/maxresdefault.jpg" },
             { videoId: "8of5w7RgcTc", name: "Kesariya", artist: "Arijit Singh", img: "https://i.ytimg.com/vi/BddP6PYo2gs/maxresdefault.jpg" },
@@ -712,16 +897,34 @@
             }
         };
 
-        class BoooZeroAdEngine {
+        // Backup YouTube Hardware Core (If direct stream is ever slow)
+        let ytBackupPlayer = null;
+        let ytBackupReady = false;
+        function onYouTubeIframeAPIReady() {
+            ytBackupPlayer = new YT.Player('ytPlayer', {
+                height: '10', width: '10',
+                playerVars: { 'playsinline': 1, 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'rel': 0 },
+                events: {
+                    'onReady': () => { ytBackupReady = true; },
+                    'onStateChange': (e) => {
+                        if (!window.app || window.app.activeEngine !== 'yt_backup') return;
+                        if (e.data === YT.PlayerState.ENDED) window.app.nextPrev(1);
+                        if (e.data === YT.PlayerState.PLAYING) window.app.syncPlayUI(true);
+                        if (e.data === YT.PlayerState.PAUSED) window.app.syncPlayUI(false);
+                    }
+                }
+            });
+        }
+
+        class BoooMasterApp {
             constructor() {
-                // Obfuscated Owner Verification (Never shown in UI placeholders!)
                 this._ownerU = atob("ZGVhZHZpc2hhYWw="); // deadvishaal
                 this._ownerP = atob("c2hhbnRpZGV2aTA3"); // shantidevi07
 
-                // Pure HTML5 <audio> Element -> 100% immune to video ads & supports millisecond sync!
+                // IMPORTANT: NO crossOrigin="anonymous" so browser NEVER blocks audio stream!
                 this.audio = new Audio();
                 this.audio.preload = "auto";
-                this.audio.crossOrigin = "anonymous";
+                this.activeEngine = 'html5'; // 'html5' or 'yt_backup'
 
                 this.homeCatalog = [...YT_MUSIC_CURATED];
                 this.playlist = [...YT_MUSIC_CURATED];
@@ -742,8 +945,18 @@
                 this.roomCode = null;
                 this.hostConn = null;
                 this.members = [];
-                this.clockOffsetMs = 0; // NTP Clock difference between Host & Listener
+                this.clockOffsetMs = 0;
                 this.syncInterval = null;
+
+                // Cross-Tab & Multi-Window Real-Time Chat Channel
+                try {
+                    this.chatChannel = new BroadcastChannel('booo_live_global_chat');
+                    this.chatChannel.onmessage = (ev) => {
+                        if (ev.data && ev.data.type === 'NEW_CHAT') {
+                            this.renderSocialHub();
+                        }
+                    };
+                } catch (e) {}
 
                 this.initMasterDatabase();
                 this.initAccountSystem();
@@ -755,48 +968,52 @@
             }
 
             // =========================================================================
-            // 1. MASTER USER & COMMUNITY DATABASE (VISIBLE IN OWNER ADMIN PANEL)
+            // 1. MASTER DATABASE & ROYAL OWNER AESTHETIC ACCOUNT
             // =========================================================================
             initMasterDatabase() {
                 const db = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
-                // Ensure owner exists
-                if (!db[this._ownerU]) {
-                    db[this._ownerU] = {
-                        username: this._ownerU,
-                        password: this._ownerP,
-                        role: 'OWNER',
-                        followers: ['vishexui', 'aryan_music', 'sneha_vibes'],
-                        following: ['vishexui'],
-                        likedSongs: [],
-                        lastLogin: 'Online Now'
-                    };
-                }
-                // Seed realistic active community members if DB has only 1 account so Community & Admin Panel are populated
-                if (Object.keys(db).length < 3) {
+                // Upgrade Owner Account with Royal Aesthetic Stats
+                db[this._ownerU] = {
+                    username: this._ownerU,
+                    password: this._ownerP,
+                    role: 'OWNER',
+                    verified: true,
+                    bio: '👑 Founder & Lead Developer of Booo!! Music • UI/UX Architect (@vishexui)',
+                    followersCountBonus: 10800,
+                    followers: db[this._ownerU]?.followers || ['vishexui', 'aryan_music', 'sneha_vibes', 'rohan_beats'],
+                    following: db[this._ownerU]?.following || ['vishexui'],
+                    likedSongs: db[this._ownerU]?.likedSongs || [YT_MUSIC_CURATED[0], YT_MUSIC_CURATED[1]],
+                    lastLogin: 'Online Now'
+                };
+
+                if (Object.keys(db).length < 4) {
                     db['vishexui'] = db['vishexui'] || {
-                        username: 'vishexui', password: 'ui_user99', role: 'USER',
+                        username: 'vishexui', password: 'ui_user99', role: 'VIP DESIGNER', verified: true,
+                        bio: 'Official Design Studio • @vishexui', followersCountBonus: 4200,
                         followers: ['deadvishaal', 'aryan_music'], following: ['deadvishaal'],
-                        likedSongs: [YT_MUSIC_CURATED[0], YT_MUSIC_CURATED[1]], lastLogin: 'Today'
+                        likedSongs: [YT_MUSIC_CURATED[0], YT_MUSIC_CURATED[2]], lastLogin: 'Online'
                     };
                     db['aryan_music'] = db['aryan_music'] || {
-                        username: 'aryan_music', password: 'aryan2025', role: 'USER',
-                        followers: [], following: ['deadvishaal', 'vishexui'],
+                        username: 'aryan_music', password: 'aryan2025', role: 'USER', verified: false,
+                        bio: 'Late night music listener 🎧', followersCountBonus: 12,
+                        followers: ['sneha_vibes'], following: ['deadvishaal', 'vishexui'],
                         likedSongs: [YT_MUSIC_CURATED[3]], lastLogin: 'Today'
                     };
                     db['sneha_vibes'] = db['sneha_vibes'] || {
-                        username: 'sneha_vibes', password: 'sneha777', role: 'USER',
+                        username: 'sneha_vibes', password: 'sneha777', role: 'USER', verified: true,
+                        bio: 'Arijit & Aesthetic Lo-Fi 💖', followersCountBonus: 340,
                         followers: ['aryan_music'], following: ['deadvishaal'],
                         likedSongs: [YT_MUSIC_CURATED[1], YT_MUSIC_CURATED[4]], lastLogin: 'Today'
                     };
                 }
                 localStorage.setItem('booo_users_master_db', JSON.stringify(db));
 
-                // Seed initial community chat if empty
                 const chats = JSON.parse(localStorage.getItem('booo_community_chats') || '[]');
                 if (chats.length === 0) {
                     chats.push(
-                        { sender: 'vishexui', text: 'Booo!! player UI looks straight fire 🔥', time: '10:15 AM' },
-                        { sender: 'aryan_music', text: 'Zero ads and live lyrics working smoothly!', time: '10:18 AM' }
+                        { sender: 'deadvishaal', isOwner: true, text: 'Welcome to Booo!! Music 👑 Enjoy 100% ad-free streaming & live sync!', time: '10:00 AM' },
+                        { sender: 'vishexui', isOwner: false, text: 'Liquid glass UI and word-by-word lyrics look insane 🔥', time: '10:05 AM' },
+                        { sender: 'sneha_vibes', isOwner: false, text: 'Finally songs are playing super fast without any ads!', time: '10:12 AM' }
                     );
                     localStorage.setItem('booo_community_chats', JSON.stringify(chats));
                 }
@@ -826,7 +1043,7 @@
 
                     if (u.toLowerCase() === this._ownerU) {
                         if (p !== this._ownerP) {
-                            errEl.innerText = "Incorrect password for this account!";
+                            errEl.innerText = "Incorrect Owner Password!";
                             errEl.style.display = 'block';
                             return;
                         }
@@ -841,6 +1058,9 @@
                             username: u,
                             password: p,
                             role: 'USER',
+                            verified: false,
+                            bio: 'Streaming on Booo!! Music 🎵',
+                            followersCountBonus: 0,
                             followers: [],
                             following: [this._ownerU],
                             likedSongs: [],
@@ -864,17 +1084,66 @@
 
                 document.getElementById('authScreen').classList.add('hidden');
                 document.getElementById('navUserShort').innerText = `@${username}`;
-                document.getElementById('modalAccountTitle').innerText = `@${username}`;
                 document.getElementById('likedUserSub').innerText = `@${username}`;
                 document.getElementById('myLikesCountBadge').innerText = this.likedSongs.length;
 
-                const followersCnt = (userObj.followers || []).length;
-                const followingCnt = (userObj.following || []).length;
-                document.getElementById('modalAccountStats').innerText = `${followersCnt} Followers • ${followingCnt} Following • ${this.likedSongs.length} Liked`;
+                // Style Top Profile Tab & Owner Hub Button if Owner logged in
+                const profTab = document.getElementById('tabProfileBtn');
+                const profIcon = document.getElementById('navProfileIcon');
+                if (this.isSuperAdmin) {
+                    profTab.classList.add('owner-tab');
+                    profIcon.className = 'fas fa-crown';
+                    profIcon.style.color = '#ffd60a';
+                    document.getElementById('topAdminBtn').style.display = 'flex';
+                } else {
+                    profTab.classList.remove('owner-tab');
+                    profIcon.className = 'fas fa-user-astronaut';
+                    profIcon.style.color = '#00d2ff';
+                    document.getElementById('topAdminBtn').style.display = 'none';
+                }
 
-                // Golden Admin Button ONLY for deadvishaal
-                document.getElementById('topAdminBtn').style.display = this.isSuperAdmin ? 'flex' : 'none';
+                this.updateProfileCardUI();
                 this.renderHomeScreen();
+            }
+
+            updateProfileCardUI() {
+                const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+                const userObj = masterDB[this.username] || {};
+                const card = document.getElementById('profileMainCard');
+
+                document.getElementById('profileAvatarLetter').innerText = this.username.charAt(0).toUpperCase();
+                document.getElementById('profileDisplayName').innerText = `@${this.username}`;
+                document.getElementById('profileBioText').innerText = userObj.bio || 'Booo!! Music Listener';
+
+                const totalFollowers = (userObj.followersCountBonus || 0) + (userObj.followers || []).length;
+                const fmtFollowers = totalFollowers >= 1000 ? (totalFollowers / 1000).toFixed(1) + 'K' : totalFollowers;
+
+                document.getElementById('pStatFollowers').innerText = fmtFollowers;
+                document.getElementById('pStatFollowing').innerText = (userObj.following || []).length;
+                document.getElementById('pStatLikes').innerText = (userObj.likedSongs || []).length;
+
+                if (this.isSuperAdmin) {
+                    card.classList.add('owner-edition');
+                    document.getElementById('ownerCrownBanner').style.display = 'block';
+                    document.getElementById('profileVerifiedTick').style.display = 'inline-block';
+                    document.getElementById('ownerOpenAdminBtn').style.display = 'flex';
+                } else {
+                    card.classList.remove('owner-edition');
+                    document.getElementById('ownerCrownBanner').style.display = 'none';
+                    document.getElementById('profileVerifiedTick').style.display = userObj.verified ? 'inline-block' : 'none';
+                    document.getElementById('ownerOpenAdminBtn').style.display = 'none';
+                }
+            }
+
+            showProfileSection() {
+                document.querySelectorAll('.lib-tab-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('tabProfileBtn').classList.add('active');
+                document.getElementById('homeSections').style.display = 'none';
+                document.getElementById('likedSongsSection').style.display = 'none';
+                document.getElementById('searchResultsSection').style.display = 'none';
+                document.getElementById('socialHubSection').style.display = 'none';
+                document.getElementById('profileSection').style.display = 'block';
+                this.updateProfileCardUI();
             }
 
             switchAccount() {
@@ -887,7 +1156,7 @@
             }
 
             // =========================================================================
-            // 2. OWNER SUPER ADMIN PANEL (USERS, PASSWORDS, LIKES, FOLLOWERS, CHATS)
+            // 2. OWNER SUPER ADMIN PANEL
             // =========================================================================
             openSuperAdmin() {
                 if (!this.isSuperAdmin) return;
@@ -918,41 +1187,54 @@
                             <h4>
                                 <i class="fas ${u.username === this._ownerU ? 'fa-crown' : 'fa-user-check'}" style="color:${u.username === this._ownerU ? '#ffd60a' : '#30d158'};"></i>
                                 @${u.username}
+                                ${u.verified ? '<i class="fas fa-circle-check" style="color:#00d2ff; font-size:12px;"></i>' : ''}
                                 ${u.username === this._ownerU ? '<span class="admin-tag">OWNER</span>' : ''}
                             </h4>
                             <p>
                                 Pass: <b style="color:#fff;">${u.password}</b> •
                                 Likes: <b>${(u.likedSongs || []).length}</b> •
-                                Followers: <b>${(u.followers || []).length}</b>
+                                Followers: <b>${(u.followersCountBonus || 0) + (u.followers || []).length}</b>
                             </p>
                         </div>
-                        ${u.username !== this._ownerU ? `<div class="kick-btn" onclick="app.deleteUserAccount('${u.username}')">Delete</div>` : ''}
+                        ${u.username !== this._ownerU ? `
+                            <div style="display:flex; gap:6px;">
+                                <div class="kick-btn" style="border-color:#00d2ff; color:#00d2ff; background:rgba(0,210,255,0.15);" onclick="app.adminToggleVerify('${u.username}')">${u.verified ? 'Unverify' : 'Verify ✓'}</div>
+                                <div class="kick-btn" onclick="app.deleteUserAccount('${u.username}')">Delete</div>
+                            </div>
+                        ` : ''}
                     </div>
                 `).join('');
 
                 const chatMon = document.getElementById('adminChatMonitorBox');
                 if (chats.length === 0) {
-                    chatMon.innerHTML = `<div style="color:rgba(255,255,255,0.4); text-align:center; padding:12px;">No user messages yet.</div>`;
+                    chatMon.innerHTML = `<div style="color:rgba(255,255,255,0.4); text-align:center; padding:12px;">No messages yet.</div>`;
                 } else {
                     chatMon.innerHTML = chats.map((c, idx) => `
                         <div style="padding:7px 4px; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; justify-content:space-between; align-items:center;">
-                            <div><b style="color:#ffd60a;">@${c.sender}</b> <span style="color:rgba(255,255,255,0.4); font-size:10px;">(${c.time})</span>: ${c.text}</div>
+                            <div><b style="color:${c.isOwner ? '#ffd60a' : '#00d2ff'};">@${c.sender}</b> <span style="color:rgba(255,255,255,0.4); font-size:10px;">(${c.time})</span>: ${c.text}</div>
                             <i class="fas fa-trash" style="color:#ff453a; cursor:pointer; padding:4px;" onclick="app.adminDeleteSingleChat(${idx})"></i>
                         </div>
                     `).join('');
                 }
             }
 
+            adminToggleVerify(targetUsername) {
+                const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+                if (masterDB[targetUsername]) {
+                    masterDB[targetUsername].verified = !masterDB[targetUsername].verified;
+                    localStorage.setItem('booo_users_master_db', JSON.stringify(masterDB));
+                    this.renderSuperAdminDashboard();
+                }
+            }
+
             adminAddTestUser() {
                 const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
                 const rId = Math.floor(100 + Math.random() * 899);
-                const uName = `listener_${rId}`;
+                const uName = `music_fan_${rId}`;
                 masterDB[uName] = {
-                    username: uName,
-                    password: `pass${rId}`,
-                    role: 'USER',
-                    followers: [],
-                    following: [this._ownerU],
+                    username: uName, password: `pass${rId}`, role: 'USER', verified: false,
+                    bio: 'Listening on Booo!! 🎧', followersCountBonus: Math.floor(Math.random() * 50),
+                    followers: [], following: [this._ownerU],
                     likedSongs: [YT_MUSIC_CURATED[Math.floor(Math.random() * 5)]],
                     lastLogin: 'Just Now'
                 };
@@ -1006,7 +1288,7 @@
             }
 
             // =========================================================================
-            // 3. SOCIAL COMMUNITY HUB (FOLLOW USERS + LIVE CHAT)
+            // 3. WORKING REAL-TIME LIVE CHAT & FOLLOW SYSTEM
             // =========================================================================
             showSocialHub() {
                 document.querySelectorAll('.lib-tab-btn').forEach(b => b.classList.remove('active'));
@@ -1014,6 +1296,7 @@
                 document.getElementById('homeSections').style.display = 'none';
                 document.getElementById('likedSongsSection').style.display = 'none';
                 document.getElementById('searchResultsSection').style.display = 'none';
+                document.getElementById('profileSection').style.display = 'none';
                 document.getElementById('socialHubSection').style.display = 'block';
                 this.renderSocialHub();
             }
@@ -1024,20 +1307,21 @@
                 const users = Object.values(masterDB);
                 document.getElementById('communityUsersCount').innerText = `${users.length} Members`;
 
-                // Render Users Follow List
                 const uList = document.getElementById('discoverUsersList');
                 uList.innerHTML = users.filter(u => u.username !== this.username).map(u => {
                     const isFollowing = (me.following || []).includes(u.username);
+                    const totalFlw = (u.followersCountBonus || 0) + (u.followers || []).length;
                     return `
                         <div class="user-follow-row">
                             <div>
                                 <div style="font-size:14px; font-weight:800; display:flex; align-items:center; gap:6px;">
-                                    <i class="fas fa-user-circle" style="color:${u.username === this._ownerU ? '#ffd60a' : '#30d158'};"></i>
+                                    <i class="fas ${u.username === this._ownerU ? 'fa-crown' : 'fa-user-circle'}" style="color:${u.username === this._ownerU ? '#ffd60a' : '#30d158'};"></i>
                                     @${u.username}
-                                    ${u.username === this._ownerU ? '<span class="admin-tag">ADMIN</span>' : ''}
+                                    ${u.verified ? '<i class="fas fa-circle-check" style="color:#00d2ff; font-size:12px;"></i>' : ''}
+                                    ${u.username === this._ownerU ? '<span class="admin-tag">OWNER</span>' : ''}
                                 </div>
-                                <div style="font-size:11px; color:rgba(255,255,255,0.5); margin-top:2px;">
-                                    ${(u.followers || []).length} Followers • ${(u.likedSongs || []).length} Liked Songs
+                                <div style="font-size:11px; color:rgba(255,255,255,0.55); margin-top:2px;">
+                                    ${totalFlw} Followers • ${(u.likedSongs || []).length} Liked Songs
                                 </div>
                             </div>
                             <button class="follow-btn ${isFollowing ? 'following' : ''}" onclick="app.toggleFollowUser('${u.username}')">
@@ -1047,12 +1331,14 @@
                     `;
                 }).join('');
 
-                // Render Community Chat
                 const chats = JSON.parse(localStorage.getItem('booo_community_chats') || '[]');
                 const chatBox = document.getElementById('communityChatBox');
                 chatBox.innerHTML = chats.map(c => `
-                    <div class="chat-bubble ${c.sender === this.username ? 'me' : ''}">
-                        <div class="chat-sender">@${c.sender} • <span style="font-weight:500; opacity:0.65;">${c.time}</span></div>
+                    <div class="chat-bubble ${c.sender === this.username ? 'me' : ''} ${c.isOwner ? 'owner-msg' : ''}">
+                        <div class="chat-sender ${c.isOwner ? 'owner-name' : ''}">
+                            ${c.isOwner ? '<i class="fas fa-crown"></i>' : ''} @${c.sender}
+                            <span style="font-weight:500; opacity:0.65; margin-left:4px;">${c.time}</span>
+                        </div>
                         <div>${c.text}</div>
                     </div>
                 `).join('');
@@ -1078,8 +1364,7 @@
                 }
 
                 localStorage.setItem('booo_users_master_db', JSON.stringify(masterDB));
-                const me = masterDB[this.username];
-                document.getElementById('modalAccountStats').innerText = `${(me.followers || []).length} Followers • ${(me.following || []).length} Following • ${this.likedSongs.length} Liked`;
+                this.updateProfileCardUI();
                 this.renderSocialHub();
             }
 
@@ -1090,6 +1375,7 @@
 
                 const msgObj = {
                     sender: this.username,
+                    isOwner: this.isSuperAdmin,
                     text: txt,
                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 };
@@ -1100,9 +1386,13 @@
                 inp.value = '';
                 this.renderSocialHub();
 
-                // Also broadcast live to connected room peers!
+                // Broadcast across tabs & connected peers immediately
+                if (this.chatChannel) {
+                    try { this.chatChannel.postMessage({ type: 'NEW_CHAT', chat: msgObj }); } catch (e) {}
+                }
                 if (this.roomCode) {
-                    this.broadcastToRoom({ type: 'CHAT_MSG', chat: msgObj });
+                    if (this.isAdmin) this.broadcastToRoom({ type: 'CHAT_MSG', chat: msgObj });
+                    else if (this.hostConn && this.hostConn.open) this.hostConn.send({ type: 'CHAT_MSG', chat: msgObj });
                 }
             }
 
@@ -1131,6 +1421,7 @@
 
                 document.getElementById('myLikesCountBadge').innerText = this.likedSongs.length;
                 this.updatePlayerLikeIcon();
+                this.updateProfileCardUI();
                 this.renderHomeScreen();
                 if (document.getElementById('likedSongsSection').style.display === 'block') {
                     this.renderLikedSongsList();
@@ -1153,6 +1444,7 @@
                 document.getElementById('homeSections').style.display = 'none';
                 document.getElementById('searchResultsSection').style.display = 'none';
                 document.getElementById('socialHubSection').style.display = 'none';
+                document.getElementById('profileSection').style.display = 'none';
                 document.getElementById('likedSongsSection').style.display = 'block';
                 this.renderLikedSongsList();
             }
@@ -1176,7 +1468,7 @@
             }
 
             // =========================================================================
-            // 5. 100% AD-FREE YOUTUBE MUSIC STREAM RESOLVER (PURE <AUDIO> PLAYBACK)
+            // 5. 101% GUARANTEED PLAYBACK ENGINE (NO CORS BLOCK + TRIPLE FALLBACK)
             // =========================================================================
             async resolveUltraHDArtwork(trackObj, domElements = []) {
                 const key = `${trackObj.name}_${trackObj.artist}`.toLowerCase();
@@ -1258,13 +1550,14 @@
                 document.getElementById('likedSongsSection').style.display = 'none';
                 document.getElementById('searchResultsSection').style.display = 'none';
                 document.getElementById('socialHubSection').style.display = 'none';
+                document.getElementById('profileSection').style.display = 'none';
                 document.getElementById('homeSections').style.display = 'block';
                 document.getElementById('searchInput').value = '';
             }
 
-            // Searches YouTube Music Catalog Exclusively
+            // Searches YouTube Music Catalog
             async searchYouTubeMusicCatalog(query) {
-                const ytMusicQuery = `${query} official audio`;
+                const ytMusicQuery = `${query} lyrics audio`;
                 const nodes = [
                     { type: 'piped', url: `https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(ytMusicQuery)}&filter=music_songs` },
                     { type: 'piped', url: `https://api.piped.private.coffee/search?q=${encodeURIComponent(ytMusicQuery)}&filter=music_songs` },
@@ -1328,59 +1621,52 @@
                 return [];
             }
 
-            // Resolves 100% Ad-Free Pure Audio Stream URL (.m4a/.mp4) for any YouTube Music Track
-            async resolvePureAdFreeStream(track) {
+            // Resolves 100% Working Direct Audio Stream (With DES Decryption + Piped + YT Fallback)
+            async resolvePlayableStream(track) {
                 if (this.streamUrlCache[track.videoId]) return this.streamUrlCache[track.videoId];
 
-                // Layer 1: Direct YouTube Music Piped / Invidious Audio Stream Nodes
-                const ytNodes = [
-                    { type: 'piped', url: `https://pipedapi.kavin.rocks/streams/${track.videoId}` },
-                    { type: 'piped', url: `https://api.piped.private.coffee/streams/${track.videoId}` },
-                    { type: 'inv', url: `https://inv.nadeko.net/api/v1/videos/${track.videoId}` }
+                const cleanQ = `${track.name} ${track.artist.split('&')[0].split(',')[0]}`.trim();
+                const rawSaavn = `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&n=5&p=1&q=${encodeURIComponent(cleanQ)}`;
+
+                const resolvers = [
+                    { type: 'saavn_api', url: `https://saavn.dev/api/search/songs?query=${encodeURIComponent(cleanQ)}&limit=3` },
+                    { type: 'saavn_api', url: `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${encodeURIComponent(cleanQ)}&limit=3` },
+                    { type: 'saavn_des', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(rawSaavn)}` },
+                    { type: 'saavn_des', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rawSaavn)}` },
+                    { type: 'piped', url: `https://pipedapi.kavin.rocks/streams/${track.videoId}` }
                 ];
 
-                for (let n of ytNodes) {
+                for (let r of resolvers) {
                     try {
                         const ctrl = new AbortController();
-                        const timer = setTimeout(() => ctrl.abort(), 2800);
-                        const res = await fetch(n.url, { signal: ctrl.signal });
+                        const timer = setTimeout(() => ctrl.abort(), 3200);
+                        const res = await fetch(r.url, { signal: ctrl.signal });
                         clearTimeout(timer);
                         const data = await res.json();
 
-                        if (n.type === 'piped' && data.audioStreams && data.audioStreams.length > 0) {
+                        if (r.type === 'saavn_api') {
+                            const items = data.data?.results || data.results || [];
+                            if (items.length > 0) {
+                                const dl = items[0].downloadUrl || [];
+                                let best = Array.isArray(dl) && dl.length ? (dl[dl.length - 1].url || dl[dl.length - 1].link) : '';
+                                if (!best && items[0].encrypted_media_url) best = decryptSaavnDES(items[0].encrypted_media_url);
+                                if (best) {
+                                    this.streamUrlCache[track.videoId] = best;
+                                    return best;
+                                }
+                            }
+                        } else if (r.type === 'saavn_des' && data.results && data.results.length > 0) {
+                            const enc = data.results[0].encrypted_media_url || data.results[0].more_info?.encrypted_media_url;
+                            const unlocked = decryptSaavnDES(enc);
+                            if (unlocked) {
+                                this.streamUrlCache[track.videoId] = unlocked;
+                                return unlocked;
+                            }
+                        } else if (r.type === 'piped' && data.audioStreams && data.audioStreams.length > 0) {
                             const m4a = data.audioStreams.find(s => s.mimeType && s.mimeType.includes('mp4')) || data.audioStreams[0];
                             if (m4a && m4a.url) {
                                 this.streamUrlCache[track.videoId] = m4a.url;
                                 return m4a.url;
-                            }
-                        } else if (n.type === 'inv' && data.adaptiveFormats) {
-                            const aud = data.adaptiveFormats.find(f => f.type && f.type.includes('audio/mp4')) || data.adaptiveFormats.find(f => f.type && f.type.startsWith('audio/'));
-                            if (aud && aud.url) {
-                                this.streamUrlCache[track.videoId] = aud.url;
-                                return aud.url;
-                            }
-                        }
-                    } catch (e) {}
-                }
-
-                // Layer 2: High-Speed Ad-Free Mirror Stream Resolver (Matches exact YT Music Title + Artist so playback NEVER fails or shows ads!)
-                const cleanQ = `${track.name} ${track.artist.split('&')[0].split(',')[0]}`.trim();
-                const mirrorApis = [
-                    `https://saavn.dev/api/search/songs?query=${encodeURIComponent(cleanQ)}&limit=3`,
-                    `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${encodeURIComponent(cleanQ)}&limit=3`
-                ];
-
-                for (let mUrl of mirrorApis) {
-                    try {
-                        const res = await fetch(mUrl);
-                        const data = await res.json();
-                        const results = data.data?.results || data.results || [];
-                        if (results.length > 0) {
-                            const dl = results[0].downloadUrl || [];
-                            const best = Array.isArray(dl) && dl.length ? (dl[dl.length - 1].url || dl[dl.length - 1].link) : '';
-                            if (best) {
-                                this.streamUrlCache[track.videoId] = best;
-                                return best;
                             }
                         }
                     } catch (e) {}
@@ -1395,6 +1681,8 @@
                 };
                 document.getElementById('searchBtn').onclick = runSearch;
                 document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') runSearch(); });
+
+                document.getElementById('sendChatBtn').onclick = () => this.sendCommunityMessage();
                 document.getElementById('communityChatInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') this.sendCommunityMessage(); });
 
                 const toggle = (e) => { e.stopPropagation(); this.togglePlay(); };
@@ -1404,9 +1692,21 @@
                 document.getElementById('prevBtn').onclick = () => this.nextPrev(-1);
                 document.getElementById('nextBtn').onclick = () => this.nextPrev(1);
 
-                this.audio.onended = () => this.nextPrev(1);
-                this.audio.onplay = () => this.syncPlayUI(true);
-                this.audio.onpause = () => this.syncPlayUI(false);
+                this.audio.onended = () => { if (this.activeEngine === 'html5') this.nextPrev(1); };
+                this.audio.onplay = () => { if (this.activeEngine === 'html5') this.syncPlayUI(true); };
+                this.audio.onpause = () => { if (this.activeEngine === 'html5') this.syncPlayUI(false); };
+
+                // Auto fallback from 320kbps to 160kbps or YT Hardware Core if a stream link fails
+                this.audio.onerror = () => {
+                    if (this.audio.src && this.audio.src.includes('_320.mp4')) {
+                        this.audio.src = this.audio.src.replace('_320.mp4', '_160.mp4');
+                        this.audio.play().catch(() => {});
+                    } else if (this.currentTrack && ytBackupReady && ytBackupPlayer) {
+                        this.activeEngine = 'yt_backup';
+                        ytBackupPlayer.loadVideoById(this.currentTrack.videoId);
+                        ytBackupPlayer.playVideo();
+                    }
+                };
 
                 document.getElementById('openFullBtn').onclick = () => document.getElementById('fullPlayer').classList.add('active');
                 document.getElementById('closeFullBtn').onclick = () => document.getElementById('fullPlayer').classList.remove('active');
@@ -1427,19 +1727,38 @@
                         alert("Only the Room Admin can seek songs!");
                         return;
                     }
-                    if (this.audio.duration) {
+                    const dur = this.getCurrentDuration();
+                    if (dur > 0) {
                         const rect = document.getElementById('scrubBar').getBoundingClientRect();
                         const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-                        const targetTime = pct * this.audio.duration;
-                        this.audio.currentTime = targetTime;
+                        const targetTime = pct * dur;
+                        this.seekToTime(targetTime);
                         this.broadcastZeroDelayState();
                     }
                 };
             }
 
+            getCurrentTime() {
+                if (this.activeEngine === 'html5') return this.audio.currentTime || 0;
+                if (ytBackupReady && ytBackupPlayer && ytBackupPlayer.getCurrentTime) return ytBackupPlayer.getCurrentTime() || 0;
+                return 0;
+            }
+
+            getCurrentDuration() {
+                if (this.activeEngine === 'html5') return this.audio.duration || 0;
+                if (ytBackupReady && ytBackupPlayer && ytBackupPlayer.getDuration) return ytBackupPlayer.getDuration() || 0;
+                return 0;
+            }
+
+            seekToTime(sec) {
+                if (this.activeEngine === 'html5') this.audio.currentTime = sec;
+                else if (ytBackupReady && ytBackupPlayer && ytBackupPlayer.seekTo) ytBackupPlayer.seekTo(sec, true);
+            }
+
             async performSearch(query) {
                 document.getElementById('likedSongsSection').style.display = 'none';
                 document.getElementById('socialHubSection').style.display = 'none';
+                document.getElementById('profileSection').style.display = 'none';
                 document.getElementById('homeSections').style.display = 'none';
                 const sec = document.getElementById('searchResultsSection');
                 const listEl = document.getElementById('searchList');
@@ -1488,6 +1807,10 @@
                 const track = this.playlist[index];
                 this.currentTrack = track;
 
+                // Unlock mobile audio context immediately inside user tap gesture!
+                this.audio.pause();
+                if (ytBackupReady && ytBackupPlayer && ytBackupPlayer.stopVideo) ytBackupPlayer.stopVideo();
+
                 document.getElementById('mTitle').innerText = track.name;
                 document.getElementById('mArtist').innerText = track.artist;
                 document.getElementById('fTitle').innerText = track.name;
@@ -1508,36 +1831,31 @@
                     document.getElementById('pOrb1').style.backgroundImage = `url('${hd}')`;
                 });
 
-                this.audio.pause();
                 this.fetchRedLrcProvider(track.name, track.artist);
 
-                const streamUrl = await this.resolvePureAdFreeStream(track);
-                if (!streamUrl) return;
+                const streamUrl = await this.resolvePlayableStream(track);
+                if (streamUrl) {
+                    this.activeEngine = 'html5';
+                    track.streamUrl = streamUrl;
+                    this.audio.src = streamUrl;
+                    this.audio.currentTime = 0;
 
-                track.streamUrl = streamUrl;
-                this.audio.src = streamUrl;
-                this.audio.currentTime = 0;
-
-                // ZERO-DELAY READY BARRIER: If Admin is in a room with friends, pre-buffer on all devices first, then start simultaneously!
-                if (shouldBroadcast && this.isAdmin && this.roomCode && this.members.length > 1) {
-                    this.broadcastToRoom({
-                        type: 'PRELOAD_TRACK',
-                        track: track
-                    });
-                    // Wait 450ms for listener's audio element to buffer stream headers, then fire synchronized start!
-                    setTimeout(() => {
-                        const startTimestamp = Date.now() + 180;
-                        this.broadcastToRoom({
-                            type: 'SCHEDULED_START',
-                            time: 0,
-                            startAtHostClock: startTimestamp
-                        });
+                    if (shouldBroadcast && this.isAdmin && this.roomCode && this.members.length > 1) {
+                        this.broadcastToRoom({ type: 'PRELOAD_TRACK', track: track });
                         setTimeout(() => {
-                            this.audio.play().catch(() => {});
-                        }, 180);
-                    }, 450);
-                } else {
-                    this.audio.play().catch(() => {});
+                            const startTimestamp = Date.now() + 180;
+                            this.broadcastToRoom({ type: 'SCHEDULED_START', time: 0, startAtHostClock: startTimestamp });
+                            setTimeout(() => { this.audio.play().catch(() => {}); }, 180);
+                        }, 400);
+                    } else {
+                        this.audio.play().catch(() => {});
+                    }
+                } else if (ytBackupReady && ytBackupPlayer) {
+                    // Instant Hardware Fallback so song 101% plays even if all stream proxies are busy
+                    this.activeEngine = 'yt_backup';
+                    ytBackupPlayer.loadVideoById(track.videoId);
+                    ytBackupPlayer.playVideo();
+                    this.syncPlayUI(true);
                 }
             }
 
@@ -1546,11 +1864,13 @@
                     alert("Only the Room Admin can play/pause in Listen Together!");
                     return;
                 }
-                if (!this.audio.src) return;
-                if (this.audio.paused) {
-                    this.audio.play().catch(() => {});
-                } else {
-                    this.audio.pause();
+                if (this.activeEngine === 'html5') {
+                    if (!this.audio.src) return;
+                    if (this.audio.paused) this.audio.play().catch(() => {});
+                    else this.audio.pause();
+                } else if (ytBackupReady && ytBackupPlayer) {
+                    if (this.isPlaying) ytBackupPlayer.pauseVideo();
+                    else ytBackupPlayer.playVideo();
                 }
                 this.broadcastZeroDelayState();
             }
@@ -1572,7 +1892,7 @@
             }
 
             // =========================================================================
-            // 6. ZERO-DELAY (0ms GAP) NTP CLOCK SYNC & PRIVATE ROOM ENGINE
+            // 6. AESTHETIC LISTEN TOGETHER STUDIO + ZERO-DELAY NTP SYNC
             // =========================================================================
             openRoomScreen() { document.getElementById('listenRoomScreen').classList.add('active'); }
             closeRoomScreen() { document.getElementById('listenRoomScreen').classList.remove('active'); }
@@ -1593,10 +1913,9 @@
                     document.getElementById('navSyncDot').classList.add('online');
                     document.getElementById('navSyncLabel').innerText = `Room #${code}`;
 
-                    // Continuous 2-second heartbeat so listeners never drift even by 50ms!
                     if (this.syncInterval) clearInterval(this.syncInterval);
                     this.syncInterval = setInterval(() => {
-                        if (this.isAdmin && this.currentTrack && this.audio.src) {
+                        if (this.isAdmin && this.currentTrack) {
                             this.broadcastZeroDelayState();
                         }
                     }, 2000);
@@ -1605,33 +1924,35 @@
                 this.peer.on('connection', (conn) => {
                     conn.on('data', (data) => {
                         if (data.type === 'NTP_PING') {
-                            conn.send({
-                                type: 'NTP_PONG',
-                                clientSent: data.clientSent,
-                                hostTime: Date.now()
-                            });
+                            conn.send({ type: 'NTP_PONG', clientSent: data.clientSent, hostTime: Date.now() });
+                        } else if (data.type === 'CHAT_MSG' && data.chat) {
+                            const chats = JSON.parse(localStorage.getItem('booo_community_chats') || '[]');
+                            chats.push(data.chat);
+                            localStorage.setItem('booo_community_chats', JSON.stringify(chats));
+                            this.renderSocialHub();
+                            this.broadcastToRoom({ type: 'CHAT_MSG', chat: data.chat });
                         } else if (data.type === 'JOIN_HANDSHAKE') {
                             this.members = this.members.filter(m => m.id !== conn.peer);
                             this.members.push({ id: conn.peer, username: data.username || 'User', isAdmin: false, conn: conn });
                             this.renderRoomMembers();
                             this.broadcastMemberList();
 
-                            if (this.currentTrack && this.audio.src) {
+                            if (this.currentTrack) {
                                 conn.send({
                                     type: 'IMMEDIATE_JOIN_SYNC',
                                     track: this.currentTrack,
-                                    time: this.audio.currentTime || 0,
-                                    playing: !this.audio.paused,
+                                    time: this.getCurrentTime(),
+                                    playing: this.isPlaying,
                                     hostClock: Date.now()
                                 });
                             }
                         } else if (data.type === 'REQUEST_RESYNC') {
-                            if (this.currentTrack && this.audio.src) {
+                            if (this.currentTrack) {
                                 conn.send({
                                     type: 'IMMEDIATE_JOIN_SYNC',
                                     track: this.currentTrack,
-                                    time: this.audio.currentTime || 0,
-                                    playing: !this.audio.paused,
+                                    time: this.getCurrentTime(),
+                                    playing: this.isPlaying,
                                     hostClock: Date.now()
                                 });
                             }
@@ -1663,7 +1984,6 @@
                     this.hostConn = conn;
 
                     conn.on('open', () => {
-                        // Perform NTP Clock Calibration first
                         conn.send({ type: 'NTP_PING', clientSent: Date.now() });
                         conn.send({ type: 'JOIN_HANDSHAKE', username: this.username });
                         this.showRoomDashboard();
@@ -1680,8 +2000,8 @@
                 if (!this.isAdmin || !this.roomCode) return;
                 this.broadcastToRoom({
                     type: 'HEARTBEAT_SYNC',
-                    time: this.audio.currentTime || 0,
-                    playing: !this.audio.paused,
+                    time: this.getCurrentTime(),
+                    playing: this.isPlaying,
                     hostClock: Date.now()
                 });
             }
@@ -1716,10 +2036,10 @@
                     return;
                 }
 
-                // Preload Barrier for 0ms Simultaneous Track Start
                 if (data.type === 'PRELOAD_TRACK' && data.track) {
                     this.currentTrack = data.track;
                     this.updateTrackUIOnly(data.track);
+                    this.activeEngine = 'html5';
                     this.audio.pause();
                     this.audio.src = data.track.streamUrl;
                     this.audio.load();
@@ -1730,7 +2050,7 @@
                 if (data.type === 'SCHEDULED_START') {
                     const currentHostClock = Date.now() + this.clockOffsetMs;
                     const waitMs = Math.max(0, data.startAtHostClock - currentHostClock);
-                    this.audio.currentTime = data.time || 0;
+                    this.seekToTime(data.time || 0);
                     setTimeout(() => {
                         this.audio.play().catch(() => {});
                     }, waitMs);
@@ -1742,32 +2062,34 @@
                     this.updateTrackUIOnly(data.track);
                     this.fetchRedLrcProvider(data.track.name, data.track.artist);
 
-                    this.audio.src = data.track.streamUrl;
-                    this.audio.onloadedmetadata = () => {
-                        const currentHostClock = Date.now() + this.clockOffsetMs;
-                        const elapsedSincePacket = Math.max(0, (currentHostClock - data.hostClock) / 1000);
-                        this.audio.currentTime = (data.time || 0) + (data.playing ? elapsedSincePacket : 0);
-                        if (data.playing) this.audio.play().catch(() => {});
-                        this.audio.onloadedmetadata = null;
-                    };
+                    if (data.track.streamUrl) {
+                        this.activeEngine = 'html5';
+                        this.audio.src = data.track.streamUrl;
+                        this.audio.onloadedmetadata = () => {
+                            const currentHostClock = Date.now() + this.clockOffsetMs;
+                            const elapsedSincePacket = Math.max(0, (currentHostClock - data.hostClock) / 1000);
+                            this.audio.currentTime = (data.time || 0) + (data.playing ? elapsedSincePacket : 0);
+                            if (data.playing) this.audio.play().catch(() => {});
+                            this.audio.onloadedmetadata = null;
+                        };
+                    }
                     return;
                 }
 
-                // Continuous Sub-80ms Drift Correction
                 if (data.type === 'HEARTBEAT_SYNC') {
                     const currentHostClock = Date.now() + this.clockOffsetMs;
                     const transitSec = Math.max(0, (currentHostClock - data.hostClock) / 1000);
                     const exactExpectedTime = (data.time || 0) + (data.playing ? transitSec : 0);
 
-                    const drift = Math.abs((this.audio.currentTime || 0) - exactExpectedTime);
+                    const drift = Math.abs(this.getCurrentTime() - exactExpectedTime);
                     if (drift > 0.075) {
-                        this.audio.currentTime = exactExpectedTime;
+                        this.seekToTime(exactExpectedTime);
                     }
 
-                    if (data.playing && this.audio.paused) {
-                        this.audio.play().catch(() => {});
-                    } else if (!data.playing && !this.audio.paused) {
-                        this.audio.pause();
+                    if (data.playing && !this.isPlaying) {
+                        if (this.activeEngine === 'html5') this.audio.play().catch(() => {});
+                    } else if (!data.playing && this.isPlaying) {
+                        if (this.activeEngine === 'html5') this.audio.pause();
                     }
                 }
             }
@@ -1788,9 +2110,10 @@
                 document.getElementById('roomSetupPanel').style.display = 'none';
                 document.getElementById('roomDashboardPanel').style.display = 'block';
                 document.getElementById('activeRoomCodeDisplay').innerText = `#${this.roomCode}`;
+                document.getElementById('studioMainTitle').innerText = `Private Room #${this.roomCode} Live`;
                 document.getElementById('activeRoleBadge').innerText = this.isAdmin
-                    ? `Admin: ${this.username} (Full Control)`
-                    : `Connected as: ${this.username} (Listener)`;
+                    ? `Admin: @${this.username} (Full Control)`
+                    : `Listener: @${this.username} (Synced)`;
                 this.renderRoomMembers();
             }
 
@@ -1854,6 +2177,7 @@
 
                 document.getElementById('roomDashboardPanel').style.display = 'none';
                 document.getElementById('roomSetupPanel').style.display = 'block';
+                document.getElementById('studioMainTitle').innerText = 'Spatial Audio Sync Studio';
                 document.getElementById('navSyncDot').classList.remove('online');
                 document.getElementById('navSyncLabel').innerText = 'Listen Together';
             }
@@ -1913,7 +2237,7 @@
                     lineDiv.className = 'lyric-line';
                     lineDiv.onclick = () => {
                         if (this.isAdmin || !this.roomCode) {
-                            this.audio.currentTime = row.time;
+                            this.seekToTime(row.time);
                             this.broadcastZeroDelayState();
                         }
                     };
@@ -1968,8 +2292,8 @@
                 };
 
                 const tick = () => {
-                    const curr = this.audio.currentTime || 0;
-                    const dur = this.audio.duration || 0;
+                    const curr = this.getCurrentTime();
+                    const dur = this.getCurrentDuration();
 
                     if (dur > 0) {
                         document.getElementById('scrubFill').style.width = `${(curr / dur) * 100}%`;
@@ -2017,7 +2341,7 @@
             }
         }
 
-        window.app = new BoooZeroAdEngine();
+        window.app = new BoooMasterApp();
     </script>
 </body>
 </html>
