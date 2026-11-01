@@ -5,28 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Booo!! Music</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- CryptoJS for Instant Stream Decryption -->
+    <!-- CryptoJS for Direct 320kbps Ad-Free Stream Decryption -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <!-- PeerJS for Real-Time Live Chat & 0ms Listen Together Sync -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <!-- Backup YouTube Audio Core -->
-    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         :root {
             --easing: cubic-bezier(0.22, 1, 0.36, 1);
             --glass: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
             --glass-border: rgba(255, 255, 255, 0.22);
-            --gold-glow: linear-gradient(135deg, #ffd60a, #ff9f0a, #ff2d55);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { background: #030306; color: #fff; overflow: hidden; height: 100vh; width: 100vw; }
 
-        #hiddenYTCore { position: fixed; bottom: 0; right: 0; width: 2px; height: 2px; opacity: 0.001; pointer-events: none; z-index: -10; }
-
         /* --- AMBIENT COLOR FLOW BACKGROUND --- */
         .ambient-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #030306; }
         .amb-orb {
-            position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.42;
+            position: absolute; border-radius: 50%; filter: blur(75px); opacity: 0.42;
             background-size: cover; background-position: center; will-change: transform;
             animation: ambientFloat 18s infinite alternate ease-in-out;
             transition: background-image 1s ease;
@@ -35,7 +30,7 @@
         .orb-2 { width: 360px; height: 360px; bottom: -12%; right: -10%; background-color: #5e5ce6; animation-delay: -6s; }
         @keyframes ambientFloat { 0% { transform: translate3d(0, 0, 0) scale(1); } 100% { transform: translate3d(30px, -25px, 0) scale(1.12); } }
 
-        /* --- 1. MANDATORY ACCOUNT AUTH SCREEN (CLEAN PLACEHOLDERS) --- */
+        /* --- 1. MANDATORY ACCOUNT AUTH SCREEN --- */
         #authScreen {
             position: fixed; inset: 0; z-index: 9000;
             background: radial-gradient(circle at 50% 20%, #1a0b2e 0%, #030306 75%);
@@ -117,14 +112,15 @@
             align-items: center; justify-content: space-between; gap: 10px;
         }
 
-        /* Clean Search Box (No Mood Pills Below!) */
+        /* Clean Search Box */
         .search-box {
-            background: rgba(255,255,255,0.08); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.18);
-            border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; margin-bottom: 16px; box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+            background: rgba(255,255,255,0.08); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px; padding: 11px 15px; display: flex; align-items: center; margin-bottom: 16px;
+            box-shadow: 0 14px 32px rgba(0,0,0,0.45), inset 0 1px 1px rgba(255,255,255,0.18);
         }
-        .search-box i { color: rgba(255,255,255,0.55); font-size: 15px; }
+        .search-box i { color: rgba(255,255,255,0.6); font-size: 16px; }
         .search-box input { flex: 1; background: transparent; border: none; color: #fff; font-size: 15.5px; margin-left: 10px; outline: none; user-select: text; }
-        .search-go { background: linear-gradient(135deg, #ff2d55, #bf5af2); border: none; color: #fff; padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 12.5px; cursor: pointer; }
+        .search-go { background: linear-gradient(135deg, #ff2d55, #bf5af2); border: none; color: #fff; padding: 9px 18px; border-radius: 13px; font-weight: 800; font-size: 13px; cursor: pointer; }
 
         /* Navigation Tabs */
         .user-library-bar { display: flex; gap: 7px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
@@ -136,6 +132,28 @@
         .lib-tab-btn.active { background: rgba(255, 45, 85, 0.24); border-color: #ff2d55; }
         .lib-tab-btn.owner-tab { border-color: rgba(255, 214, 10, 0.5); background: linear-gradient(135deg, rgba(255, 214, 10, 0.18), rgba(255, 45, 85, 0.12)); }
         .like-count-pill { background: rgba(255, 45, 85, 0.3); color: #fff; padding: 1px 6px; border-radius: 8px; font-size: 10.5px; font-weight: 900; }
+
+        /* --- CLEAN AESTHETIC SEARCH STUDIO EMPTY STATE (NO SUGGESTED SONGS!) --- */
+        .search-empty-studio {
+            padding: 42px 22px; border-radius: 28px; text-align: center; margin: 12px 0 24px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.14);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+        }
+        .studio-pulse-circle {
+            width: 76px; height: 76px; border-radius: 50%; margin: 0 auto 16px;
+            background: linear-gradient(135deg, rgba(255,45,85,0.22), rgba(191,90,242,0.22));
+            border: 1px solid rgba(255,255,255,0.25);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; color: #fff;
+            box-shadow: 0 0 30px rgba(255,45,85,0.3);
+        }
+        .vibe-shuffle-pill {
+            display: inline-flex; align-items: center; gap: 6px; margin-top: 14px;
+            padding: 6px 14px; border-radius: 20px; font-size: 11.5px; font-weight: 800;
+            background: rgba(48, 209, 88, 0.15); border: 1px solid rgba(48, 209, 88, 0.4); color: #30d158;
+        }
 
         /* --- ROYAL PREMIUM OWNER AESTHETIC PROFILE CARD --- */
         .aesthetic-profile-card {
@@ -181,42 +199,8 @@
         .owner-edition .p-stat-num { color: #ffd60a; }
         .p-stat-lbl { font-size: 10.5px; color: rgba(255,255,255,0.55); font-weight: 700; }
 
-        /* Hero & Home Sections */
-        .hero-banner {
-            position: relative; width: 100%; height: 210px; border-radius: 26px; overflow: hidden; margin-bottom: 24px; cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.22); box-shadow: 0 20px 45px rgba(0,0,0,0.6);
-        }
-        .hero-banner img { width: 100%; height: 100%; object-fit: cover; }
-        .hero-overlay {
-            position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.05) 15%, rgba(3,3,6,0.92) 100%);
-            padding: 18px 20px; display: flex; flex-direction: column; justify-content: flex-end;
-        }
-        .hero-badge {
-            display: inline-flex; align-items: center; gap: 6px; width: fit-content; padding: 4px 10px; border-radius: 12px;
-            font-size: 10px; font-weight: 800; background: rgba(48, 209, 88, 0.25); border: 1px solid rgba(48, 209, 88, 0.55); color: #30d158; margin-bottom: 8px;
-        }
-        .hero-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
-        .hero-info h2 { font-size: 23px; font-weight: 900; margin-bottom: 3px; }
-        .hero-info p { font-size: 13.5px; color: rgba(255,255,255,0.75); }
-        .hero-play-fab { width: 46px; height: 46px; border-radius: 50%; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; font-size: 17px; }
-
-        .section-heading { font-size: 19px; font-weight: 800; margin-bottom: 13px; display: flex; justify-content: space-between; align-items: center; }
+        .section-heading { font-size: 18px; font-weight: 800; margin-bottom: 13px; display: flex; justify-content: space-between; align-items: center; }
         .section-sub { font-size: 11.5px; color: rgba(255,255,255,0.48); font-weight: 700; text-transform: uppercase; }
-
-        .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 26px; }
-        .quick-card { display: flex; align-items: center; padding: 6px; border-radius: 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); cursor: pointer; overflow: hidden; }
-        .quick-card img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; margin-right: 10px; flex-shrink: 0; }
-        .quick-card-text h4 { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .quick-card-text p { font-size: 11px; color: rgba(255,255,255,0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        .carousel-scroll { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 26px; }
-        .carousel-scroll::-webkit-scrollbar { display: none; }
-        .album-card { width: 142px; flex-shrink: 0; cursor: pointer; }
-        .album-art-wrap { position: relative; width: 142px; height: 142px; border-radius: 18px; overflow: hidden; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.14); }
-        .album-art-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        .hd-chip { position: absolute; bottom: 7px; right: 7px; padding: 2px 6px; border-radius: 6px; background: rgba(0,0,0,0.65); font-size: 9px; font-weight: 800; color: #fff; }
-        .album-card h4 { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .album-card p { font-size: 12px; color: rgba(255,255,255,0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .song-row {
             display: flex; align-items: center; padding: 10px 12px; margin-bottom: 10px; border-radius: 16px;
@@ -310,7 +294,6 @@
         }
         #listenRoomScreen.active { transform: translateY(0); }
 
-        /* Aesthetic Radar Pulse Hero inside Listen Together */
         .sync-studio-hero {
             position: relative; padding: 22px 16px; border-radius: 26px; margin-bottom: 16px; text-align: center;
             background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
@@ -361,7 +344,6 @@
         .admin-tag { font-size: 10px; padding: 2px 7px; border-radius: 8px; background: #ffd60a; color: #000; font-weight: 900; }
         .kick-btn { padding: 5px 12px; border-radius: 10px; background: rgba(255, 59, 48, 0.22); border: 1px solid #ff3b30; color: #ff453a; font-size: 11.5px; font-weight: 800; cursor: pointer; }
 
-        /* Down-Center Liquid Glass Box: Coded by Vishal */
         .coded-by-vishal-box {
             margin: auto auto 0; padding: 9px 22px; border-radius: 20px;
             background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05));
@@ -403,6 +385,10 @@
 
         .player-top-bar { padding: 18px 22px 8px; display: flex; justify-content: space-between; align-items: center; z-index: 5; }
         .drag-pill { width: 42px; height: 5px; background: rgba(255,255,255,0.38); border-radius: 5px; cursor: pointer; }
+        .vibe-status-chip {
+            font-size: 10.5px; font-weight: 800; padding: 4px 10px; border-radius: 12px;
+            background: rgba(48, 209, 88, 0.18); border: 1px solid rgba(48, 209, 88, 0.45); color: #30d158;
+        }
 
         .art-box {
             width: 76%; max-width: 300px; aspect-ratio: 1/1; margin: 12px auto; border-radius: 26px; overflow: hidden;
@@ -424,16 +410,17 @@
         .scrub-fill { width: 0%; height: 100%; background: #fff; border-radius: 6px; box-shadow: 0 0 10px #fff; }
         .scrub-time { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.58); margin-top: 8px; font-weight: 600; }
 
-        .main-transport { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; margin-bottom: 22px; }
-        .main-transport i { font-size: 29px; color: #fff; cursor: pointer; }
-        .main-transport .big-play { font-size: 45px; }
+        .main-transport { display: flex; justify-content: space-between; align-items: center; padding: 0 12px; margin-bottom: 22px; }
+        .main-transport i { font-size: 26px; color: #fff; cursor: pointer; transition: 0.2s; }
+        .main-transport .big-play { font-size: 46px; }
+        .shuffle-toggle.active { color: #30d158; text-shadow: 0 0 12px rgba(48, 209, 88, 0.6); }
 
         .player-bottom-dock { display: flex; justify-content: space-between; align-items: center; padding: 10px 18px; border-radius: 20px; background: var(--glass); border: 1px solid var(--glass-border); }
         .dock-item { font-size: 12.5px; font-weight: 700; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 
         /* --- LYRICS SCREEN --- */
         #lyricsView {
-            position: absolute; inset: 0; z-index: 120; background: rgba(5, 5, 10, 0.85); backdrop-filter: blur(45px);
+            position: absolute; inset: 0; z-index: 120; background: rgba(5, 5, 10, 0.88); backdrop-filter: blur(45px);
             display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.35s ease;
         }
         #lyricsView.active { opacity: 1; pointer-events: auto; }
@@ -450,8 +437,6 @@
     </style>
 </head>
 <body>
-
-    <div id="hiddenYTCore"><div id="ytPlayer"></div></div>
 
     <div class="ambient-bg">
         <div class="amb-orb orb-1" id="amb1"></div>
@@ -554,7 +539,6 @@
             </div>
         </div>
 
-        <!-- Aesthetic Radar Visualizer Header -->
         <div class="sync-studio-hero">
             <div class="radar-rings">
                 <div class="radar-ring"></div>
@@ -610,7 +594,6 @@
             </div>
         </div>
 
-        <!-- Down-Center Liquid Glass Box: Coded by Vishal -->
         <div class="coded-by-vishal-box">
             <i class="fas fa-code" style="color:#ff2d55;"></i>
             <span>Coded by Vishal</span>
@@ -664,17 +647,17 @@
             <span><i class="fas fa-bullhorn" style="color:#ffd60a; margin-right:8px;"></i><span id="globalNoticeText"></span></span>
         </div>
 
-        <!-- Clean Search Bar (No Mood Pills Below!) -->
+        <!-- Clean Search Bar (User searches -> Songs play + Vibe Shuffle!) -->
         <div class="search-box">
             <i class="fas fa-search"></i>
-            <input type="text" id="searchInput" placeholder="Search any song or artist...">
+            <input type="text" id="searchInput" placeholder="Search song or artist to play...">
             <button class="search-go" id="searchBtn">Search</button>
         </div>
 
         <!-- Navigation Bar -->
         <div class="user-library-bar">
             <div class="lib-tab-btn active" id="tabDiscoverBtn" onclick="app.showHome()">
-                <i class="fas fa-compass" style="color:#bf5af2;"></i><span>Home</span>
+                <i class="fas fa-magnifying-glass" style="color:#bf5af2;"></i><span>Search</span>
             </div>
             <div class="lib-tab-btn" id="tabLikedBtn" onclick="app.showLikedSongs()">
                 <i class="fas fa-heart" style="color:#ff2d55;"></i><span>Liked</span>
@@ -759,39 +742,29 @@
             <div class="social-card" id="discoverUsersList"></div>
         </div>
 
-        <!-- SEARCH RESULTS SECTION -->
+        <!-- SEARCH RESULTS & VIBE SHUFFLE QUEUE SECTION -->
         <div id="searchResultsSection" style="display: none; margin-bottom: 28px;">
             <div class="section-heading">
                 <span id="searchHeadingText">Search Results</span>
-                <span class="section-sub" style="cursor:pointer; color:#ff2d55;" onclick="app.showHome()">Back to Home</span>
+                <span class="section-sub" style="color:#30d158;"><i class="fas fa-shuffle"></i> Vibe Shuffle Active</span>
             </div>
             <div id="searchList"></div>
         </div>
 
-        <!-- AESTHETIC HOME SCREEN SECTIONS -->
+        <!-- CLEAN AESTHETIC SEARCH STUDIO (NO SUGGESTED SONGS!) -->
         <div id="homeSections">
-            <div class="hero-banner" onclick="app.playFromList('home', 0)">
-                <img id="heroImg" src="">
-                <div class="hero-overlay">
-                    <div class="hero-badge"><i class="fas fa-shield-halved"></i> 100% Ad-Free Audio • Master HD</div>
-                    <div class="hero-bottom">
-                        <div class="hero-info">
-                            <h2 id="heroTitle">Kamin</h2>
-                            <p id="heroArtist">EMIN & JONY</p>
-                        </div>
-                        <div class="hero-play-fab"><i class="fas fa-play"></i></div>
-                    </div>
+            <div class="search-empty-studio">
+                <div class="studio-pulse-circle">
+                    <i class="fas fa-compact-disc fa-spin" style="animation-duration: 8s;"></i>
+                </div>
+                <h2 style="font-size: 21px; font-weight: 900; margin-bottom: 6px;">Search Your Vibe</h2>
+                <p style="font-size: 13px; color: rgba(255,255,255,0.6); max-width: 260px; margin: 0 auto; line-height: 1.45;">
+                    Type any song or artist above. Your music will automatically shuffle & flow based on your song's vibe—100% Ad-Free.
+                </p>
+                <div class="vibe-shuffle-pill">
+                    <i class="fas fa-wand-magic-sparkles"></i> Smart Vibe Auto-Shuffle Enabled
                 </div>
             </div>
-
-            <div class="section-heading"><span>Quick Picks</span><span class="section-sub">Instant Play</span></div>
-            <div class="quick-grid" id="quickGridContainer"></div>
-
-            <div class="section-heading"><span>Trending Albums & Hits</span><span class="section-sub">Ultra HD Art</span></div>
-            <div class="carousel-scroll" id="trendingContainer"></div>
-
-            <div class="section-heading"><span>Suggested For You</span><span class="section-sub">Lossless Stream</span></div>
-            <div id="suggestedList"></div>
 
             <div class="support-card">
                 <h4><i class="fab fa-instagram" style="color:#ff2d55;"></i> Support Us</h4>
@@ -817,7 +790,7 @@
     <div id="fullPlayer">
         <div class="player-ambient-layer"><div class="flow-orb" id="pOrb1"></div></div>
         <div class="player-top-bar">
-            <div style="width: 32px;"></div>
+            <span class="vibe-status-chip"><i class="fas fa-shuffle"></i> Vibe Shuffle</span>
             <div class="drag-pill" id="closeFullBtn"></div>
             <i class="fas fa-chevron-down" id="closeFullIcon" style="color:rgba(255,255,255,0.6); cursor:pointer; font-size: 18px;"></i>
         </div>
@@ -848,9 +821,11 @@
             </div>
 
             <div class="main-transport">
+                <i class="fas fa-shuffle shuffle-toggle active" id="shuffleBtn" onclick="app.toggleVibeShuffle()" title="Vibe Shuffle"></i>
                 <i class="fas fa-backward-step" id="prevBtn"></i>
                 <i class="fas fa-play big-play" id="fPlayBtn"></i>
                 <i class="fas fa-forward-step" id="nextBtn"></i>
+                <i class="fas fa-repeat" onclick="app.replayCurrent()" style="font-size:22px; opacity:0.75;"></i>
             </div>
 
             <div class="player-bottom-dock">
@@ -862,8 +837,8 @@
     </div>
 
     <script>
-        // C-Style 64-Bit DES Decryptor for Direct 320kbps Audio Streams
-        function decryptSaavnDES(encryptedBase64) {
+        // C-Style 64-Bit DES Decryptor for Direct 320kbps Ad-Free Audio Streams
+        function decryptStreamCipher(encryptedBase64) {
             if (!encryptedBase64) return null;
             try {
                 const keyHex = CryptoJS.enc.Utf8.parse("38346591");
@@ -878,58 +853,43 @@
             } catch (err) { return null; }
         }
 
-        const YT_MUSIC_CURATED = [
-            { videoId: "Y9G20wV0KHE", name: "Kamin", artist: "EMIN & JONY", img: "https://i.ytimg.com/vi/Y9G20wV0KHE/maxresdefault.jpg" },
-            { videoId: "8of5w7RgcTc", name: "Kesariya", artist: "Arijit Singh", img: "https://i.ytimg.com/vi/BddP6PYo2gs/maxresdefault.jpg" },
-            { videoId: "mzB1VGEGcSU", name: "Lucid Dreams", artist: "Juice WRLD", img: "https://i.ytimg.com/vi/mzB1VGEGcSU/maxresdefault.jpg" },
-            { videoId: "_51KXfwcPMs", name: "Heeriye", artist: "Jasleen Royal & Arijit Singh", img: "https://i.ytimg.com/vi/RLzC55ai0eo/maxresdefault.jpg" },
-            { videoId: "fHI8X4OXluQ", name: "Blinding Lights", artist: "The Weeknd", img: "https://i.ytimg.com/vi/4NRXx6U8ABQ/maxresdefault.jpg" },
-            { videoId: "h3EJICKwITw", name: "All Girls Are The Same", artist: "Juice WRLD", img: "https://i.ytimg.com/vi/h3EJICKwITw/maxresdefault.jpg" },
-            { videoId: "QbC6d1J13I4", name: "Apna Bana Le", artist: "Arijit Singh & Sachin-Jigar", img: "https://i.ytimg.com/vi/ElZfdU54Cp8/maxresdefault.jpg" },
-            { videoId: "60ItHLz5WEA", name: "Faded", artist: "Alan Walker", img: "https://i.ytimg.com/vi/60ItHLz5WEA/maxresdefault.jpg" },
-            { videoId: "aeJ4N1r2zBY", name: "Chaleya", artist: "Arijit Singh & Shilpa Rao", img: "https://i.ytimg.com/vi/VAdGW7QDJiU/maxresdefault.jpg" },
-            { videoId: "plnfIj7dkJE", name: "Starboy", artist: "The Weeknd", img: "https://i.ytimg.com/vi/34Na4j8AVgA/maxresdefault.jpg" }
-        ];
+        // Deep Sanitizer so Lyrics Search NEVER fails due to garbage words in titles
+        function cleanSongMetadata(rawTitle, rawArtist) {
+            let title = (rawTitle || '')
+                .replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&amp;/g, '&')
+                .replace(/\(.*?\)|\[.*?\]|\{.*?\}/g, '')
+                .replace(/official\s*video|official\s*music\s*video|official\s*audio|lyrical\s*video|lyric\s*video|full\s*video|full\s*song|full\s*audio|lyrics|lyrical|audio|video|hd|4k|8k|remastered|feat\.|ft\./gi, '')
+                .replace(/\|.*$/g, '')
+                .trim();
 
-        window.handleImgError = function(imgEl, videoId) {
-            if (imgEl && imgEl.src.includes('maxresdefault')) {
-                imgEl.src = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+            if (title.includes(' - ')) {
+                const parts = title.split(' - ');
+                title = parts[parts.length - 1].trim() || parts[0].trim();
             }
-        };
 
-        // Backup YouTube Hardware Core (If direct stream is ever slow)
-        let ytBackupPlayer = null;
-        let ytBackupReady = false;
-        function onYouTubeIframeAPIReady() {
-            ytBackupPlayer = new YT.Player('ytPlayer', {
-                height: '10', width: '10',
-                playerVars: { 'playsinline': 1, 'autoplay': 1, 'controls': 0, 'disablekb': 1, 'rel': 0 },
-                events: {
-                    'onReady': () => { ytBackupReady = true; },
-                    'onStateChange': (e) => {
-                        if (!window.app || window.app.activeEngine !== 'yt_backup') return;
-                        if (e.data === YT.PlayerState.ENDED) window.app.nextPrev(1);
-                        if (e.data === YT.PlayerState.PLAYING) window.app.syncPlayUI(true);
-                        if (e.data === YT.PlayerState.PAUSED) window.app.syncPlayUI(false);
-                    }
-                }
-            });
+            let artist = (rawArtist || '')
+                .replace(/&quot;/g, '"').replace(/&#039;/g, "'")
+                .replace(/ - Topic|VEVO|Official/gi, '')
+                .split(',')[0].split('&')[0].split('|')[0]
+                .trim();
+
+            return { cleanTitle: title || rawTitle, cleanArtist: artist || rawArtist };
         }
 
-        class BoooMasterApp {
+        class BoooPureZeroAdEngine {
             constructor() {
                 this._ownerU = atob("ZGVhZHZpc2hhYWw="); // deadvishaal
                 this._ownerP = atob("c2hhbnRpZGV2aTA3"); // shantidevi07
 
-                // IMPORTANT: NO crossOrigin="anonymous" so browser NEVER blocks audio stream!
+                // 100% Pure HTML5 <audio> Player — NO YouTube IFrame = ZERO ADS EVER!
                 this.audio = new Audio();
                 this.audio.preload = "auto";
-                this.activeEngine = 'html5'; // 'html5' or 'yt_backup'
 
-                this.homeCatalog = [...YT_MUSIC_CURATED];
-                this.playlist = [...YT_MUSIC_CURATED];
+                this.playlist = [];
                 this.searchResults = [];
                 this.likedSongs = [];
+                this.playedHistoryIds = new Set();
+                this.vibeShuffleEnabled = true;
                 this.currentIndex = 0;
                 this.currentTrack = null;
                 this.isPlaying = false;
@@ -948,21 +908,16 @@
                 this.clockOffsetMs = 0;
                 this.syncInterval = null;
 
-                // Cross-Tab & Multi-Window Real-Time Chat Channel
                 try {
                     this.chatChannel = new BroadcastChannel('booo_live_global_chat');
                     this.chatChannel.onmessage = (ev) => {
-                        if (ev.data && ev.data.type === 'NEW_CHAT') {
-                            this.renderSocialHub();
-                        }
+                        if (ev.data && ev.data.type === 'NEW_CHAT') this.renderSocialHub();
                     };
                 } catch (e) {}
 
                 this.initMasterDatabase();
                 this.initAccountSystem();
                 this.checkGlobalAnnouncement();
-                this.renderHomeScreen();
-                this.upgradeHomeArtworks();
                 this.bindEvents();
                 this.start60FPSLoop();
             }
@@ -972,7 +927,6 @@
             // =========================================================================
             initMasterDatabase() {
                 const db = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
-                // Upgrade Owner Account with Royal Aesthetic Stats
                 db[this._ownerU] = {
                     username: this._ownerU,
                     password: this._ownerP,
@@ -982,7 +936,7 @@
                     followersCountBonus: 10800,
                     followers: db[this._ownerU]?.followers || ['vishexui', 'aryan_music', 'sneha_vibes', 'rohan_beats'],
                     following: db[this._ownerU]?.following || ['vishexui'],
-                    likedSongs: db[this._ownerU]?.likedSongs || [YT_MUSIC_CURATED[0], YT_MUSIC_CURATED[1]],
+                    likedSongs: db[this._ownerU]?.likedSongs || [],
                     lastLogin: 'Online Now'
                 };
 
@@ -991,19 +945,19 @@
                         username: 'vishexui', password: 'ui_user99', role: 'VIP DESIGNER', verified: true,
                         bio: 'Official Design Studio • @vishexui', followersCountBonus: 4200,
                         followers: ['deadvishaal', 'aryan_music'], following: ['deadvishaal'],
-                        likedSongs: [YT_MUSIC_CURATED[0], YT_MUSIC_CURATED[2]], lastLogin: 'Online'
+                        likedSongs: [], lastLogin: 'Online'
                     };
                     db['aryan_music'] = db['aryan_music'] || {
                         username: 'aryan_music', password: 'aryan2025', role: 'USER', verified: false,
                         bio: 'Late night music listener 🎧', followersCountBonus: 12,
                         followers: ['sneha_vibes'], following: ['deadvishaal', 'vishexui'],
-                        likedSongs: [YT_MUSIC_CURATED[3]], lastLogin: 'Today'
+                        likedSongs: [], lastLogin: 'Today'
                     };
                     db['sneha_vibes'] = db['sneha_vibes'] || {
                         username: 'sneha_vibes', password: 'sneha777', role: 'USER', verified: true,
                         bio: 'Arijit & Aesthetic Lo-Fi 💖', followersCountBonus: 340,
                         followers: ['aryan_music'], following: ['deadvishaal'],
-                        likedSongs: [YT_MUSIC_CURATED[1], YT_MUSIC_CURATED[4]], lastLogin: 'Today'
+                        likedSongs: [], lastLogin: 'Today'
                     };
                 }
                 localStorage.setItem('booo_users_master_db', JSON.stringify(db));
@@ -1011,9 +965,8 @@
                 const chats = JSON.parse(localStorage.getItem('booo_community_chats') || '[]');
                 if (chats.length === 0) {
                     chats.push(
-                        { sender: 'deadvishaal', isOwner: true, text: 'Welcome to Booo!! Music 👑 Enjoy 100% ad-free streaming & live sync!', time: '10:00 AM' },
-                        { sender: 'vishexui', isOwner: false, text: 'Liquid glass UI and word-by-word lyrics look insane 🔥', time: '10:05 AM' },
-                        { sender: 'sneha_vibes', isOwner: false, text: 'Finally songs are playing super fast without any ads!', time: '10:12 AM' }
+                        { sender: 'deadvishaal', isOwner: true, text: 'Welcome to Booo!! Music 👑 Search any song for 100% ad-free vibe shuffle!', time: '10:00 AM' },
+                        { sender: 'vishexui', isOwner: false, text: 'Clean search studio and live word-by-word lyrics look fire 🔥', time: '10:05 AM' }
                     );
                     localStorage.setItem('booo_community_chats', JSON.stringify(chats));
                 }
@@ -1055,15 +1008,9 @@
 
                     if (!masterDB[u]) {
                         masterDB[u] = {
-                            username: u,
-                            password: p,
-                            role: 'USER',
-                            verified: false,
-                            bio: 'Streaming on Booo!! Music 🎵',
-                            followersCountBonus: 0,
-                            followers: [],
-                            following: [this._ownerU],
-                            likedSongs: [],
+                            username: u, password: p, role: 'USER', verified: false,
+                            bio: 'Streaming on Booo!! Music 🎵', followersCountBonus: 0,
+                            followers: [], following: [this._ownerU], likedSongs: [],
                             lastLogin: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                         };
                     } else {
@@ -1087,7 +1034,6 @@
                 document.getElementById('likedUserSub').innerText = `@${username}`;
                 document.getElementById('myLikesCountBadge').innerText = this.likedSongs.length;
 
-                // Style Top Profile Tab & Owner Hub Button if Owner logged in
                 const profTab = document.getElementById('tabProfileBtn');
                 const profIcon = document.getElementById('navProfileIcon');
                 if (this.isSuperAdmin) {
@@ -1103,7 +1049,6 @@
                 }
 
                 this.updateProfileCardUI();
-                this.renderHomeScreen();
             }
 
             updateProfileCardUI() {
@@ -1234,9 +1179,7 @@
                 masterDB[uName] = {
                     username: uName, password: `pass${rId}`, role: 'USER', verified: false,
                     bio: 'Listening on Booo!! 🎧', followersCountBonus: Math.floor(Math.random() * 50),
-                    followers: [], following: [this._ownerU],
-                    likedSongs: [YT_MUSIC_CURATED[Math.floor(Math.random() * 5)]],
-                    lastLogin: 'Just Now'
+                    followers: [], following: [this._ownerU], likedSongs: [], lastLogin: 'Just Now'
                 };
                 localStorage.setItem('booo_users_master_db', JSON.stringify(masterDB));
                 this.renderSuperAdminDashboard();
@@ -1288,7 +1231,7 @@
             }
 
             // =========================================================================
-            // 3. WORKING REAL-TIME LIVE CHAT & FOLLOW SYSTEM
+            // 3. REAL-TIME LIVE CHAT & FOLLOW SYSTEM
             // =========================================================================
             showSocialHub() {
                 document.querySelectorAll('.lib-tab-btn').forEach(b => b.classList.remove('active'));
@@ -1386,7 +1329,6 @@
                 inp.value = '';
                 this.renderSocialHub();
 
-                // Broadcast across tabs & connected peers immediately
                 if (this.chatChannel) {
                     try { this.chatChannel.postMessage({ type: 'NEW_CHAT', chat: msgObj }); } catch (e) {}
                 }
@@ -1399,18 +1341,18 @@
             // =========================================================================
             // 4. LIKED SONGS STORAGE
             // =========================================================================
-            isSongLiked(videoId) {
-                return this.likedSongs.some(s => s.videoId === videoId);
+            isSongLiked(id) {
+                return this.likedSongs.some(s => s.id === id);
             }
 
             toggleLikeSong(trackObj, ev) {
                 if (ev) ev.stopPropagation();
-                if (!trackObj || !trackObj.videoId) return;
+                if (!trackObj || !trackObj.id) return;
 
-                if (this.isSongLiked(trackObj.videoId)) {
-                    this.likedSongs = this.likedSongs.filter(s => s.videoId !== trackObj.videoId);
+                if (this.isSongLiked(trackObj.id)) {
+                    this.likedSongs = this.likedSongs.filter(s => s.id !== trackObj.id);
                 } else {
-                    this.likedSongs.unshift({ videoId: trackObj.videoId, name: trackObj.name, artist: trackObj.artist, img: trackObj.img });
+                    this.likedSongs.unshift({ ...trackObj });
                 }
 
                 const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
@@ -1422,7 +1364,6 @@
                 document.getElementById('myLikesCountBadge').innerText = this.likedSongs.length;
                 this.updatePlayerLikeIcon();
                 this.updateProfileCardUI();
-                this.renderHomeScreen();
                 if (document.getElementById('likedSongsSection').style.display === 'block') {
                     this.renderLikedSongsList();
                 }
@@ -1434,7 +1375,7 @@
 
             updatePlayerLikeIcon() {
                 const btn = document.getElementById('playerLikeBtn');
-                if (this.currentTrack && this.isSongLiked(this.currentTrack.videoId)) btn.classList.add('liked');
+                if (this.currentTrack && this.isSongLiked(this.currentTrack.id)) btn.classList.add('liked');
                 else btn.classList.remove('liked');
             }
 
@@ -1452,12 +1393,12 @@
             renderLikedSongsList() {
                 const listEl = document.getElementById('likedSongsList');
                 if (this.likedSongs.length === 0) {
-                    listEl.innerHTML = `<div style="text-align:center; padding:35px 20px; color:rgba(255,255,255,0.5);">No favorite songs yet.<br><small>Tap the ❤️ Heart icon on any song!</small></div>`;
+                    listEl.innerHTML = `<div style="text-align:center; padding:35px 20px; color:rgba(255,255,255,0.5);">No favorite songs yet.<br><small>Search a song and tap the ❤️ Heart icon!</small></div>`;
                     return;
                 }
                 listEl.innerHTML = this.likedSongs.map((s, idx) => `
                     <div class="song-row" onclick="app.playFromList('liked', ${idx})">
-                        <img src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
+                        <img src="${s.img}">
                         <div class="song-meta"><h4>${s.name}</h4><p>${s.artist}</p></div>
                         <div class="row-actions">
                             <i class="fas fa-heart heart-btn liked" onclick="app.toggleLikeSong(app.likedSongs[${idx}], event)"></i>
@@ -1467,211 +1408,264 @@
                 `).join('');
             }
 
-            // =========================================================================
-            // 5. 101% GUARANTEED PLAYBACK ENGINE (NO CORS BLOCK + TRIPLE FALLBACK)
-            // =========================================================================
-            async resolveUltraHDArtwork(trackObj, domElements = []) {
-                const key = `${trackObj.name}_${trackObj.artist}`.toLowerCase();
-                if (this.artCache[key]) {
-                    trackObj.img = this.artCache[key];
-                    domElements.forEach(el => { if (el) el.src = trackObj.img; });
-                    return trackObj.img;
-                }
-                try {
-                    const cleanQ = `${trackObj.name} ${trackObj.artist.split('&')[0].split(',')[0]}`.trim();
-                    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(cleanQ)}&entity=song&limit=1`);
-                    const data = await res.json();
-                    if (data.results && data.results.length > 0 && data.results[0].artworkUrl100) {
-                        const hdUrl = data.results[0].artworkUrl100.replace('100x100bb', '1000x1000bb');
-                        this.artCache[key] = hdUrl;
-                        trackObj.img = hdUrl;
-                        domElements.forEach(el => { if (el) el.src = hdUrl; });
-                        return hdUrl;
-                    }
-                } catch (e) {}
-                return trackObj.img;
-            }
-
-            async upgradeHomeArtworks() {
-                for (let i = 0; i < this.homeCatalog.length; i++) {
-                    await this.resolveUltraHDArtwork(this.homeCatalog[i]);
-                }
-                this.renderHomeScreen();
-            }
-
-            renderHomeScreen() {
-                const list = this.homeCatalog;
-                if (!list.length) return;
-
-                const hero = list[0];
-                const hImg = document.getElementById('heroImg');
-                hImg.src = hero.img;
-                hImg.onerror = () => handleImgError(hImg, hero.videoId);
-                document.getElementById('heroTitle').innerText = hero.name;
-                document.getElementById('heroArtist').innerText = hero.artist;
-
-                document.getElementById('quickGridContainer').innerHTML = list.slice(1, 5).map((s, idx) => `
-                    <div class="quick-card" onclick="app.playFromList('home', ${idx + 1})">
-                        <img src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
-                        <div class="quick-card-text" style="overflow:hidden;">
-                            <h4>${s.name}</h4><p>${s.artist}</p>
-                        </div>
-                    </div>
-                `).join('');
-
-                document.getElementById('trendingContainer').innerHTML = list.slice(4, 10).map((s, idx) => `
-                    <div class="album-card" onclick="app.playFromList('home', ${idx + 4})">
-                        <div class="album-art-wrap">
-                            <img src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
-                            <span class="hd-chip">HD</span>
-                        </div>
-                        <h4>${s.name}</h4><p>${s.artist}</p>
-                    </div>
-                `).join('');
-
-                document.getElementById('suggestedList').innerHTML = list.map((s, idx) => {
-                    const liked = this.isSongLiked(s.videoId);
-                    return `
-                        <div class="song-row" onclick="app.playFromList('home', ${idx})">
-                            <img src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
-                            <div class="song-meta"><h4>${s.name}</h4><p>${s.artist}</p></div>
-                            <div class="row-actions">
-                                <i class="fas fa-heart heart-btn ${liked ? 'liked' : ''}" onclick="app.toggleLikeSong(app.homeCatalog[${idx}], event)"></i>
-                                <div class="play-circle"><i class="fas fa-play"></i></div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
             showHome() {
                 document.querySelectorAll('.lib-tab-btn').forEach(b => b.classList.remove('active'));
                 document.getElementById('tabDiscoverBtn').classList.add('active');
                 document.getElementById('likedSongsSection').style.display = 'none';
-                document.getElementById('searchResultsSection').style.display = 'none';
                 document.getElementById('socialHubSection').style.display = 'none';
                 document.getElementById('profileSection').style.display = 'none';
-                document.getElementById('homeSections').style.display = 'block';
-                document.getElementById('searchInput').value = '';
+
+                if (this.searchResults.length > 0) {
+                    document.getElementById('homeSections').style.display = 'none';
+                    document.getElementById('searchResultsSection').style.display = 'block';
+                } else {
+                    document.getElementById('searchResultsSection').style.display = 'none';
+                    document.getElementById('homeSections').style.display = 'block';
+                }
             }
 
-            // Searches YouTube Music Catalog
-            async searchYouTubeMusicCatalog(query) {
-                const ytMusicQuery = `${query} lyrics audio`;
-                const nodes = [
-                    { type: 'piped', url: `https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(ytMusicQuery)}&filter=music_songs` },
-                    { type: 'piped', url: `https://api.piped.private.coffee/search?q=${encodeURIComponent(ytMusicQuery)}&filter=music_songs` },
-                    { type: 'html', url: `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.youtube.com/results?search_query=' + encodeURIComponent(ytMusicQuery))}` },
-                    { type: 'html', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent('https://www.youtube.com/results?search_query=' + encodeURIComponent(ytMusicQuery))}` },
-                    { type: 'inv', url: `https://inv.nadeko.net/api/v1/search?q=${encodeURIComponent(ytMusicQuery)}&type=video` }
+            // =========================================================================
+            // 5. 100% AD-FREE SEARCH & VIBE AUTO-SHUFFLE ENGINE
+            // =========================================================================
+            async fetchAdFreeTracks(query) {
+                const rawSaavn = `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&n=25&p=1&q=${encodeURIComponent(query)}`;
+                const gateways = [
+                    { type: 'wrap', url: `https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}&limit=25` },
+                    { type: 'wrap', url: `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${encodeURIComponent(query)}&limit=25` },
+                    { type: 'des', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(rawSaavn)}` },
+                    { type: 'des', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rawSaavn)}` },
+                    { type: 'piped', url: `https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(query + ' official audio')}&filter=music_songs` }
                 ];
 
-                for (let node of nodes) {
+                for (let g of gateways) {
                     try {
                         const ctrl = new AbortController();
                         const timer = setTimeout(() => ctrl.abort(), 4200);
-                        const res = await fetch(node.url, { signal: ctrl.signal });
+                        const res = await fetch(g.url, { signal: ctrl.signal });
                         clearTimeout(timer);
+                        const data = await res.json();
 
-                        let list = [];
-                        if (node.type === 'piped') {
-                            const data = await res.json();
-                            list = (data.items || []).map(it => {
-                                const vId = it.url ? it.url.split('v=')[1] : '';
+                        let tracks = [];
+                        if (g.type === 'wrap') {
+                            const items = data.data?.results || data.results || [];
+                            tracks = items.map(item => {
+                                const imgs = item.image || [];
+                                const hdImg = Array.isArray(imgs) && imgs.length ? (imgs[imgs.length - 1].url || imgs[imgs.length - 1].link) : (typeof imgs === 'string' ? imgs.replace('150x150', '500x500') : '');
+                                const dUrls = item.downloadUrl || [];
+                                let audioUrl = Array.isArray(dUrls) && dUrls.length ? (dUrls[dUrls.length - 1].url || dUrls[dUrls.length - 1].link) : '';
+                                if (!audioUrl && item.encrypted_media_url) audioUrl = decryptStreamCipher(item.encrypted_media_url);
+                                if (audioUrl) audioUrl = audioUrl.replace('preview.saavncdn.com', 'aac.saavncdn.com').replace('_96_p.mp4', '_320.mp4');
+                                const rawArtist = item.primaryArtists || (item.artists?.primary ? item.artists.primary.map(a => a.name).join(', ') : 'Artist');
+                                const { cleanTitle, cleanArtist } = cleanSongMetadata(item.name || item.title, String(rawArtist));
                                 return {
-                                    videoId: vId,
-                                    name: (it.title || 'Song').replace(/\(Official.*\)|\[.*\]|Lyrical|Lyrics|Audio|Video|Full Song/gi, '').trim(),
-                                    artist: (it.uploaderName || 'Artist').replace(/ - Topic|VEVO/gi, '').trim(),
-                                    img: `https://i.ytimg.com/vi/${vId}/maxresdefault.jpg`
+                                    id: item.id || cleanTitle + cleanArtist,
+                                    name: cleanTitle,
+                                    artist: cleanArtist,
+                                    img: hdImg,
+                                    streamUrl: audioUrl
                                 };
-                            }).filter(x => x.videoId);
-                        } else if (node.type === 'html') {
-                            const text = await res.text();
-                            const m = text.match(/var ytInitialData = (\{.*?\});<\/script>/);
-                            if (m && m[1]) {
-                                const data = JSON.parse(m[1]);
-                                const contents = data.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents || [];
-                                contents.forEach(it => {
-                                    const v = it.videoRenderer;
-                                    if (v && v.videoId) {
-                                        const title = v.title?.runs?.[0]?.text || 'Song';
-                                        const author = v.ownerText?.runs?.[0]?.text || 'Artist';
-                                        list.push({
-                                            videoId: v.videoId,
-                                            name: title.replace(/\(Official.*\)|\[.*\]|Lyrical|Lyrics|Audio|Video|Full Song/gi, '').trim(),
-                                            artist: author.replace(/ - Topic|VEVO/gi, '').trim(),
-                                            img: `https://i.ytimg.com/vi/${v.videoId}/maxresdefault.jpg`
-                                        });
-                                    }
-                                });
-                            }
-                        } else if (node.type === 'inv') {
-                            const data = await res.json();
-                            list = (data || []).map(it => ({
-                                videoId: it.videoId,
-                                name: (it.title || 'Song').replace(/\(Official.*\)|\[.*\]|Lyrical|Lyrics|Audio|Video|Full Song/gi, '').trim(),
-                                artist: (it.author || 'Artist').replace(/ - Topic|VEVO/gi, '').trim(),
-                                img: `https://i.ytimg.com/vi/${it.videoId}/maxresdefault.jpg`
-                            })).filter(x => x.videoId);
+                            }).filter(t => t.streamUrl);
+                        } else if (g.type === 'des' && data.results) {
+                            tracks = data.results.map(item => {
+                                const enc = item.encrypted_media_url || item.more_info?.encrypted_media_url;
+                                const rawArtist = item.primary_artists || item.more_info?.primary_artists || item.singers || 'Artist';
+                                const { cleanTitle, cleanArtist } = cleanSongMetadata(item.song || item.title, String(rawArtist));
+                                return {
+                                    id: item.id || cleanTitle + cleanArtist,
+                                    name: cleanTitle,
+                                    artist: cleanArtist,
+                                    img: (item.image || '').replace('150x150', '500x500'),
+                                    streamUrl: decryptStreamCipher(enc)
+                                };
+                            }).filter(t => t.streamUrl);
+                        } else if (g.type === 'piped' && data.items) {
+                            tracks = data.items.map(it => {
+                                const vId = it.url ? it.url.split('v=')[1] : '';
+                                const { cleanTitle, cleanArtist } = cleanSongMetadata(it.title, it.uploaderName);
+                                return {
+                                    id: vId,
+                                    videoId: vId,
+                                    name: cleanTitle,
+                                    artist: cleanArtist,
+                                    img: `https://i.ytimg.com/vi/${vId}/maxresdefault.jpg`,
+                                    streamUrl: null
+                                };
+                            }).filter(t => t.id);
                         }
 
-                        if (list.length > 0) return list;
+                        if (tracks.length > 0) return tracks;
                     } catch (e) {}
                 }
                 return [];
             }
 
-            // Resolves 100% Working Direct Audio Stream (With DES Decryption + Piped + YT Fallback)
-            async resolvePlayableStream(track) {
-                if (this.streamUrlCache[track.videoId]) return this.streamUrlCache[track.videoId];
+            async performSearch(query) {
+                document.getElementById('likedSongsSection').style.display = 'none';
+                document.getElementById('socialHubSection').style.display = 'none';
+                document.getElementById('profileSection').style.display = 'none';
+                document.getElementById('homeSections').style.display = 'none';
 
-                const cleanQ = `${track.name} ${track.artist.split('&')[0].split(',')[0]}`.trim();
-                const rawSaavn = `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&n=5&p=1&q=${encodeURIComponent(cleanQ)}`;
+                const sec = document.getElementById('searchResultsSection');
+                const listEl = document.getElementById('searchList');
+                sec.style.display = 'block';
+                document.getElementById('searchHeadingText').innerText = `Results for "${query}"`;
+                listEl.innerHTML = `<div style="text-align:center; padding: 35px; color:rgba(255,255,255,0.6);"><i class="fas fa-circle-notch fa-spin"></i> Finding tracks & building vibe queue...</div>`;
 
-                const resolvers = [
-                    { type: 'saavn_api', url: `https://saavn.dev/api/search/songs?query=${encodeURIComponent(cleanQ)}&limit=3` },
-                    { type: 'saavn_api', url: `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${encodeURIComponent(cleanQ)}&limit=3` },
-                    { type: 'saavn_des', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(rawSaavn)}` },
-                    { type: 'saavn_des', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rawSaavn)}` },
-                    { type: 'piped', url: `https://pipedapi.kavin.rocks/streams/${track.videoId}` }
-                ];
-
-                for (let r of resolvers) {
-                    try {
-                        const ctrl = new AbortController();
-                        const timer = setTimeout(() => ctrl.abort(), 3200);
-                        const res = await fetch(r.url, { signal: ctrl.signal });
-                        clearTimeout(timer);
-                        const data = await res.json();
-
-                        if (r.type === 'saavn_api') {
-                            const items = data.data?.results || data.results || [];
-                            if (items.length > 0) {
-                                const dl = items[0].downloadUrl || [];
-                                let best = Array.isArray(dl) && dl.length ? (dl[dl.length - 1].url || dl[dl.length - 1].link) : '';
-                                if (!best && items[0].encrypted_media_url) best = decryptSaavnDES(items[0].encrypted_media_url);
-                                if (best) {
-                                    this.streamUrlCache[track.videoId] = best;
-                                    return best;
-                                }
-                            }
-                        } else if (r.type === 'saavn_des' && data.results && data.results.length > 0) {
-                            const enc = data.results[0].encrypted_media_url || data.results[0].more_info?.encrypted_media_url;
-                            const unlocked = decryptSaavnDES(enc);
-                            if (unlocked) {
-                                this.streamUrlCache[track.videoId] = unlocked;
-                                return unlocked;
-                            }
-                        } else if (r.type === 'piped' && data.audioStreams && data.audioStreams.length > 0) {
-                            const m4a = data.audioStreams.find(s => s.mimeType && s.mimeType.includes('mp4')) || data.audioStreams[0];
-                            if (m4a && m4a.url) {
-                                this.streamUrlCache[track.videoId] = m4a.url;
-                                return m4a.url;
-                            }
-                        }
-                    } catch (e) {}
+                const results = await this.fetchAdFreeTracks(query);
+                if (results.length > 0) {
+                    this.searchResults = results;
+                    listEl.innerHTML = results.map((s, idx) => {
+                        const liked = this.isSongLiked(s.id);
+                        return `
+                            <div class="song-row" onclick="app.playFromList('search', ${idx})">
+                                <img src="${s.img}">
+                                <div class="song-meta"><h4>${s.name}</h4><p>${s.artist}</p></div>
+                                <div class="row-actions">
+                                    <i class="fas fa-heart heart-btn ${liked ? 'liked' : ''}" onclick="app.toggleLikeSong(app.searchResults[${idx}], event)"></i>
+                                    <div class="play-circle"><i class="fas fa-play"></i></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    listEl.innerHTML = `<div style="text-align:center; padding: 35px; color:#ff453a;">No tracks found. Try another song or artist name!</div>`;
                 }
-                return null;
+            }
+
+            playFromList(source, index) {
+                if (!this.isAdmin && this.roomCode) {
+                    alert("Only the Room Admin can change songs in Listen Together!");
+                    return;
+                }
+                this.playlist = source === 'liked' ? [...this.likedSongs] : [...this.searchResults];
+                this.playedHistoryIds.clear();
+                this.loadAndPlay(index, true);
+            }
+
+            async loadAndPlay(index, shouldBroadcast = true) {
+                if (!this.playlist || !this.playlist[index]) return;
+                this.currentIndex = index;
+                const track = this.playlist[index];
+                this.currentTrack = track;
+                this.playedHistoryIds.add(track.id);
+
+                this.audio.pause();
+
+                document.getElementById('mTitle').innerText = track.name;
+                document.getElementById('mArtist').innerText = track.artist;
+                document.getElementById('fTitle').innerText = track.name;
+                document.getElementById('fArtist').innerText = track.artist;
+
+                document.getElementById('mCover').src = track.img;
+                document.getElementById('fCover').src = track.img;
+                document.getElementById('pOrb1').style.backgroundImage = `url('${track.img}')`;
+                document.getElementById('amb1').style.backgroundImage = `url('${track.img}')`;
+
+                document.getElementById('miniPlayer').classList.add('active');
+                document.getElementById('fullPlayer').classList.add('active');
+                this.updatePlayerLikeIcon();
+
+                // Fetch Live Word-by-Word Lyrics immediately
+                this.fetchRedLrcProvider(track.name, track.artist);
+
+                // Automatically expand Vibe Queue in background based on current song's artist/vibe
+                this.expandVibeShuffleQueue(track);
+
+                let streamUrl = track.streamUrl;
+                if (!streamUrl && track.videoId) {
+                    const res = await fetch(`https://pipedapi.kavin.rocks/streams/${track.videoId}`).then(r => r.json()).catch(() => null);
+                    if (res && res.audioStreams && res.audioStreams.length) {
+                        streamUrl = res.audioStreams[0].url;
+                        track.streamUrl = streamUrl;
+                    }
+                }
+
+                if (!streamUrl) return;
+
+                this.audio.src = streamUrl;
+                this.audio.currentTime = 0;
+
+                if (shouldBroadcast && this.isAdmin && this.roomCode && this.members.length > 1) {
+                    this.broadcastToRoom({ type: 'PRELOAD_TRACK', track: track });
+                    setTimeout(() => {
+                        const startTimestamp = Date.now() + 180;
+                        this.broadcastToRoom({ type: 'SCHEDULED_START', time: 0, startAtHostClock: startTimestamp });
+                        setTimeout(() => { this.audio.play().catch(() => {}); }, 180);
+                    }, 400);
+                } else {
+                    this.audio.play().catch(() => {});
+                }
+            }
+
+            // Smart Vibe Auto-Shuffle Queue Builder: Fetches similar vibe tracks so music shuffles endlessly
+            async expandVibeShuffleQueue(seedTrack) {
+                try {
+                    const vibeQuery = `${seedTrack.artist} ${seedTrack.name.split(' ')[0]}`;
+                    const moreTracks = await this.fetchAdFreeTracks(vibeQuery);
+                    moreTracks.forEach(t => {
+                        if (!this.playlist.some(existing => existing.id === t.id)) {
+                            this.playlist.push(t);
+                        }
+                    });
+                } catch (e) {}
+            }
+
+            toggleVibeShuffle() {
+                this.vibeShuffleEnabled = !this.vibeShuffleEnabled;
+                document.getElementById('shuffleBtn').classList.toggle('active', this.vibeShuffleEnabled);
+            }
+
+            replayCurrent() {
+                if (!this.isAdmin && this.roomCode) return;
+                this.audio.currentTime = 0;
+                this.audio.play().catch(() => {});
+                this.broadcastZeroDelayState();
+            }
+
+            nextPrev(step) {
+                if (!this.isAdmin && this.roomCode) return;
+                if (!this.playlist.length) return;
+
+                if (step > 0 && this.vibeShuffleEnabled && this.playlist.length > 1) {
+                    // Pick a random unplayed track matching the vibe
+                    const unplayedIndices = [];
+                    this.playlist.forEach((t, idx) => {
+                        if (!this.playedHistoryIds.has(t.id) && idx !== this.currentIndex) {
+                            unplayedIndices.push(idx);
+                        }
+                    });
+
+                    if (unplayedIndices.length > 0) {
+                        const randomIdx = unplayedIndices[Math.floor(Math.random() * unplayedIndices.length)];
+                        this.loadAndPlay(randomIdx, true);
+                        return;
+                    } else {
+                        this.playedHistoryIds.clear();
+                    }
+                }
+
+                this.currentIndex = (this.currentIndex + step + this.playlist.length) % this.playlist.length;
+                this.loadAndPlay(this.currentIndex, true);
+            }
+
+            togglePlay() {
+                if (!this.isAdmin && this.roomCode) {
+                    alert("Only the Room Admin can play/pause in Listen Together!");
+                    return;
+                }
+                if (!this.audio.src) return;
+                if (this.audio.paused) this.audio.play().catch(() => {});
+                else this.audio.pause();
+                this.broadcastZeroDelayState();
+            }
+
+            syncPlayUI(playing) {
+                this.isPlaying = playing;
+                const icon = playing ? 'fa-pause' : 'fa-play';
+                document.getElementById('mPlayBtn').className = `fas ${icon}`;
+                document.getElementById('fPlayBtn').className = `fas ${icon} big-play`;
+                const art = document.getElementById('artContainer');
+                playing ? art.classList.add('playing') : art.classList.remove('playing');
             }
 
             bindEvents() {
@@ -1692,19 +1686,16 @@
                 document.getElementById('prevBtn').onclick = () => this.nextPrev(-1);
                 document.getElementById('nextBtn').onclick = () => this.nextPrev(1);
 
-                this.audio.onended = () => { if (this.activeEngine === 'html5') this.nextPrev(1); };
-                this.audio.onplay = () => { if (this.activeEngine === 'html5') this.syncPlayUI(true); };
-                this.audio.onpause = () => { if (this.activeEngine === 'html5') this.syncPlayUI(false); };
+                this.audio.onended = () => this.nextPrev(1);
+                this.audio.onplay = () => this.syncPlayUI(true);
+                this.audio.onpause = () => this.syncPlayUI(false);
 
-                // Auto fallback from 320kbps to 160kbps or YT Hardware Core if a stream link fails
                 this.audio.onerror = () => {
                     if (this.audio.src && this.audio.src.includes('_320.mp4')) {
                         this.audio.src = this.audio.src.replace('_320.mp4', '_160.mp4');
                         this.audio.play().catch(() => {});
-                    } else if (this.currentTrack && ytBackupReady && ytBackupPlayer) {
-                        this.activeEngine = 'yt_backup';
-                        ytBackupPlayer.loadVideoById(this.currentTrack.videoId);
-                        ytBackupPlayer.playVideo();
+                    } else {
+                        this.nextPrev(1);
                     }
                 };
 
@@ -1727,168 +1718,13 @@
                         alert("Only the Room Admin can seek songs!");
                         return;
                     }
-                    const dur = this.getCurrentDuration();
-                    if (dur > 0) {
+                    if (this.audio.duration) {
                         const rect = document.getElementById('scrubBar').getBoundingClientRect();
                         const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-                        const targetTime = pct * dur;
-                        this.seekToTime(targetTime);
+                        this.audio.currentTime = pct * this.audio.duration;
                         this.broadcastZeroDelayState();
                     }
                 };
-            }
-
-            getCurrentTime() {
-                if (this.activeEngine === 'html5') return this.audio.currentTime || 0;
-                if (ytBackupReady && ytBackupPlayer && ytBackupPlayer.getCurrentTime) return ytBackupPlayer.getCurrentTime() || 0;
-                return 0;
-            }
-
-            getCurrentDuration() {
-                if (this.activeEngine === 'html5') return this.audio.duration || 0;
-                if (ytBackupReady && ytBackupPlayer && ytBackupPlayer.getDuration) return ytBackupPlayer.getDuration() || 0;
-                return 0;
-            }
-
-            seekToTime(sec) {
-                if (this.activeEngine === 'html5') this.audio.currentTime = sec;
-                else if (ytBackupReady && ytBackupPlayer && ytBackupPlayer.seekTo) ytBackupPlayer.seekTo(sec, true);
-            }
-
-            async performSearch(query) {
-                document.getElementById('likedSongsSection').style.display = 'none';
-                document.getElementById('socialHubSection').style.display = 'none';
-                document.getElementById('profileSection').style.display = 'none';
-                document.getElementById('homeSections').style.display = 'none';
-                const sec = document.getElementById('searchResultsSection');
-                const listEl = document.getElementById('searchList');
-                sec.style.display = 'block';
-                document.getElementById('searchHeadingText').innerText = `Results for "${query}"`;
-                listEl.innerHTML = `<div style="text-align:center; padding: 30px; color:rgba(255,255,255,0.6);"><i class="fas fa-circle-notch fa-spin"></i> Searching tracks...</div>`;
-
-                const results = await this.searchYouTubeMusicCatalog(query);
-                this.searchResults = results.length > 0 ? results : this.homeCatalog;
-
-                listEl.innerHTML = this.searchResults.map((s, idx) => {
-                    const liked = this.isSongLiked(s.videoId);
-                    return `
-                        <div class="song-row" onclick="app.playFromList('search', ${idx})">
-                            <img id="simg-${idx}" src="${s.img}" onerror="handleImgError(this, '${s.videoId}')">
-                            <div class="song-meta"><h4>${s.name}</h4><p>${s.artist}</p></div>
-                            <div class="row-actions">
-                                <i class="fas fa-heart heart-btn ${liked ? 'liked' : ''}" onclick="app.toggleLikeSong(app.searchResults[${idx}], event)"></i>
-                                <div class="play-circle"><i class="fas fa-play"></i></div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-                this.searchResults.slice(0, 8).forEach((s, idx) => {
-                    const imgDom = document.getElementById(`simg-${idx}`);
-                    this.resolveUltraHDArtwork(s, [imgDom]);
-                });
-            }
-
-            playFromList(source, index) {
-                if (!this.isAdmin && this.roomCode) {
-                    alert("Only the Room Admin can change songs in Listen Together!");
-                    return;
-                }
-                if (source === 'search') this.playlist = this.searchResults;
-                else if (source === 'liked') this.playlist = this.likedSongs;
-                else this.playlist = this.homeCatalog;
-
-                this.loadAndPlay(index, true);
-            }
-
-            async loadAndPlay(index, shouldBroadcast = true) {
-                if (!this.playlist || !this.playlist[index]) return;
-                this.currentIndex = index;
-                const track = this.playlist[index];
-                this.currentTrack = track;
-
-                // Unlock mobile audio context immediately inside user tap gesture!
-                this.audio.pause();
-                if (ytBackupReady && ytBackupPlayer && ytBackupPlayer.stopVideo) ytBackupPlayer.stopVideo();
-
-                document.getElementById('mTitle').innerText = track.name;
-                document.getElementById('mArtist').innerText = track.artist;
-                document.getElementById('fTitle').innerText = track.name;
-                document.getElementById('fArtist').innerText = track.artist;
-
-                const mCov = document.getElementById('mCover');
-                const fCov = document.getElementById('fCover');
-                mCov.src = track.img; fCov.src = track.img;
-                mCov.onerror = () => handleImgError(mCov, track.videoId);
-                fCov.onerror = () => handleImgError(fCov, track.videoId);
-
-                document.getElementById('pOrb1').style.backgroundImage = `url('${track.img}')`;
-                document.getElementById('miniPlayer').classList.add('active');
-                document.getElementById('fullPlayer').classList.add('active');
-                this.updatePlayerLikeIcon();
-
-                this.resolveUltraHDArtwork(track, [mCov, fCov]).then(hd => {
-                    document.getElementById('pOrb1').style.backgroundImage = `url('${hd}')`;
-                });
-
-                this.fetchRedLrcProvider(track.name, track.artist);
-
-                const streamUrl = await this.resolvePlayableStream(track);
-                if (streamUrl) {
-                    this.activeEngine = 'html5';
-                    track.streamUrl = streamUrl;
-                    this.audio.src = streamUrl;
-                    this.audio.currentTime = 0;
-
-                    if (shouldBroadcast && this.isAdmin && this.roomCode && this.members.length > 1) {
-                        this.broadcastToRoom({ type: 'PRELOAD_TRACK', track: track });
-                        setTimeout(() => {
-                            const startTimestamp = Date.now() + 180;
-                            this.broadcastToRoom({ type: 'SCHEDULED_START', time: 0, startAtHostClock: startTimestamp });
-                            setTimeout(() => { this.audio.play().catch(() => {}); }, 180);
-                        }, 400);
-                    } else {
-                        this.audio.play().catch(() => {});
-                    }
-                } else if (ytBackupReady && ytBackupPlayer) {
-                    // Instant Hardware Fallback so song 101% plays even if all stream proxies are busy
-                    this.activeEngine = 'yt_backup';
-                    ytBackupPlayer.loadVideoById(track.videoId);
-                    ytBackupPlayer.playVideo();
-                    this.syncPlayUI(true);
-                }
-            }
-
-            togglePlay() {
-                if (!this.isAdmin && this.roomCode) {
-                    alert("Only the Room Admin can play/pause in Listen Together!");
-                    return;
-                }
-                if (this.activeEngine === 'html5') {
-                    if (!this.audio.src) return;
-                    if (this.audio.paused) this.audio.play().catch(() => {});
-                    else this.audio.pause();
-                } else if (ytBackupReady && ytBackupPlayer) {
-                    if (this.isPlaying) ytBackupPlayer.pauseVideo();
-                    else ytBackupPlayer.playVideo();
-                }
-                this.broadcastZeroDelayState();
-            }
-
-            syncPlayUI(playing) {
-                this.isPlaying = playing;
-                const icon = playing ? 'fa-pause' : 'fa-play';
-                document.getElementById('mPlayBtn').className = `fas ${icon}`;
-                document.getElementById('fPlayBtn').className = `fas ${icon} big-play`;
-                const art = document.getElementById('artContainer');
-                playing ? art.classList.add('playing') : art.classList.remove('playing');
-            }
-
-            nextPrev(step) {
-                if (!this.isAdmin && this.roomCode) return;
-                if (!this.playlist.length) return;
-                this.currentIndex = (this.currentIndex + step + this.playlist.length) % this.playlist.length;
-                this.loadAndPlay(this.currentIndex, true);
             }
 
             // =========================================================================
@@ -1915,9 +1751,7 @@
 
                     if (this.syncInterval) clearInterval(this.syncInterval);
                     this.syncInterval = setInterval(() => {
-                        if (this.isAdmin && this.currentTrack) {
-                            this.broadcastZeroDelayState();
-                        }
+                        if (this.isAdmin && this.currentTrack) this.broadcastZeroDelayState();
                     }, 2000);
                 });
 
@@ -1937,22 +1771,22 @@
                             this.renderRoomMembers();
                             this.broadcastMemberList();
 
-                            if (this.currentTrack) {
+                            if (this.currentTrack && this.audio.src) {
                                 conn.send({
                                     type: 'IMMEDIATE_JOIN_SYNC',
                                     track: this.currentTrack,
-                                    time: this.getCurrentTime(),
-                                    playing: this.isPlaying,
+                                    time: this.audio.currentTime || 0,
+                                    playing: !this.audio.paused,
                                     hostClock: Date.now()
                                 });
                             }
                         } else if (data.type === 'REQUEST_RESYNC') {
-                            if (this.currentTrack) {
+                            if (this.currentTrack && this.audio.src) {
                                 conn.send({
                                     type: 'IMMEDIATE_JOIN_SYNC',
                                     track: this.currentTrack,
-                                    time: this.getCurrentTime(),
-                                    playing: this.isPlaying,
+                                    time: this.audio.currentTime || 0,
+                                    playing: !this.audio.paused,
                                     hostClock: Date.now()
                                 });
                             }
@@ -2000,8 +1834,8 @@
                 if (!this.isAdmin || !this.roomCode) return;
                 this.broadcastToRoom({
                     type: 'HEARTBEAT_SYNC',
-                    time: this.getCurrentTime(),
-                    playing: this.isPlaying,
+                    time: this.audio.currentTime || 0,
+                    playing: !this.audio.paused,
                     hostClock: Date.now()
                 });
             }
@@ -2039,7 +1873,6 @@
                 if (data.type === 'PRELOAD_TRACK' && data.track) {
                     this.currentTrack = data.track;
                     this.updateTrackUIOnly(data.track);
-                    this.activeEngine = 'html5';
                     this.audio.pause();
                     this.audio.src = data.track.streamUrl;
                     this.audio.load();
@@ -2050,10 +1883,8 @@
                 if (data.type === 'SCHEDULED_START') {
                     const currentHostClock = Date.now() + this.clockOffsetMs;
                     const waitMs = Math.max(0, data.startAtHostClock - currentHostClock);
-                    this.seekToTime(data.time || 0);
-                    setTimeout(() => {
-                        this.audio.play().catch(() => {});
-                    }, waitMs);
+                    this.audio.currentTime = data.time || 0;
+                    setTimeout(() => { this.audio.play().catch(() => {}); }, waitMs);
                     return;
                 }
 
@@ -2063,7 +1894,6 @@
                     this.fetchRedLrcProvider(data.track.name, data.track.artist);
 
                     if (data.track.streamUrl) {
-                        this.activeEngine = 'html5';
                         this.audio.src = data.track.streamUrl;
                         this.audio.onloadedmetadata = () => {
                             const currentHostClock = Date.now() + this.clockOffsetMs;
@@ -2081,16 +1911,13 @@
                     const transitSec = Math.max(0, (currentHostClock - data.hostClock) / 1000);
                     const exactExpectedTime = (data.time || 0) + (data.playing ? transitSec : 0);
 
-                    const drift = Math.abs(this.getCurrentTime() - exactExpectedTime);
+                    const drift = Math.abs((this.audio.currentTime || 0) - exactExpectedTime);
                     if (drift > 0.075) {
-                        this.seekToTime(exactExpectedTime);
+                        this.audio.currentTime = exactExpectedTime;
                     }
 
-                    if (data.playing && !this.isPlaying) {
-                        if (this.activeEngine === 'html5') this.audio.play().catch(() => {});
-                    } else if (!data.playing && this.isPlaying) {
-                        if (this.activeEngine === 'html5') this.audio.pause();
-                    }
+                    if (data.playing && this.audio.paused) this.audio.play().catch(() => {});
+                    else if (!data.playing && !this.audio.paused) this.audio.pause();
                 }
             }
 
@@ -2183,34 +2010,60 @@
             }
 
             // =========================================================================
-            // 7. WORD-BY-WORD LYRICS ENGINE ("Lrc by Vishal")
+            // 7. 4-STAGE BULLETPROOF WORD-BY-WORD LYRICS ENGINE ("Lrc by Vishal")
             // =========================================================================
-            async fetchRedLrcProvider(name, artist) {
+            async fetchRedLrcProvider(rawName, rawArtist) {
                 this.lyricsData = [];
                 const box = document.getElementById('lyricsBox');
-                box.innerHTML = `<div style="text-align:center; color:rgba(255,255,255,0.55); margin-top:24vh;"><i class="fas fa-circle-notch fa-spin"></i> Loading word-by-word lyrics...</div>`;
+                box.innerHTML = `<div style="text-align:center; color:rgba(255,255,255,0.55); margin-top:24vh;"><i class="fas fa-circle-notch fa-spin"></i> Syncing live lyrics...</div>`;
 
-                try {
-                    const cleanName = name.replace(/\(.*\)|\[.*\]|-.*$|\|.*$/g, '').trim();
-                    const cleanArtist = artist.split('&')[0].split(',')[0].trim();
+                const { cleanTitle, cleanArtist } = cleanSongMetadata(rawName, rawArtist);
 
-                    let res = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(cleanName + ' ' + cleanArtist)}`);
-                    let data = await res.json();
-                    let synced = Array.isArray(data) ? data.find(d => d.syncedLyrics)?.syncedLyrics : null;
+                const endpoints = [
+                    `https://lrclib.net/api/search?track_name=${encodeURIComponent(cleanTitle)}&artist_name=${encodeURIComponent(cleanArtist)}`,
+                    `https://lrclib.net/api/search?q=${encodeURIComponent(cleanTitle + ' ' + cleanArtist)}`,
+                    `https://lrclib.net/api/search?q=${encodeURIComponent(cleanTitle)}`
+                ];
 
-                    if (!synced) {
-                        res = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(cleanName)}`);
-                        data = await res.json();
-                        synced = Array.isArray(data) ? data.find(d => d.syncedLyrics)?.syncedLyrics : null;
-                    }
+                let syncedLrc = null;
+                let plainLyrics = null;
 
-                    if (synced) {
-                        this.parseWordByWordLRC(synced);
-                    } else {
-                        box.innerHTML = `<div style="text-align:center; color:rgba(255,255,255,0.45); margin-top:24vh;">Lyrics not available for this track</div>`;
-                    }
-                } catch (e) {
-                    box.innerHTML = `<div style="text-align:center; color:rgba(255,255,255,0.45); margin-top:24vh;">Lyrics Offline</div>`;
+                for (let url of endpoints) {
+                    try {
+                        const res = await fetch(url);
+                        const data = await res.json();
+                        if (Array.isArray(data) && data.length > 0) {
+                            const foundSync = data.find(d => d.syncedLyrics);
+                            if (foundSync) {
+                                syncedLrc = foundSync.syncedLyrics;
+                                break;
+                            }
+                            if (!plainLyrics) {
+                                const foundPlain = data.find(d => d.plainLyrics);
+                                if (foundPlain) plainLyrics = foundPlain.plainLyrics;
+                            }
+                        }
+                    } catch (e) {}
+                }
+
+                if (syncedLrc) {
+                    this.parseWordByWordLRC(syncedLrc);
+                } else if (plainLyrics) {
+                    // Auto-build timed LRC from plain lyrics so word-by-word sync ALWAYS works!
+                    const lines = plainLyrics.split('\n').map(l => l.trim()).filter(Boolean);
+                    const totalDur = (this.audio.duration && this.audio.duration > 30) ? this.audio.duration - 10 : lines.length * 3.4;
+                    const secPerLine = Math.max(2.6, Math.min(4.2, totalDur / Math.max(1, lines.length)));
+
+                    const generatedLrc = lines.map((lineText, idx) => {
+                        const tSec = idx * secPerLine + 2.0;
+                        const m = String(Math.floor(tSec / 60)).padStart(2, '0');
+                        const s = String(Math.floor(tSec % 60)).padStart(2, '0');
+                        return `[${m}:${s}.00] ${lineText}`;
+                    }).join('\n');
+
+                    this.parseWordByWordLRC(generatedLrc);
+                } else {
+                    box.innerHTML = `<div style="text-align:center; color:rgba(255,255,255,0.45); margin-top:24vh;">Lyrics not found for "${cleanTitle}"</div>`;
                 }
             }
 
@@ -2237,7 +2090,7 @@
                     lineDiv.className = 'lyric-line';
                     lineDiv.onclick = () => {
                         if (this.isAdmin || !this.roomCode) {
-                            this.seekToTime(row.time);
+                            this.audio.currentTime = row.time;
                             this.broadcastZeroDelayState();
                         }
                     };
@@ -2292,8 +2145,8 @@
                 };
 
                 const tick = () => {
-                    const curr = this.getCurrentTime();
-                    const dur = this.getCurrentDuration();
+                    const curr = this.audio.currentTime || 0;
+                    const dur = this.audio.duration || 0;
 
                     if (dur > 0) {
                         document.getElementById('scrubFill').style.width = `${(curr / dur) * 100}%`;
@@ -2341,7 +2194,7 @@
             }
         }
 
-        window.app = new BoooMasterApp();
+        window.app = new BoooPureZeroAdEngine();
     </script>
 </body>
 </html>
