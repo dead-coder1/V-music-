@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Booo!! Music</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Gun.js Real-Time Cloud Database for Global User Accounts & Live Chat -->
+    <!-- CryptoJS for Direct 320kbps Ad-Free Audio Stream Decryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <!-- Gun.js Cloud Database for Saving User Accounts Across Devices -->
     <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
     <!-- PeerJS for 0ms Listen Together Private Studio Sync -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <!-- YouTube Music / InnerTube Audio Stream Core -->
-    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         :root {
             --easing: cubic-bezier(0.22, 1, 0.36, 1);
@@ -19,12 +19,6 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { background: #030306; color: #fff; overflow: hidden; height: 100vh; width: 100vw; }
-
-        /* In-Viewport 1x1 Stealth InnerTube Mount (Prevents Mobile WebView Autoplay Block) */
-        #innerTubeMount {
-            position: fixed; bottom: 0; right: 0; width: 2px; height: 2px;
-            opacity: 0.001; pointer-events: none; z-index: -10; overflow: hidden;
-        }
 
         /* --- AMBIENT COLOR FLOW BACKGROUND --- */
         .ambient-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #030306; }
@@ -120,7 +114,7 @@
             align-items: center; justify-content: space-between; gap: 10px;
         }
 
-        /* Clean Search Box */
+        /* Clean Search Box (No Extra Mood Pills Below!) */
         .search-box {
             background: rgba(255,255,255,0.08); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.2);
             border-radius: 20px; padding: 11px 15px; display: flex; align-items: center; margin-bottom: 16px;
@@ -135,14 +129,14 @@
         .user-library-bar::-webkit-scrollbar { display: none; }
         .lib-tab-btn {
             flex: 1; justify-content: center;
-            padding: 9px 11px; border-radius: 15px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14);
-            display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap;
+            padding: 10px 11px; border-radius: 15px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14);
+            display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap;
         }
         .lib-tab-btn.active { background: rgba(255, 45, 85, 0.24); border-color: #ff2d55; }
         .lib-tab-btn.owner-tab { border-color: rgba(255, 214, 10, 0.5); background: linear-gradient(135deg, rgba(255, 214, 10, 0.18), rgba(255, 45, 85, 0.12)); }
         .like-count-pill { background: rgba(255, 45, 85, 0.3); color: #fff; padding: 1px 6px; border-radius: 8px; font-size: 10.5px; font-weight: 900; }
 
-        /* --- CLEAN AESTHETIC SEARCH STUDIO EMPTY STATE (NO SUGGESTED SONGS!) --- */
+        /* --- CLEAN AESTHETIC SEARCH STUDIO (NO SUGGESTED SONGS!) --- */
         .search-empty-studio {
             padding: 42px 22px; border-radius: 28px; text-align: center; margin: 12px 0 24px;
             background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
@@ -225,7 +219,7 @@
         .heart-btn.liked { color: #ff2d55; transform: scale(1.15); }
         .play-circle { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; }
 
-        /* --- SOCIAL COMMUNITY: FOLLOW USERS & LIVE REAL-TIME CLOUD CHAT --- */
+        /* --- FOLLOW USERS DIRECTORY --- */
         .social-card {
             padding: 16px; border-radius: 22px; margin-bottom: 16px;
             background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
@@ -242,36 +236,6 @@
         }
         .follow-btn.following { background: rgba(255,255,255,0.15); color: #30d158; border: 1px solid #30d158; }
 
-        .chat-messages-box {
-            height: 250px; overflow-y: auto; padding: 12px; border-radius: 18px;
-            background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.12); margin-bottom: 10px;
-            display: flex; flex-direction: column; gap: 9px; scroll-behavior: smooth;
-        }
-        .chat-bubble {
-            padding: 10px 14px; border-radius: 16px; max-width: 84%; font-size: 13.5px; line-height: 1.38;
-            background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.14); align-self: flex-start;
-        }
-        .chat-bubble.me {
-            background: linear-gradient(135deg, rgba(255,45,85,0.38), rgba(191,90,242,0.38));
-            border-color: rgba(255,45,85,0.55); align-self: flex-end;
-        }
-        .chat-bubble.owner-msg {
-            background: linear-gradient(135deg, rgba(255, 214, 10, 0.28), rgba(255, 45, 85, 0.25));
-            border: 1px solid rgba(255, 214, 10, 0.65);
-            box-shadow: 0 4px 15px rgba(255, 214, 10, 0.15);
-        }
-        .chat-sender { font-size: 11px; font-weight: 800; color: #00d2ff; margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
-        .chat-sender.owner-name { color: #ffd60a; }
-        .chat-input-row { display: flex; gap: 8px; }
-        .chat-input-row input {
-            flex: 1; padding: 12px 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.22);
-            background: rgba(0,0,0,0.5); color: #fff; font-size: 14px; outline: none; user-select: text;
-        }
-        .chat-send-btn {
-            padding: 0 20px; border-radius: 15px; border: none;
-            background: linear-gradient(135deg, #30d158, #00b09b); color: #000; font-weight: 900; font-size: 15px; cursor: pointer;
-        }
-
         .support-card {
             margin-top: 22px; padding: 18px; border-radius: 22px; background: var(--glass); border: 1px solid var(--glass-border); text-align: center; box-shadow: 0 12px 30px rgba(0,0,0,0.4);
         }
@@ -285,14 +249,1857 @@
             transform: translateY(100%); transition: transform 0.4s var(--easing); display: flex; flex-direction: column; padding: 20px 18px 28px; overflow-y: auto;
         }
         #superAdminScreen.active { transform: translateY(0); }
-        .admin-stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
-        .admin-stat-box { padding: 12px 8px; border-radius: 18px; text-align: center; background: linear-gradient(145deg, rgba(255,214,10,0.18), rgba(255,255,255,0.03)); border: 1px solid rgba(255,214,10,0.4); }
-        .admin-stat-num { font-size: 20px; font-weight: 900; color: #ffd60a; }
-        .admin-stat-lbl { font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 700; margin-top: 3px; }
+        .admin-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+        .admin-stat-box { padding: 14px 10px; border-radius: 18px; text-align: center; background: linear-gradient(145deg, rgba(255,214,10,0.18), rgba(255,255,255,0.03)); border: 1px solid rgba(255,214,10,0.4); }
+        .admin-stat-num { font-size: 22px; font-weight: 900; color: #ffd60a; }
+        .admin-stat-lbl { font-size: 10.5px; color: rgba(255,255,255,0.7); font-weight: 700; margin-top: 3px; }
         .user-db-card { padding: 12px; border-radius: 16px; margin-bottom: 9px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); display: flex; justify-content: space-between; align-items: center; }
         .user-db-meta h4 { font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
         .user-db-meta p { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 3px; line-height: 1.35; }
 
         /* --- AESTHETIC FULL-SCREEN LISTEN TOGETHER STUDIO PAGE --- */
         #listenRoomScreen {
-            position: fixed; inset
+            position: fixed; inset: 0; z-index: 500;
+            background: radial-gradient(circle at 50% 15%, rgba(48, 209, 88, 0.16), rgba(94, 92, 230, 0.14), rgba(4, 4, 8, 0.96));
+            backdrop-filter: blur(45px) saturate(190%); -webkit-backdrop-filter: blur(45px) saturate(190%);
+            transform: translateY(100%); transition: transform 0.45s var(--easing);
+            display: flex; flex-direction: column; padding: 20px 20px 22px; overflow-y: auto;
+        }
+        #listenRoomScreen.active { transform: translateY(0); }
+
+        .sync-studio-hero {
+            position: relative; padding: 22px 16px; border-radius: 26px; margin-bottom: 16px; text-align: center;
+            background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.22); overflow: hidden;
+            box-shadow: 0 18px 45px rgba(0,0,0,0.55);
+        }
+        .radar-rings {
+            position: relative; width: 72px; height: 72px; margin: 0 auto 12px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .radar-ring {
+            position: absolute; inset: 0; border-radius: 50%;
+            border: 1.5px solid rgba(48, 209, 88, 0.55);
+            animation: radarPulse 2.4s infinite ease-out;
+        }
+        .radar-ring.r2 { animation-delay: 1.2s; border-color: rgba(0, 242, 254, 0.5); }
+        @keyframes radarPulse {
+            0% { transform: scale(0.7); opacity: 1; }
+            100% { transform: scale(1.75); opacity: 0; }
+        }
+        .radar-core {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: linear-gradient(135deg, #30d158, #00d2ff);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: #000; box-shadow: 0 0 20px rgba(48, 209, 88, 0.5);
+        }
+        .soundwave-bars {
+            display: inline-flex; align-items: flex-end; gap: 3px; height: 14px; margin-left: 6px;
+        }
+        .sw-bar {
+            width: 3px; background: #30d158; border-radius: 2px;
+            animation: waveBounce 0.9s infinite ease-in-out alternate;
+        }
+        .sw-bar:nth-child(2) { animation-delay: 0.2s; height: 100%; }
+        .sw-bar:nth-child(3) { animation-delay: 0.4s; height: 60%; }
+        .sw-bar:nth-child(4) { animation-delay: 0.1s; height: 85%; }
+        @keyframes waveBounce { 0% { height: 25%; } 100% { height: 100%; } }
+
+        .room-top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .room-private-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 14px; background: rgba(48, 209, 88, 0.16); border: 1px solid rgba(48, 209, 88, 0.45); color: #30d158; font-size: 11.5px; font-weight: 800; }
+        .room-box-card { padding: 18px 16px; border-radius: 24px; margin-bottom: 14px; background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03)); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
+        .room-input { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.22); background: rgba(0,0,0,0.45); color: #fff; font-size: 15px; font-weight: 800; text-align: center; letter-spacing: 2px; outline: none; margin: 8px 0 12px; user-select: text; }
+        .room-action-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 13px; border-radius: 15px; font-weight: 800; font-size: 14px; color: #fff; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); margin-bottom: 10px; }
+        .member-list-box { max-height: 170px; overflow-y: auto; margin-top: 10px; border-radius: 16px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; }
+        .member-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+        .member-row:last-child { border-bottom: none; }
+        .member-name { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .admin-tag { font-size: 10px; padding: 2px 7px; border-radius: 8px; background: #ffd60a; color: #000; font-weight: 900; }
+        .kick-btn { padding: 5px 12px; border-radius: 10px; background: rgba(255, 59, 48, 0.22); border: 1px solid #ff3b30; color: #ff453a; font-size: 11.5px; font-weight: 800; cursor: pointer; }
+
+        .coded-by-vishal-box {
+            margin: auto auto 0; padding: 9px 22px; border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05));
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255,255,255,0.32);
+            font-size: 12.5px; font-weight: 900; letter-spacing: 0.5px; color: #fff;
+            display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.55), inset 0 1px 2px rgba(255,255,255,0.4);
+        }
+
+        /* --- SUPPORT MODAL --- */
+        .glass-modal { position: fixed; inset: 0; z-index: 600; background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 18px; }
+        .glass-modal.active { opacity: 1; pointer-events: auto; }
+        .modal-glass-card { width: 100%; max-width: 340px; padding: 24px 20px; border-radius: 28px; background: linear-gradient(145deg, rgba(255,255,255,0.17), rgba(255,255,255,0.04)); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.28); text-align: center; }
+        .modal-btn { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 13px 16px; margin-bottom: 10px; border-radius: 15px; background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.16); color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; cursor: pointer; }
+
+        /* --- MINI & FULL PLAYERS --- */
+        #miniPlayer {
+            position: fixed; bottom: 14px; left: 14px; right: 14px; height: 64px;
+            background: linear-gradient(135deg, rgba(45,45,55,0.9), rgba(18,18,26,0.96)); backdrop-filter: blur(25px);
+            border: 1px solid rgba(255,255,255,0.22); border-radius: 20px; display: flex; align-items: center; padding: 0 14px; z-index: 50;
+            transform: translateY(150%); transition: transform 0.4s var(--easing); cursor: pointer; box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+        }
+        #miniPlayer.active { transform: translateY(0); }
+        #mCover { width: 46px; height: 46px; border-radius: 12px; margin-right: 12px; object-fit: cover; }
+
+        #fullPlayer {
+            position: fixed; inset: 0; z-index: 200; transform: translateY(100%); transition: transform 0.5s var(--easing);
+            display: flex; flex-direction: column; background: rgba(6, 6, 10, 0.9); backdrop-filter: blur(40px); overflow: hidden;
+        }
+        #fullPlayer.active { transform: translateY(0); }
+
+        .player-ambient-layer { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+        .flow-orb {
+            position: absolute; width: 130%; height: 130%; top: -15%; left: -15%; background-size: cover; background-position: center;
+            filter: blur(55px) saturate(200%) brightness(0.42); will-change: transform; animation: spinFlow 24s infinite linear;
+        }
+        @keyframes spinFlow { 100% { transform: rotate(360deg); } }
+
+        .player-top-bar { padding: 18px 22px 8px; display: flex; justify-content: space-between; align-items: center; z-index: 5; }
+        .drag-pill { width: 42px; height: 5px; background: rgba(255,255,255,0.38); border-radius: 5px; cursor: pointer; }
+        .vibe-status-chip {
+            font-size: 10.5px; font-weight: 800; padding: 4px 10px; border-radius: 12px;
+            background: rgba(48, 209, 88, 0.18); border: 1px solid rgba(48, 209, 88, 0.45); color: #30d158;
+        }
+
+        .art-box {
+            width: 76%; max-width: 300px; aspect-ratio: 1/1; margin: 12px auto; border-radius: 26px; overflow: hidden;
+            box-shadow: 0 28px 65px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.18); transition: transform 0.45s var(--easing);
+        }
+        .art-box.playing { transform: scale(1.04); }
+        .art-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        .player-controls-area { padding: 0 26px; margin-top: auto; margin-bottom: 30px; z-index: 5; }
+        .track-header-row { display: flex; justify-content: space-between; align-items: center; }
+        .track-header { flex: 1; overflow: hidden; margin-right: 12px; }
+        .track-header h2 { font-size: 22px; font-weight: 800; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-header p { font-size: 15.5px; color: rgba(255,255,255,0.68); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .player-like-btn { font-size: 24px; color: rgba(255,255,255,0.4); cursor: pointer; transition: 0.2s; }
+        .player-like-btn.liked { color: #ff2d55; transform: scale(1.15); }
+
+        .scrub-zone { margin: 20px 0; padding: 6px 0; cursor: pointer; }
+        .scrub-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.22); border-radius: 6px; overflow: hidden; }
+        .scrub-fill { width: 0%; height: 100%; background: #fff; border-radius: 6px; box-shadow: 0 0 10px #fff; }
+        .scrub-time { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.58); margin-top: 8px; font-weight: 600; }
+
+        .main-transport { display: flex; justify-content: space-between; align-items: center; padding: 0 12px; margin-bottom: 22px; }
+        .main-transport i { font-size: 26px; color: #fff; cursor: pointer; transition: 0.2s; }
+        .main-transport .big-play { font-size: 46px; }
+        .shuffle-toggle.active { color: #30d158; text-shadow: 0 0 12px rgba(48, 209, 88, 0.6); }
+
+        .player-bottom-dock { display: flex; justify-content: space-between; align-items: center; padding: 10px 18px; border-radius: 20px; background: var(--glass); border: 1px solid var(--glass-border); }
+        .dock-item { font-size: 12.5px; font-weight: 700; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+
+        /* --- LYRICS SCREEN --- */
+        #lyricsView {
+            position: absolute; inset: 0; z-index: 120; background: rgba(5, 5, 10, 0.88); backdrop-filter: blur(45px);
+            display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.35s ease;
+        }
+        #lyricsView.active { opacity: 1; pointer-events: auto; }
+        .lrc-header { padding: 18px 22px 12px; display: flex; justify-content: space-between; align-items: center; z-index: 130; }
+        .lrc-vishal-box { padding: 6px 15px; border-radius: 16px; background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04)); border: 1px solid rgba(255,255,255,0.28); font-size: 12px; font-weight: 800; color: #fff; display: inline-flex; align-items: center; gap: 6px; }
+        #lyricsBox { flex: 1; overflow-y: auto; padding: 55px 24px 50vh; scroll-behavior: smooth; }
+        #lyricsBox::-webkit-scrollbar { display: none; }
+
+        .lyric-line { font-size: 27px; font-weight: 800; margin-bottom: 26px; line-height: 1.38; transition: transform 0.3s var(--easing), opacity 0.3s ease; opacity: 0.28; cursor: pointer; }
+        .lyric-line.past { opacity: 0.45; }
+        .lyric-line.active { transform: scale(1.04); opacity: 1; }
+        .lyric-word { display: inline-block; margin-right: 7px; color: rgba(255, 255, 255, 0.28); transition: transform 0.14s ease; }
+        .lyric-word.sung { color: #ffffff; transform: translateY(-2.5px) scale(1.03); text-shadow: 0 0 14px rgba(255, 255, 255, 0.5); }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-bg">
+        <div class="amb-orb orb-1" id="amb1"></div>
+        <div class="amb-orb orb-2" id="amb2"></div>
+    </div>
+
+    <!-- 1. MANDATORY ACCOUNT LOGIN / REGISTER SCREEN -->
+    <div id="authScreen">
+        <div class="auth-glass-card">
+            <div class="booo-edge-box" style="cursor: default;">
+                <div class="booo-inner-glass">Booo!!</div>
+            </div>
+            <div class="auth-title">Welcome to Booo!!</div>
+            <div class="auth-sub">Sign in or create your account to continue</div>
+
+            <div id="authErrorMsg">Incorrect password!</div>
+
+            <input type="text" id="authUser" class="auth-input" placeholder="Enter Username" maxlength="18" autocomplete="off">
+            <input type="password" id="authPass" class="auth-input" placeholder="Enter Password" autocomplete="off">
+
+            <div class="password-warning-box">
+                <i class="fas fa-triangle-exclamation"></i>
+                <span><b>Important:</b> Never forget your password! There is no "Forgot Password" option, and your account cannot be recovered if you lose it.</span>
+            </div>
+
+            <button class="auth-submit-btn" id="authSubmitBtn">Sign In / Register</button>
+        </div>
+    </div>
+
+    <!-- 2. SUPER ADMIN OWNER DASHBOARD (SECRET OWNER PANEL) -->
+    <div id="superAdminScreen">
+        <div class="room-top-header">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <i class="fas fa-arrow-left" onclick="app.closeSuperAdmin()" style="font-size:20px; cursor:pointer; padding:6px;"></i>
+                <h2 style="font-size:19px; font-weight:900; color:#ffd60a;"><i class="fas fa-crown"></i> Supreme Owner Hub</h2>
+            </div>
+            <div class="room-private-badge" style="background:rgba(255,214,10,0.2); border-color:#ffd60a; color:#ffd60a;">@deadvishaal</div>
+        </div>
+
+        <div class="admin-stat-grid">
+            <div class="admin-stat-box">
+                <div class="admin-stat-num" id="admTotalUsers">0</div>
+                <div class="admin-stat-lbl">Total Registered Users</div>
+            </div>
+            <div class="admin-stat-box">
+                <div class="admin-stat-num" id="admTotalLikes">0</div>
+                <div class="admin-stat-lbl">Total Saved Likes</div>
+            </div>
+        </div>
+
+        <!-- Global Broadcast Announcement -->
+        <div class="room-box-card">
+            <h3 style="font-size:14.5px; font-weight:800; margin-bottom:6px; color:#ffd60a;"><i class="fas fa-bullhorn"></i> Broadcast Notice to All Users</h3>
+            <input type="text" id="adminBroadcastInput" class="room-input" placeholder="Type global announcement..." style="letter-spacing:normal; font-size:13.5px; margin:4px 0 8px;">
+            <div style="display:flex; gap:8px;">
+                <div class="room-action-btn" onclick="app.publishGlobalAnnouncement()" style="flex:1; background:linear-gradient(135deg,#ffd60a,#ff9f0a); color:#000; border:none; margin:0; padding:9px; font-size:12.5px;">
+                    <i class="fas fa-paper-plane"></i> Publish Notice
+                </div>
+                <div class="room-action-btn" onclick="app.clearGlobalAnnouncement()" style="background:rgba(255,59,48,0.2); border-color:#ff3b30; color:#ff453a; margin:0; padding:9px; width:auto; font-size:12.5px;">
+                    Remove
+                </div>
+            </div>
+        </div>
+
+        <!-- Registered Accounts, Passwords, Followers & VIP Verification -->
+        <div class="room-box-card" style="flex:1;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h3 style="font-size:14.5px; font-weight:800;"><i class="fas fa-users-gear" style="color:#30d158; margin-right:6px;"></i>All Cloud User Accounts & Passwords</h3>
+                <span style="font-size:11px; color:#ffd60a; font-weight:800; cursor:pointer;" onclick="app.adminAddTestUser()">+ Add User</span>
+            </div>
+            <div id="adminUsersDirectory" style="max-height:320px; overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <!-- 3. AESTHETIC FULL-SCREEN LISTEN TOGETHER STUDIO SCREEN (WITH CODED BY VISHAL) -->
+    <div id="listenRoomScreen">
+        <div class="room-top-header">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <i class="fas fa-arrow-left" onclick="app.closeRoomScreen()" style="font-size:20px; cursor:pointer; padding:6px;"></i>
+                <h2 style="font-size:21px; font-weight:900;">Listen Together</h2>
+            </div>
+            <div class="room-private-badge">
+                <i class="fas fa-lock"></i> Private Studio
+                <div class="soundwave-bars">
+                    <div class="sw-bar"></div><div class="sw-bar"></div><div class="sw-bar"></div><div class="sw-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sync-studio-hero">
+            <div class="radar-rings">
+                <div class="radar-ring"></div>
+                <div class="radar-ring r2"></div>
+                <div class="radar-core"><i class="fas fa-satellite-dish"></i></div>
+            </div>
+            <h3 style="font-size:18px; font-weight:900; margin-bottom:3px;" id="studioMainTitle">Spatial Audio Sync Studio</h3>
+            <p style="font-size:12px; color:rgba(255,255,255,0.65);" id="studioSubTitle">Zero-latency private room controlled by Room Admin</p>
+        </div>
+
+        <div id="roomSetupPanel">
+            <div class="room-box-card">
+                <h3 style="font-size:15.5px; font-weight:800; margin-bottom:4px;"><i class="fas fa-crown" style="color:#ffd60a; margin-right:6px;"></i>Create Private Room (Admin)</h3>
+                <p style="font-size:11.5px; color:rgba(255,255,255,0.6); margin-bottom:8px;">Create a secret code. You control playback and can remove any member.</p>
+                <input type="text" id="createCodeInput" class="room-input" placeholder="SET SECRET CODE (e.g. 4590)" maxlength="6">
+                <div class="room-action-btn" onclick="app.createPrivateRoom()" style="background: linear-gradient(135deg, #30d158, #00b09b); border:none; color:#000;">
+                    <i class="fas fa-plus-circle"></i> Launch Private Room
+                </div>
+            </div>
+
+            <div class="room-box-card">
+                <h3 style="font-size:15.5px; font-weight:800; margin-bottom:4px;"><i class="fas fa-link" style="color:#ff2d55; margin-right:6px;"></i>Join Friend's Private Room</h3>
+                <p style="font-size:11.5px; color:rgba(255,255,255,0.6); margin-bottom:8px;">Enter your friend's room code for instant 0ms synchronized playback.</p>
+                <input type="text" id="joinCodeInput" class="room-input" placeholder="ENTER PRIVATE ROOM CODE" maxlength="6">
+                <div class="room-action-btn" onclick="app.joinPrivateRoom()" style="background: linear-gradient(135deg, #ff2d55, #bf5af2); border:none;">
+                    <i class="fas fa-bolt"></i> Connect & Sync Now
+                </div>
+            </div>
+        </div>
+
+        <div id="roomDashboardPanel" style="display: none;">
+            <div class="room-box-card" style="text-align:center;">
+                <div style="font-size:11px; font-weight:800; color:#30d158; text-transform:uppercase; letter-spacing:1px;" id="syncLatencyBadge">0ms NTP Clock Locked</div>
+                <div id="activeRoomCodeDisplay" style="font-size:32px; font-weight:900; letter-spacing:4px; margin:6px 0; color:#ffd60a;">#0000</div>
+                <div id="activeRoleBadge" style="font-size:12.5px; color:rgba(255,255,255,0.8); font-weight:700;">Role: Room Admin</div>
+
+                <div style="display:flex; gap:10px; margin-top:16px;">
+                    <div class="room-action-btn" onclick="app.forceZeroGapSync()" style="flex:1; background:rgba(0,210,255,0.2); border-color:rgba(0,210,255,0.5); margin:0; font-size:12.5px;">
+                        <i class="fas fa-rotate" style="color:#00d2ff;"></i> Re-Sync (0ms Gap)
+                    </div>
+                    <div class="room-action-btn" onclick="app.leaveRoom()" style="flex:1; background:rgba(255,59,48,0.2); border-color:rgba(255,59,48,0.5); margin:0; font-size:12.5px; color:#ff453a;">
+                        <i class="fas fa-power-off"></i> Leave Room
+                    </div>
+                </div>
+            </div>
+
+            <div class="room-box-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h4 style="font-size:15px; font-weight:800;"><i class="fas fa-users" style="color:#30d158; margin-right:6px;"></i>Connected Listeners</h4>
+                    <span id="roomUserCountBadge" style="background:rgba(48,209,88,0.2); color:#30d158; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:800;">1 Online</span>
+                </div>
+                <div class="member-list-box" id="roomMembersList"></div>
+            </div>
+        </div>
+
+        <div class="coded-by-vishal-box">
+            <i class="fas fa-code" style="color:#ff2d55;"></i>
+            <span>Coded by Vishal</span>
+        </div>
+    </div>
+
+    <!-- SUPPORT MODAL -->
+    <div id="supportModal" class="glass-modal">
+        <div class="modal-glass-card">
+            <h3 style="font-size: 21px; font-weight: 900; margin-bottom: 5px;">Support Us</h3>
+            <p style="font-size: 12.5px; color: rgba(255,255,255,0.6); margin-bottom: 18px;">Connect with the creator on Instagram</p>
+            <a href="https://instagram.com/deadvishaal" target="_blank" class="modal-btn">
+                <span><i class="fab fa-instagram" style="margin-right: 10px; color:#ff2d55;"></i> @deadvishaal</span>
+                <i class="fas fa-chevron-right" style="font-size: 13px; opacity: 0.6;"></i>
+            </a>
+            <a href="https://instagram.com/vishexui" target="_blank" class="modal-btn">
+                <span><i class="fab fa-instagram" style="margin-right: 10px; color:#bf5af2;"></i> @vishexui</span>
+                <i class="fas fa-chevron-right" style="font-size: 13px; opacity: 0.6;"></i>
+            </a>
+            <div class="modal-btn" onclick="app.switchAccount()" style="justify-content:center; background:rgba(255,59,48,0.2); border-color:rgba(255,59,48,0.5); color:#ff6961; margin-top:10px;">
+                <span><i class="fas fa-right-from-bracket" style="margin-right:8px;"></i> Log Out / Switch Account</span>
+            </div>
+            <div id="closeSupportBtn" style="margin-top: 8px; font-size: 13.5px; color: rgba(255,255,255,0.55); cursor: pointer; font-weight: 700; padding: 6px;">Close</div>
+        </div>
+    </div>
+
+    <!-- TOP NAVBAR -->
+    <div class="top-navbar">
+        <div class="booo-edge-box" onclick="app.showHome()">
+            <div class="booo-inner-glass">Booo!!</div>
+        </div>
+        <div class="nav-actions">
+            <div class="glass-pill admin-pill" id="topAdminBtn" onclick="app.openSuperAdmin()">
+                <i class="fas fa-crown"></i><span>Owner Hub</span>
+            </div>
+            <div class="glass-pill" id="topSyncBtn">
+                <span class="sync-dot" id="navSyncDot"></span>
+                <i class="fas fa-users-rays"></i>
+                <span id="navSyncLabel">Listen Together</span>
+            </div>
+            <div class="glass-pill" id="topSupportBtn">
+                <i class="fab fa-instagram"></i>
+                <span>Support Us</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP INTERFACE -->
+    <div class="main-scroll">
+        <div id="globalNoticeBanner">
+            <span><i class="fas fa-bullhorn" style="color:#ffd60a; margin-right:8px;"></i><span id="globalNoticeText"></span></span>
+        </div>
+
+        <!-- Clean Search Bar -->
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search song or artist to play...">
+            <button class="search-go" id="searchBtn">Search</button>
+        </div>
+
+        <!-- Navigation Bar (Chat Removed!) -->
+        <div class="user-library-bar">
+            <div class="lib-tab-btn active" id="tabDiscoverBtn" onclick="app.showHome()">
+                <i class="fas fa-magnifying-glass" style="color:#bf5af2;"></i><span>Search</span>
+            </div>
+            <div class="lib-tab-btn" id="tabLikedBtn" onclick="app.showLikedSongs()">
+                <i class="fas fa-heart" style="color:#ff2d55;"></i><span>Liked</span>
+                <span class="like-count-pill" id="myLikesCountBadge">0</span>
+            </div>
+            <div class="lib-tab-btn" id="tabSocialBtn" onclick="app.showSocialHub()">
+                <i class="fas fa-user-plus" style="color:#30d158;"></i><span>Users</span>
+            </div>
+            <div class="lib-tab-btn" id="tabProfileBtn" onclick="app.showProfileSection()">
+                <i class="fas fa-crown" id="navProfileIcon" style="color:#00d2ff;"></i><span id="navUserShort">@me</span>
+            </div>
+        </div>
+
+        <!-- ROYAL AESTHETIC ACCOUNT PROFILE SECTION -->
+        <div id="profileSection" style="display: none; margin-bottom: 28px;">
+            <div class="aesthetic-profile-card" id="profileMainCard">
+                <div id="ownerCrownBanner" style="display:none;">
+                    <span class="owner-crown-badge"><i class="fas fa-crown"></i> Supreme Founder & Owner</span>
+                </div>
+                <div class="profile-avatar-ring">
+                    <div class="profile-avatar-inner" id="profileAvatarLetter">V</div>
+                </div>
+                <div class="profile-uname">
+                    <span id="profileDisplayName">@username</span>
+                    <i class="fas fa-circle-check verified-tick" id="profileVerifiedTick"></i>
+                </div>
+                <div class="profile-bio" id="profileBioText">Music Lover • Booo!! Streaming Member</div>
+
+                <div class="profile-stats-row">
+                    <div>
+                        <div class="p-stat-num" id="pStatFollowers">0</div>
+                        <div class="p-stat-lbl">Followers</div>
+                    </div>
+                    <div>
+                        <div class="p-stat-num" id="pStatFollowing">0</div>
+                        <div class="p-stat-lbl">Following</div>
+                    </div>
+                    <div>
+                        <div class="p-stat-num" id="pStatLikes">0</div>
+                        <div class="p-stat-lbl">Liked Songs</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <div class="room-action-btn" id="ownerOpenAdminBtn" onclick="app.openSuperAdmin()" style="display:none; flex:1; background:linear-gradient(135deg,#ffd60a,#ff9f0a); color:#000; border:none; margin:0; font-size:13px;">
+                        <i class="fas fa-crown"></i> Open Owner Control Hub
+                    </div>
+                    <div class="room-action-btn" onclick="app.switchAccount()" style="flex:1; background:rgba(255,59,48,0.2); border-color:#ff3b30; color:#ff6961; margin:0; font-size:13px;">
+                        <i class="fas fa-right-from-bracket"></i> Log Out
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LIKED SONGS SECTION -->
+        <div id="likedSongsSection" style="display: none; margin-bottom: 28px;">
+            <div class="section-heading">
+                <span>My Favorite Songs</span>
+                <span class="section-sub" id="likedUserSub">@user</span>
+            </div>
+            <div id="likedSongsList"></div>
+        </div>
+
+        <!-- USERS FOLLOW SECTION (CHAT REMOVED) -->
+        <div id="socialHubSection" style="display: none; margin-bottom: 28px;">
+            <div class="section-heading">
+                <span>Discover & Follow Users</span>
+                <span class="section-sub" id="communityUsersCount">0 Users</span>
+            </div>
+            <div class="social-card" id="discoverUsersList"></div>
+        </div>
+
+        <!-- SEARCH RESULTS & VIBE SHUFFLE QUEUE SECTION -->
+        <div id="searchResultsSection" style="display: none; margin-bottom: 28px;">
+            <div class="section-heading">
+                <span id="searchHeadingText">Search Results</span>
+                <span class="section-sub" style="color:#30d158;"><i class="fas fa-shuffle"></i> Vibe Shuffle Active</span>
+            </div>
+            <div id="searchList"></div>
+        </div>
+
+        <!-- CLEAN AESTHETIC SEARCH STUDIO (NO SUGGESTED SONGS!) -->
+        <div id="homeSections">
+            <div class="search-empty-studio">
+                <div class="studio-pulse-circle">
+                    <i class="fas fa-compact-disc fa-spin" style="animation-duration: 8s;"></i>
+                </div>
+                <h2 style="font-size: 21px; font-weight: 900; margin-bottom: 6px;">Search Your Vibe</h2>
+                <p style="font-size: 13px; color: rgba(255,255,255,0.6); max-width: 260px; margin: 0 auto; line-height: 1.45;">
+                    Type any song or artist above. Your music plays 100% Ad-Free and shuffles automatically based on your vibe.
+                </p>
+                <div class="vibe-shuffle-pill">
+                    <i class="fas fa-wand-magic-sparkles"></i> Smart Vibe Auto-Shuffle Enabled
+                </div>
+            </div>
+
+            <div class="support-card">
+                <h4><i class="fab fa-instagram" style="color:#ff2d55;"></i> Support Us</h4>
+                <div class="insta-grid">
+                    <a href="https://instagram.com/deadvishaal" target="_blank" class="insta-chip"><i class="fab fa-instagram"></i> @deadvishaal</a>
+                    <a href="https://instagram.com/vishexui" target="_blank" class="insta-chip"><i class="fab fa-instagram"></i> @vishexui</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MINI PLAYER -->
+    <div id="miniPlayer">
+        <img id="mCover" src="">
+        <div class="song-meta" id="openFullBtn" style="margin-right: 12px; flex:1; overflow:hidden;">
+            <h4 id="mTitle" style="font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Select a song</h4>
+            <p id="mArtist" style="font-size:12px; color:rgba(255,255,255,0.6);">Booo!! Music</p>
+        </div>
+        <i class="fas fa-play" id="mPlayBtn" style="font-size: 21px; padding: 10px;"></i>
+    </div>
+
+    <!-- FULL SCREEN PLAYER -->
+    <div id="fullPlayer">
+        <div class="player-ambient-layer"><div class="flow-orb" id="pOrb1"></div></div>
+        <div class="player-top-bar">
+            <span class="vibe-status-chip"><i class="fas fa-shuffle"></i> Vibe Shuffle</span>
+            <div class="drag-pill" id="closeFullBtn"></div>
+            <i class="fas fa-chevron-down" id="closeFullIcon" style="color:rgba(255,255,255,0.6); cursor:pointer; font-size: 18px;"></i>
+        </div>
+
+        <div id="lyricsView">
+            <div class="lrc-header">
+                <div class="lrc-vishal-box"><i class="fas fa-wand-magic-sparkles" style="color:#30d158;"></i><span>Lrc by Vishal</span></div>
+                <div class="drag-pill" id="closeLyricsBtn" style="margin: 0;"></div>
+                <i class="fas fa-xmark" onclick="document.getElementById('lyricsView').classList.remove('active')" style="color:rgba(255,255,255,0.6); font-size:18px; cursor:pointer;"></i>
+            </div>
+            <div id="lyricsBox"></div>
+        </div>
+
+        <div class="art-box" id="artContainer"><img id="fCover" src=""></div>
+
+        <div class="player-controls-area">
+            <div class="track-header-row">
+                <div class="track-header">
+                    <h2 id="fTitle">Song Title</h2>
+                    <p id="fArtist">Artist</p>
+                </div>
+                <i class="fas fa-heart player-like-btn" id="playerLikeBtn" onclick="app.toggleCurrentSongLike()"></i>
+            </div>
+
+            <div class="scrub-zone" id="scrubBar">
+                <div class="scrub-bg"><div class="scrub-fill" id="scrubFill"></div></div>
+                <div class="scrub-time"><span id="tCurrent">0:00</span><span id="tDuration">0:00</span></div>
+            </div>
+
+            <div class="main-transport">
+                <i class="fas fa-shuffle shuffle-toggle active" id="shuffleBtn" onclick="app.toggleVibeShuffle()" title="Vibe Shuffle"></i>
+                <i class="fas fa-backward-step" id="prevBtn"></i>
+                <i class="fas fa-play big-play" id="fPlayBtn"></i>
+                <i class="fas fa-forward-step" id="nextBtn"></i>
+                <i class="fas fa-repeat" onclick="app.replayCurrent()" style="font-size:22px; opacity:0.75;"></i>
+            </div>
+
+            <div class="player-bottom-dock">
+                <div class="dock-item" id="toggleLyricsBtn"><i class="fas fa-quote-left"></i> Lyrics</div>
+                <div class="dock-item" id="playerSyncBtn"><i class="fas fa-users-rays" style="color:#30d158;"></i> Listen Together</div>
+                <div class="dock-item" id="playerSupportBtn"><i class="fab fa-instagram" style="color:#bf5af2;"></i> Support Us</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // C-Style 64-Bit DES Decryptor for Direct 320kbps Ad-Free Audio Streams
+        function decryptStreamCipher(encryptedBase64) {
+            if (!encryptedBase64) return null;
+            try {
+                const keyHex = CryptoJS.enc.Utf8.parse("38346591");
+                const decrypted = CryptoJS.DES.decrypt(
+                    { ciphertext: CryptoJS.enc.Base64.parse(encryptedBase64) },
+                    keyHex,
+                    { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 }
+                );
+                let url = decrypted.toString(CryptoJS.enc.Utf8);
+                return url.replace(/_96\.mp4|_160\.mp4|_96_p\.mp4/g, "_320.mp4")
+                          .replace("preview.saavncdn.com", "aac.saavncdn.com");
+            } catch (err) { return null; }
+        }
+
+        // Deep Sanitizer so Lyrics & Stream Matching Always Succeed
+        function cleanSongMetadata(rawTitle, rawArtist) {
+            let title = (rawTitle || '')
+                .replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&amp;/g, '&')
+                .replace(/\(.*?\)|\[.*?\]|\{.*?\}/g, '')
+                .replace(/official\s*video|official\s*music\s*video|official\s*audio|lyrical\s*video|lyric\s*video|full\s*video|full\s*song|full\s*audio|lyrics|lyrical|audio|video|hd|4k|8k|remastered|feat\.|ft\./gi, '')
+                .replace(/\|.*$/g, '')
+                .trim();
+
+            if (title.includes(' - ')) {
+                const parts = title.split(' - ');
+                title = parts[parts.length - 1].trim() || parts[0].trim();
+            }
+
+            let artist = (rawArtist || '')
+                .replace(/&quot;/g, '"').replace(/&#039;/g, "'")
+                .replace(/ - Topic|VEVO|Official/gi, '')
+                .split(',')[0].split('&')[0].split('|')[0]
+                .trim();
+
+            return { cleanTitle: title || rawTitle, cleanArtist: artist || rawArtist };
+        }
+
+        class BoooAllInOneEngine {
+            constructor() {
+                this._ownerU = atob("ZGVhZHZpc2hhYWw="); // deadvishaal
+                this._ownerP = atob("c2hhbnRpZGV2aTA3"); // shantidevi07
+
+                // Pure HTML5 <audio> Element -> 0% Ads Ever, Instant Play, Millisecond Sync!
+                this.audio = new Audio();
+                this.audio.preload = "auto";
+
+                this.playlist = [];
+                this.searchResults = [];
+                this.likedSongs = [];
+                this.playedHistoryIds = new Set();
+                this.vibeShuffleEnabled = true;
+                this.currentIndex = 0;
+                this.currentTrack = null;
+                this.isPlaying = false;
+                this.lyricsData = [];
+                this.artCache = {};
+
+                // Account, Cloud DB & Zero-Delay NTP Sync State
+                this.username = "";
+                this.isSuperAdmin = false;
+                this.peer = null;
+                this.isAdmin = false;
+                this.roomCode = null;
+                this.hostConn = null;
+                this.members = [];
+                this.clockOffsetMs = 0;
+                this.syncInterval = null;
+
+                this.initCloudDatabase();
+                this.initAccountSystem();
+                this.checkGlobalAnnouncement();
+                this.bindEvents();
+                this.start60FPSLoop();
+            }
+
+            // =========================================================================
+            // 1. CLOUD USER DATA SAVING & ROYAL OWNER AESTHETIC ACCOUNT
+            // =========================================================================
+            initCloudDatabase() {
+                const db = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+                db[this._ownerU] = {
+                    username: this._ownerU,
+                    password: this._ownerP,
+                    role: 'OWNER',
+                    verified: true,
+                    bio: '👑 Founder & Lead Developer of Booo!! Music • UI/UX Architect (@vishexui)',
+                    followersCountBonus: 10800,
+                    followers: db[this._ownerU]?.followers || ['vishexui', 'aryan_music', 'sneha_vibes'],
+                    following: db[this._ownerU]?.following || ['vishexui'],
+                    likedSongs: db[this._ownerU]?.likedSongs || [],
+                    lastLogin: 'Online Now'
+                };
+
+                if (Object.keys(db).length < 3) {
+                    db['vishexui'] = db['vishexui'] || {
+                        username: 'vishexui', password: 'ui_user99', role: 'VIP DESIGNER', verified: true,
+                        bio: 'Official Design Studio • @vishexui', followersCountBonus: 4200,
+                        followers: ['deadvishaal'], following: ['deadvishaal'], likedSongs: [], lastLogin: 'Online'
+                    };
+                    db['aryan_music'] = db['aryan_music'] || {
+                        username: 'aryan_music', password: 'aryan2025', role: 'USER', verified: false,
+                        bio: 'Late night music listener 🎧', followersCountBonus: 14,
+                        followers: [], following: ['deadvishaal', 'vishexui'], likedSongs: [], lastLogin: 'Today'
+                    };
+                }
+                localStorage.setItem('booo_users_master_db', JSON.stringify(db));
+
+                try {
+                    this.gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
+                    this.gun.get('booo_global_v3_users').map().on((payload, uname) => {
+                        if (payload && payload.json && uname) {
+                            try {
+                                const parsedUser = JSON.parse(payload.json);
+                                const localDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+                                localDB[uname] = parsedUser;
+                                localStorage.setItem('booo_users_master_db', JSON.stringify(localDB));
+                                if (document.getElementById('superAdminScreen').classList.contains('active')) {
+                                    this.renderSuperAdminDashboard();
+                                }
+                            } catch (e) {}
+                        }
+                    });
+                } catch (e) {}
+            }
+
+            saveUserToCloudAndLocal(username, userObj) {
+                const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+                masterDB[username] = userObj;
+                localStorage.setItem('booo_users_master_db', JSON.stringify(masterDB));
+
+                if (this.gun) {
+                    try {
+                        this.gun.get('booo_global_v3_users').get(username).put({
+                            json: JSON.stringify(userObj),
+                            updatedAt: Date.now()
+                        });
+                    } catch (e) {}
+                }
+            }
+
+            initAccountSystem() {
+                const savedSession = localStorage.getItem('booo_active_user');
+                const db = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+
+                if (savedSession && db[savedSession]) {
+                    this.completeLogin(savedSession, db[savedSession]);
+                }
+
+                document.getElementById('authSubmitBtn').onclick = () => {
+                    const rawUser = document.getElementById('authUser').value.trim();
+                    const u = rawUser.toLowerCase() === this._ownerU ? this._ownerU : rawUser;
+                    const p = document.getElementById('authPass').value.trim();
+                    const errEl = document.getElementById('authErrorMsg');
+
+                    if (u.length < 2 || p.length < 3) {
+                        errEl.innerText = "Username (min 2 chars) & Password (min 3 chars) required!";
+                        errEl.style.display = 'block';
+                        return;
+                    }
+
+                    const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+
+                    if (u.toLowerCase() === this._ownerU) {
+                        if (p !== this._ownerP) {
+                            errEl.innerText = "Incorrect Owner Password!";
+                            errEl.style.display = 'block';
+                            return;
+                        }
+                    } else if (masterDB[u] && masterDB[u].password !== p) {
+                        errEl.innerText = "Incorrect password! Passwords cannot be reset.";
+                        errEl.style.display = 'block';
+                        return;
+                    }
+
+                    const userRecord = masterDB[u] || {
+                        username: u, password: p, role: 'USER', verified: false,
+                        bio: 'Streaming on Booo!! Music 🎵', followersCountBonus: 0,
+                        followers: [], following: [this._ownerU], likedSongs: []
+                    };
+                    userRecord.lastLogin = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    this.saveUserToCloudAndLocal(u, userRecord);
+                    localStorage.setItem('booo_active_user', u);
+                    errEl.style.display = 'none';
+                    this.completeLogin(u, userRecord);
+                };
+            }
+
+            completeLogin(username, userObj) {
+                this.username = username;
+                this.isSuperAdmin = (username === this._ownerU);
+                this.likedSongs = userObj.likedSongs || [];
+
+                document.getElementById('authScreen').classList.add('hidden');
+                document.getElementById('navUserShort').innerText = `@${username}`;
+                document.getElementById('likedUserSub').innerText = `@${username}`;
+                document.getElementById('myLikesCountBadge').innerText = this.likedSongs.length;
+
+                const profTab = document.getElementById('tabProfileBtn');
+                const profIcon = document.getElementById('navProfileIcon');
+                if (this.isSuperAdmin) {
+                    profTab.classList.add('owner-tab');
+                    profIcon.className = 'fas fa-crown';
+                    profIcon.style.color = '#ffd60a';
+                    document.getElementById('topAdminBtn').style.display = 'flex';
+                } else {
+                    profTab.classList.remove('owner-tab');
+                    profIcon.className = 'fas fa-user-astronaut';
+                    profIcon.style.color = '#00d2ff';
+                    document.getElementById('topAdminBtn').style.display = 'none';
+                }
+
+                this.updateProfileCardUI();
+            }
+
+            updateProfileCardUI() {
+                const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+                const userObj = masterDB[this.username] || {};
+                const card = document.getElementById('profileMainCard');
+
+                document.getElementById('profileAvatarLetter').innerText = this.username.charAt(0).toUpperCase();
+                document.getElementById('profileDisplayName').innerText = `@${this.username}`;
+                document.getElementById('profileBioText').innerText = userObj.bio || 'Booo!! Music Listener';
+
+                const totalFollowers = (userObj.followersCountBonus || 0) + (userObj.followers || []).length;
+                const fmtFollowers = totalFollowers >= 1000 ? (totalFollowers / 1000).toFixed(1) + 'K' : totalFollowers;
+
+                document.getElementById('pStatFollowers').innerText = fmtFollowers;
+                document.getElementById('pStatFollowing').innerText = (userObj.following || []).length;
+                document.getElementById('pStatLikes').innerText = (userObj.likedSongs || []).length;
+
+                if (this.isSuperAdmin) {
+                    card.classList.add('owner-edition');
+                    document.getElementById('ownerCrownBanner').style.display = 'block';
+                    document.getElementById('profileVerifiedTick').style.display = 'inline-block';
+                    document.getElementById('ownerOpenAdminBtn').style.display = 'flex';
+                } else {
+                    card.classList.remove('owner-edition');
+                    document.getElementById('ownerCrownBanner').style.display = 'none';
+                    document.getElementById('profileVerifiedTick').style.display = userObj.verified ? 'inline-block' : 'none';
+                    document.getElementById('ownerOpenAdminBtn').style.display = 'none';
+                }
+            }
+
+            showProfileSection() {
+                document.querySelectorAll('.lib-tab-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('tabProfileBtn').classList.add('active');
+                document.getElementById('homeSections').style.display = 'none';
+                document.getElementById('likedSongsSection').style.display = 'none';
+                document.getElementById('searchResultsSection').style.display = 'none';
+                document.getElementById('socialHubSection').style.display = 'none';
+                document.getElementById('profileSection').style.display = 'block';
+                this.updateProfileCardUI();
+            }
+
+            switchAccount() {
+                localStorage.removeItem('booo_active_user');
+                document.getElementById('supportModal').classList.remove('active');
+                document.getElementById('superAdminScreen').classList.remove('active');
+                document.getElementById('authUser').value = '';
+                document.getElementById('authPass').value = '';
+                document.getElementById('authScreen').classList.remove('hidden');
+            }
+
+            // =========================================================================
+            // 2. OWNER SUPER ADMIN PANEL
+            // =========================================================================
+            openSuperAdmin() {
+                if (!this.isSuperAdmin) return;
+                this.renderSuperAdminDashboard();
+                document.getElementById('superAdminScreen').classList.add('active');
+            }
+
+            closeSuperAdmin() {
+                document.getElementById('superAdminScreen').classList.remove('active');
+            }
+
+            renderSuperAdminDashboard() {
+                const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+                const usersList = Object.values(masterDB);
+
+                let totalLikes = 0;
+                usersList.forEach(u => { totalLikes += (u.likedSongs ? u.likedSongs.length : 0); });
+
+                document.getElementById('admTotalUsers').innerText = usersList.length;
+                document.getElementById('admTotalLikes').innerText = totalLikes;
+
+                const dirEl = document.getElementById('adminUsersDirectory');
+                dirEl.innerHTML = usersList.map(u => `
+                    <div class="user-db-card">
+                        <div class="user-db-meta">
+                            <h4>
+                                <i class="fas ${u.username === this._ownerU ? 'fa-crown' : 'fa-user-check'}" style="color:${u.username === this._ownerU ? '#ffd60a' : '#30d158'};"></i>
+                                @${u.username}
+                                ${u.verified ? '<i class="fas fa-circle-check" style="color:#00d2ff; font-size:12px;"></i>' : ''}
+                                ${u.username === this._ownerU ? '<span class="admin-tag">OWNER</span>' : ''}
+                            </h4>
+                            <p>
+                                Pass: <b style="color:#fff;">${u.password}</b> •
+                                Likes: <b>${(u.likedSongs || []).length}</b> •
+                                Followers: <b>${(u.followersCountBonus || 0) + (u.followers || []).length}</b>
+                            </p>
+                        </div>
+                        ${u.username !== this._ownerU ? `
+                            <div style="display:flex; gap:6px;">
+                                <div class="kick-btn" style="border-color:#00d2ff; color:#00d2ff; background:rgba(0,210,255,0.15);" onclick="app.adminToggleVerify('${u.username}')">${u.verified ? 'Unverify' : 'Verify ✓'}</div>
+                                <div class="kick-btn" onclick="app.deleteUserAccount('${u.username}')">Delete</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            }
+
+            adminToggleVerify(targetUsername) {
+                const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+                if (masterDB[targetUsername]) {
+                    masterDB[targetUsername].verified = !masterDB[targetUsername].verified;
+                    this.saveUserToCloudAndLocal(targetUsername, masterDB[targetUsername]);
+                    this.renderSuperAdminDashboard();
+                }
+            }
+
+            adminAddTestUser() {
+                const rId = Math.floor(100 + Math.random() * 899);
+                const uName = `music_fan_${rId}`;
+                const newUser = {
+                    username: uName, password: `pass${rId}`, role: 'USER', verified: false,
+                    bio: 'Listening on Booo!! 🎧', followersCountBonus: Math.floor(Math.random() * 50),
+                    followers: [], following: [this._ownerU], likedSongs: [], lastLogin: 'Just Now'
+                };
+                this.saveUserToCloudAndLocal(uName, newUser);
+                this.renderSuperAdminDashboard();
+            }
+
+            deleteUserAccount(targetUsername) {
+                if (!this.isSuperAdmin || targetUsername === this._ownerU) return;
+                const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+                delete masterDB[targetUsername];
+                localStorage.setItem('booo_users_master_db', JSON.stringify(masterDB));
+                this.renderSuperAdminDashboard();
+            }
+
+            publishGlobalAnnouncement() {
+                const msg = document.getElementById('adminBroadcastInput').value.trim();
+                if (!msg) return;
+                localStorage.setItem('booo_global_announcement', msg);
+                this.checkGlobalAnnouncement();
+            }
+
+            clearGlobalAnnouncement() {
+                localStorage.removeItem('booo_global_announcement');
+                this.checkGlobalAnnouncement();
+            }
+
+            checkGlobalAnnouncement() {
+                const msg = localStorage.getItem('booo_global_announcement');
+                const banner = document.getElementById('globalNoticeBanner');
+                if (msg) {
+                    document.getElementById('globalNoticeText').innerText = msg;
+                    banner.style.display = 'flex';
+                } else {
+                    banner.style.display = 'none';
+                }
+            }
+
+            // =========================================================================
+            // 3. FOLLOW USERS DIRECTORY (CHAT REMOVED)
+            // =========================================================================
+            showSocialHub() {
+                document.querySelectorAll('.lib-tab-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('tabSocialBtn').classList.add('active');
+                document.getElementById('homeSections').style.display = 'none';
+                document.getElementById('likedSongsSection').style.display = 'none';
+                document.getElementById('searchResultsSection').style.display = 'none';
+                document.getElementById('profileSection').style.display = 'none';
+                document.getElementById('socialHubSection').style.display = 'block';
+                this.renderSocialHub();
+            }
+
+            renderSocialHub() {
+                const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+                const me = masterDB[this.username] || { following: [], followers: [] };
+                const users = Object.values(masterDB);
+                document.getElementById('communityUsersCount').innerText = `${users.length} Members`;
+
+                const uList = document.getElementById('discoverUsersList');
+                uList.innerHTML = users.filter(u => u.username !== this.username).map(u => {
+                    const isFollowing = (me.following || []).includes(u.username);
+                    const totalFlw = (u.followersCountBonus || 0) + (u.followers || []).length;
+                    return `
+                        <div class="user-follow-row">
+                            <div>
+                                <div style="font-size:14px; font-weight:800; display:flex; align-items:center; gap:6px;">
+                                    <i class="fas ${u.username === this._ownerU ? 'fa-crown' : 'fa-user-circle'}" style="color:${u.username === this._ownerU ? '#ffd60a' : '#30d158'};"></i>
+                                    @${u.username}
+                                    ${u.verified ? '<i class="fas fa-circle-check" style="color:#00d2ff; font-size:12px;"></i>' : ''}
+                                    ${u.username === this._ownerU ? '<span class="admin-tag">OWNER</span>' : ''}
+                                </div>
+                                <div style="font-size:11px; color:rgba(255,255,255,0.55); margin-top:2px;">
+                                    ${totalFlw} Followers • ${(u.likedSongs || []).length} Liked Songs
+                                </div>
+                            </div>
+                            <button class="follow-btn ${isFollowing ? 'following' : ''}" onclick="app.toggleFollowUser('${u.username}')">
+                                ${isFollowing ? '<i class="fas fa-check"></i> Following' : '+ Follow'}
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            toggleFollowUser(targetUser) {
+                const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+                if (!masterDB[this.username] || !masterDB[targetUser]) return;
+
+                masterDB[this.username].following = masterDB[this.username].following || [];
+                masterDB[targetUser].followers = masterDB[targetUser].followers || [];
+
+                const idx = masterDB[this.username].following.indexOf(targetUser);
+                if (idx > -1) {
+                    masterDB[this.username].following.splice(idx, 1);
+                    masterDB[targetUser].followers = masterDB[targetUser].followers.filter(f => f !== this.username);
+                } else {
+                    masterDB[this.username].following.push(targetUser);
+                    if (!masterDB[targetUser].followers.includes(this.username)) {
+                        masterDB[targetUser].followers.push(this.username);
+                    }
+                }
+
+                this.saveUserToCloudAndLocal(this.username, masterDB[this.username]);
+                this.saveUserToCloudAndLocal(targetUser, masterDB[targetUser]);
+                this.updateProfileCardUI();
+                this.renderSocialHub();
+            }
+
+            // =========================================================================
+            // 4. LIKED SONGS STORAGE
+            // =========================================================================
+            isSongLiked(id) {
+                return this.likedSongs.some(s => s.id === id);
+            }
+
+            toggleLikeSong(trackObj, ev) {
+                if (ev) ev.stopPropagation();
+                if (!trackObj || !trackObj.id) return;
+
+                if (this.isSongLiked(trackObj.id)) {
+                    this.likedSongs = this.likedSongs.filter(s => s.id !== trackObj.id);
+                } else {
+                    this.likedSongs.unshift({ ...trackObj });
+                }
+
+                const masterDB = JSON.parse(localStorage.getItem('booo_users_master_db') || '{}');
+                if (masterDB[this.username]) {
+                    masterDB[this.username].likedSongs = this.likedSongs;
+                    this.saveUserToCloudAndLocal(this.username, masterDB[this.username]);
+                }
+
+                document.getElementById('myLikesCountBadge').innerText = this.likedSongs.length;
+                this.updatePlayerLikeIcon();
+                this.updateProfileCardUI();
+                if (document.getElementById('likedSongsSection').style.display === 'block') {
+                    this.renderLikedSongsList();
+                }
+            }
+
+            toggleCurrentSongLike() {
+                if (this.currentTrack) this.toggleLikeSong(this.currentTrack);
+            }
+
+            updatePlayerLikeIcon() {
+                const btn = document.getElementById('playerLikeBtn');
+                if (this.currentTrack && this.isSongLiked(this.currentTrack.id)) btn.classList.add('liked');
+                else btn.classList.remove('liked');
+            }
+
+            showLikedSongs() {
+                document.querySelectorAll('.lib-tab-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('tabLikedBtn').classList.add('active');
+                document.getElementById('homeSections').style.display = 'none';
+                document.getElementById('searchResultsSection').style.display = 'none';
+                document.getElementById('socialHubSection').style.display = 'none';
+                document.getElementById('profileSection').style.display = 'none';
+                document.getElementById('likedSongsSection').style.display = 'block';
+                this.renderLikedSongsList();
+            }
+
+            renderLikedSongsList() {
+                const listEl = document.getElementById('likedSongsList');
+                if (this.likedSongs.length === 0) {
+                    listEl.innerHTML = `<div style="text-align:center; padding:35px 20px; color:rgba(255,255,255,0.5);">No favorite songs yet.<br><small>Search a song and tap the ❤️ Heart icon!</small></div>`;
+                    return;
+                }
+                listEl.innerHTML = this.likedSongs.map((s, idx) => `
+                    <div class="song-row" onclick="app.playFromList('liked', ${idx})">
+                        <img src="${s.img}">
+                        <div class="song-meta"><h4>${s.name}</h4><p>${s.artist}</p></div>
+                        <div class="row-actions">
+                            <i class="fas fa-heart heart-btn liked" onclick="app.toggleLikeSong(app.likedSongs[${idx}], event)"></i>
+                            <div class="play-circle"><i class="fas fa-play"></i></div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            showHome() {
+                document.querySelectorAll('.lib-tab-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('tabDiscoverBtn').classList.add('active');
+                document.getElementById('likedSongsSection').style.display = 'none';
+                document.getElementById('socialHubSection').style.display = 'none';
+                document.getElementById('profileSection').style.display = 'none';
+
+                if (this.searchResults.length > 0) {
+                    document.getElementById('homeSections').style.display = 'none';
+                    document.getElementById('searchResultsSection').style.display = 'block';
+                } else {
+                    document.getElementById('searchResultsSection').style.display = 'none';
+                    document.getElementById('homeSections').style.display = 'block';
+                }
+            }
+
+            // =========================================================================
+            // 5. PARALLEL MULTI-NODE SEARCH & 100% AD-FREE STREAM ENGINE (`Promise.any`)
+            // =========================================================================
+            async querySingleMusicNode(node) {
+                const ctrl = new AbortController();
+                const timer = setTimeout(() => ctrl.abort(), 4500);
+                try {
+                    const res = await fetch(node.url, { signal: ctrl.signal });
+                    clearTimeout(timer);
+                    const data = await res.json();
+
+                    let tracks = [];
+                    if (node.type === 'wrap') {
+                        const items = data.data?.results || data.results || [];
+                        tracks = items.map(item => {
+                            const imgs = item.image || [];
+                            const hdImg = Array.isArray(imgs) && imgs.length ? (imgs[imgs.length - 1].url || imgs[imgs.length - 1].link) : (typeof imgs === 'string' ? imgs.replace('150x150', '500x500') : '');
+                            const dUrls = item.downloadUrl || [];
+                            let audioUrl = Array.isArray(dUrls) && dUrls.length ? (dUrls[dUrls.length - 1].url || dUrls[dUrls.length - 1].link) : '';
+                            if (!audioUrl && item.encrypted_media_url) audioUrl = decryptStreamCipher(item.encrypted_media_url);
+                            if (audioUrl) audioUrl = audioUrl.replace('preview.saavncdn.com', 'aac.saavncdn.com').replace('_96_p.mp4', '_320.mp4');
+                            const rawArtist = item.primaryArtists || (item.artists?.primary ? item.artists.primary.map(a => a.name).join(', ') : 'Artist');
+                            const { cleanTitle, cleanArtist } = cleanSongMetadata(item.name || item.title, String(rawArtist));
+                            return {
+                                id: item.id || cleanTitle + cleanArtist,
+                                name: cleanTitle,
+                                artist: cleanArtist,
+                                img: hdImg,
+                                streamUrl: audioUrl
+                            };
+                        }).filter(t => t.streamUrl);
+                    } else if (node.type === 'des') {
+                        const rawObj = data.contents ? JSON.parse(data.contents) : data;
+                        const results = rawObj.results || [];
+                        tracks = results.map(item => {
+                            const enc = item.encrypted_media_url || item.more_info?.encrypted_media_url;
+                            const rawArtist = item.primary_artists || item.more_info?.primary_artists || item.singers || 'Artist';
+                            const { cleanTitle, cleanArtist } = cleanSongMetadata(item.song || item.title, String(rawArtist));
+                            return {
+                                id: item.id || cleanTitle + cleanArtist,
+                                name: cleanTitle,
+                                artist: cleanArtist,
+                                img: (item.image || '').replace('150x150', '500x500'),
+                                streamUrl: decryptStreamCipher(enc)
+                            };
+                        }).filter(t => t.streamUrl);
+                    } else if (node.type === 'piped') {
+                        const items = data.items || [];
+                        tracks = items.map(it => {
+                            const vId = it.url ? it.url.split('v=')[1] : '';
+                            const { cleanTitle, cleanArtist } = cleanSongMetadata(it.title, it.uploaderName);
+                            return {
+                                id: vId,
+                                videoId: vId,
+                                name: cleanTitle,
+                                artist: cleanArtist,
+                                img: `https://i.ytimg.com/vi/${vId}/hqdefault.jpg`,
+                                streamUrl: null
+                            };
+                        }).filter(t => t.id);
+                    }
+
+                    if (tracks.length > 0) return tracks;
+                } catch (e) {
+                    clearTimeout(timer);
+                }
+                throw new Error("Node empty");
+            }
+
+            async searchAdFreeMusicParallel(query) {
+                const rawEndpoint = `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&n=25&p=1&q=${encodeURIComponent(query)}`;
+                const nodes = [
+                    { type: 'wrap', url: `https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}&limit=25` },
+                    { type: 'wrap', url: `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${encodeURIComponent(query)}&limit=25` },
+                    { type: 'des', url: `https://api.allorigins.win/get?url=${encodeURIComponent(rawEndpoint)}` },
+                    { type: 'des', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rawEndpoint)}` },
+                    { type: 'piped', url: `https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(query + ' official audio')}&filter=music_songs` }
+                ];
+
+                try {
+                    return await Promise.any(nodes.map(n => this.querySingleMusicNode(n)));
+                } catch (e) {
+                    return [];
+                }
+            }
+
+            async resolveUltraHDArtwork(trackObj, domElements = []) {
+                const key = `${trackObj.name}_${trackObj.artist}`.toLowerCase();
+                if (this.artCache[key]) {
+                    trackObj.img = this.artCache[key];
+                    domElements.forEach(el => { if (el) el.src = trackObj.img; });
+                    return trackObj.img;
+                }
+                try {
+                    const cleanQ = `${trackObj.name} ${trackObj.artist}`.trim();
+                    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(cleanQ)}&entity=song&limit=1`);
+                    const data = await res.json();
+                    if (data.results && data.results.length > 0 && data.results[0].artworkUrl100) {
+                        const hdUrl = data.results[0].artworkUrl100.replace('100x100bb', '1000x1000bb');
+                        this.artCache[key] = hdUrl;
+                        trackObj.img = hdUrl;
+                        domElements.forEach(el => { if (el) el.src = hdUrl; });
+                        return hdUrl;
+                    }
+                } catch (e) {}
+                return trackObj.img;
+            }
+
+            async performSearch(query) {
+                document.getElementById('likedSongsSection').style.display = 'none';
+                document.getElementById('socialHubSection').style.display = 'none';
+                document.getElementById('profileSection').style.display = 'none';
+                document.getElementById('homeSections').style.display = 'none';
+
+                const sec = document.getElementById('searchResultsSection');
+                const listEl = document.getElementById('searchList');
+                sec.style.display = 'block';
+                document.getElementById('searchHeadingText').innerText = `Results for "${query}"`;
+                listEl.innerHTML = `<div style="text-align:center; padding: 35px; color:rgba(255,255,255,0.6);"><i class="fas fa-circle-notch fa-spin"></i> Loading tracks...</div>`;
+
+                const results = await this.searchAdFreeMusicParallel(query);
+                if (results.length > 0) {
+                    this.searchResults = results;
+                    listEl.innerHTML = results.map((s, idx) => {
+                        const liked = this.isSongLiked(s.id);
+                        return `
+                            <div class="song-row" onclick="app.playFromList('search', ${idx})">
+                                <img id="simg-${idx}" src="${s.img}">
+                                <div class="song-meta"><h4>${s.name}</h4><p>${s.artist}</p></div>
+                                <div class="row-actions">
+                                    <i class="fas fa-heart heart-btn ${liked ? 'liked' : ''}" onclick="app.toggleLikeSong(app.searchResults[${idx}], event)"></i>
+                                    <div class="play-circle"><i class="fas fa-play"></i></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    this.searchResults.slice(0, 8).forEach((s, idx) => {
+                        const imgDom = document.getElementById(`simg-${idx}`);
+                        this.resolveUltraHDArtwork(s, [imgDom]);
+                    });
+                } else {
+                    listEl.innerHTML = `<div style="text-align:center; padding: 35px; color:#ff453a;">No tracks found. Try another song name!</div>`;
+                }
+            }
+
+            playFromList(source, index) {
+                if (!this.isAdmin && this.roomCode) {
+                    alert("Only the Room Admin can change songs in Listen Together!");
+                    return;
+                }
+                this.playlist = source === 'liked' ? [...this.likedSongs] : [...this.searchResults];
+                this.playedHistoryIds.clear();
+                this.loadAndPlay(index, true);
+            }
+
+            async loadAndPlay(index, shouldBroadcast = true) {
+                if (!this.playlist || !this.playlist[index]) return;
+                this.currentIndex = index;
+                const track = this.playlist[index];
+                this.currentTrack = track;
+                this.playedHistoryIds.add(track.id);
+
+                this.audio.pause();
+
+                document.getElementById('mTitle').innerText = track.name;
+                document.getElementById('mArtist').innerText = track.artist;
+                document.getElementById('fTitle').innerText = track.name;
+                document.getElementById('fArtist').innerText = track.artist;
+
+                const mCov = document.getElementById('mCover');
+                const fCov = document.getElementById('fCover');
+                mCov.src = track.img; fCov.src = track.img;
+                document.getElementById('pOrb1').style.backgroundImage = `url('${track.img}')`;
+                document.getElementById('amb1').style.backgroundImage = `url('${track.img}')`;
+
+                document.getElementById('miniPlayer').classList.add('active');
+                document.getElementById('fullPlayer').classList.add('active');
+                this.updatePlayerLikeIcon();
+
+                this.resolveUltraHDArtwork(track, [mCov, fCov]).then(hd => {
+                    document.getElementById('pOrb1').style.backgroundImage = `url('${hd}')`;
+                });
+
+                this.fetchRedLrcProvider(track.name, track.artist);
+                this.expandVibeShuffleQueue(track);
+
+                let streamUrl = track.streamUrl;
+                if (!streamUrl && track.videoId) {
+                    try {
+                        const res = await fetch(`https://pipedapi.kavin.rocks/streams/${track.videoId}`).then(r => r.json());
+                        if (res && res.audioStreams && res.audioStreams.length) {
+                            streamUrl = res.audioStreams[0].url;
+                            track.streamUrl = streamUrl;
+                        }
+                    } catch (e) {}
+                }
+
+                if (!streamUrl) return;
+
+                this.audio.src = streamUrl;
+                this.audio.currentTime = 0;
+
+                if (shouldBroadcast && this.isAdmin && this.roomCode && this.members.length > 1) {
+                    this.broadcastToRoom({ type: 'PRELOAD_TRACK', track: track });
+                    setTimeout(() => {
+                        const startTimestamp = Date.now() + 180;
+                        this.broadcastToRoom({ type: 'SCHEDULED_START', time: 0, startAtHostClock: startTimestamp });
+                        setTimeout(() => { this.audio.play().catch(() => {}); }, 180);
+                    }, 380);
+                } else {
+                    this.audio.play().catch(() => {});
+                }
+            }
+
+            async expandVibeShuffleQueue(seedTrack) {
+                try {
+                    const vibeQuery = `${seedTrack.artist}`;
+                    const moreTracks = await this.searchAdFreeMusicParallel(vibeQuery);
+                    moreTracks.forEach(t => {
+                        if (!this.playlist.some(existing => existing.id === t.id)) {
+                            this.playlist.push(t);
+                        }
+                    });
+                } catch (e) {}
+            }
+
+            toggleVibeShuffle() {
+                this.vibeShuffleEnabled = !this.vibeShuffleEnabled;
+                document.getElementById('shuffleBtn').classList.toggle('active', this.vibeShuffleEnabled);
+            }
+
+            replayCurrent() {
+                if (!this.isAdmin && this.roomCode) return;
+                this.audio.currentTime = 0;
+                this.audio.play().catch(() => {});
+                this.broadcastZeroDelayState();
+            }
+
+            nextPrev(step) {
+                if (!this.isAdmin && this.roomCode) return;
+                if (!this.playlist.length) return;
+
+                if (step > 0 && this.vibeShuffleEnabled && this.playlist.length > 1) {
+                    const unplayedIndices = [];
+                    this.playlist.forEach((t, idx) => {
+                        if (!this.playedHistoryIds.has(t.id) && idx !== this.currentIndex) {
+                            unplayedIndices.push(idx);
+                        }
+                    });
+
+                    if (unplayedIndices.length > 0) {
+                        const randomIdx = unplayedIndices[Math.floor(Math.random() * unplayedIndices.length)];
+                        this.loadAndPlay(randomIdx, true);
+                        return;
+                    } else {
+                        this.playedHistoryIds.clear();
+                    }
+                }
+
+                this.currentIndex = (this.currentIndex + step + this.playlist.length) % this.playlist.length;
+                this.loadAndPlay(this.currentIndex, true);
+            }
+
+            togglePlay() {
+                if (!this.isAdmin && this.roomCode) {
+                    alert("Only the Room Admin can play/pause in Listen Together!");
+                    return;
+                }
+                if (!this.audio.src) return;
+                if (this.audio.paused) this.audio.play().catch(() => {});
+                else this.audio.pause();
+                this.broadcastZeroDelayState();
+            }
+
+            syncPlayUI(playing) {
+                this.isPlaying = playing;
+                const icon = playing ? 'fa-pause' : 'fa-play';
+                document.getElementById('mPlayBtn').className = `fas ${icon}`;
+                document.getElementById('fPlayBtn').className = `fas ${icon} big-play`;
+                const art = document.getElementById('artContainer');
+                playing ? art.classList.add('playing') : art.classList.remove('playing');
+            }
+
+            bindEvents() {
+                const runSearch = () => {
+                    const q = document.getElementById('searchInput').value.trim();
+                    if (q) this.performSearch(q);
+                };
+                document.getElementById('searchBtn').onclick = runSearch;
+                document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') runSearch(); });
+
+                const toggle = (e) => { e.stopPropagation(); this.togglePlay(); };
+                document.getElementById('mPlayBtn').onclick = toggle;
+                document.getElementById('fPlayBtn').onclick = toggle;
+
+                document.getElementById('prevBtn').onclick = () => this.nextPrev(-1);
+                document.getElementById('nextBtn').onclick = () => this.nextPrev(1);
+
+                this.audio.onended = () => this.nextPrev(1);
+                this.audio.onplay = () => this.syncPlayUI(true);
+                this.audio.onpause = () => this.syncPlayUI(false);
+
+                this.audio.onerror = () => {
+                    if (this.audio.src && this.audio.src.includes('_320.mp4')) {
+                        this.audio.src = this.audio.src.replace('_320.mp4', '_160.mp4');
+                        this.audio.play().catch(() => {});
+                    } else {
+                        this.nextPrev(1);
+                    }
+                };
+
+                document.getElementById('openFullBtn').onclick = () => document.getElementById('fullPlayer').classList.add('active');
+                document.getElementById('closeFullBtn').onclick = () => document.getElementById('fullPlayer').classList.remove('active');
+                document.getElementById('closeFullIcon').onclick = () => document.getElementById('fullPlayer').classList.remove('active');
+
+                document.getElementById('toggleLyricsBtn').onclick = () => document.getElementById('lyricsView').classList.toggle('active');
+                document.getElementById('closeLyricsBtn').onclick = () => document.getElementById('lyricsView').classList.remove('active');
+
+                document.getElementById('topSupportBtn').onclick = () => document.getElementById('supportModal').classList.add('active');
+                document.getElementById('playerSupportBtn').onclick = () => document.getElementById('supportModal').classList.add('active');
+                document.getElementById('closeSupportBtn').onclick = () => document.getElementById('supportModal').classList.remove('active');
+
+                document.getElementById('topSyncBtn').onclick = () => this.openRoomScreen();
+                document.getElementById('playerSyncBtn').onclick = () => this.openRoomScreen();
+
+                document.getElementById('scrubBar').onclick = (e) => {
+                    if (!this.isAdmin && this.roomCode) {
+                        alert("Only the Room Admin can seek songs!");
+                        return;
+                    }
+                    if (this.audio.duration) {
+                        const rect = document.getElementById('scrubBar').getBoundingClientRect();
+                        const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                        this.audio.currentTime = pct * this.audio.duration;
+                        this.broadcastZeroDelayState();
+                    }
+                };
+            }
+
+            // =========================================================================
+            // 6. AESTHETIC LISTEN TOGETHER STUDIO + ZERO-DELAY NTP SYNC
+            // =========================================================================
+            openRoomScreen() { document.getElementById('listenRoomScreen').classList.add('active'); }
+            closeRoomScreen() { document.getElementById('listenRoomScreen').classList.remove('active'); }
+
+            createPrivateRoom() {
+                const customCode = document.getElementById('createCodeInput').value.trim();
+                const code = customCode.length >= 3 ? customCode : Math.floor(1000 + Math.random() * 9000).toString();
+
+                if (this.peer) this.peer.destroy();
+                this.isAdmin = true;
+                this.roomCode = code;
+                this.members = [{ id: 'HOST', username: this.username, isAdmin: true, conn: null }];
+
+                this.peer = new Peer(`booo-ntp-${code}`);
+
+                this.peer.on('open', () => {
+                    this.showRoomDashboard();
+                    document.getElementById('navSyncDot').classList.add('online');
+                    document.getElementById('navSyncLabel').innerText = `Room #${code}`;
+
+                    if (this.syncInterval) clearInterval(this.syncInterval);
+                    this.syncInterval = setInterval(() => {
+                        if (this.isAdmin && this.currentTrack) this.broadcastZeroDelayState();
+                    }, 2000);
+                });
+
+                this.peer.on('connection', (conn) => {
+                    conn.on('data', (data) => {
+                        if (data.type === 'NTP_PING') {
+                            conn.send({ type: 'NTP_PONG', clientSent: data.clientSent, hostTime: Date.now() });
+                        } else if (data.type === 'JOIN_HANDSHAKE') {
+                            this.members = this.members.filter(m => m.id !== conn.peer);
+                            this.members.push({ id: conn.peer, username: data.username || 'User', isAdmin: false, conn: conn });
+                            this.renderRoomMembers();
+                            this.broadcastMemberList();
+
+                            if (this.currentTrack && this.audio.src) {
+                                conn.send({
+                                    type: 'IMMEDIATE_JOIN_SYNC',
+                                    track: this.currentTrack,
+                                    time: this.audio.currentTime || 0,
+                                    playing: !this.audio.paused,
+                                    hostClock: Date.now()
+                                });
+                            }
+                        } else if (data.type === 'REQUEST_RESYNC') {
+                            if (this.currentTrack && this.audio.src) {
+                                conn.send({
+                                    type: 'IMMEDIATE_JOIN_SYNC',
+                                    track: this.currentTrack,
+                                    time: this.audio.currentTime || 0,
+                                    playing: !this.audio.paused,
+                                    hostClock: Date.now()
+                                });
+                            }
+                        }
+                    });
+
+                    conn.on('close', () => {
+                        this.members = this.members.filter(m => m.id !== conn.peer);
+                        this.renderRoomMembers();
+                        this.broadcastMemberList();
+                    });
+                });
+            }
+
+            joinPrivateRoom() {
+                const code = document.getElementById('joinCodeInput').value.trim();
+                if (code.length < 3) {
+                    alert("Please enter a valid Private Room Code!");
+                    return;
+                }
+
+                if (this.peer) this.peer.destroy();
+                this.isAdmin = false;
+                this.roomCode = code;
+                this.peer = new Peer();
+
+                this.peer.on('open', () => {
+                    const conn = this.peer.connect(`booo-ntp-${code}`);
+                    this.hostConn = conn;
+
+                    conn.on('open', () => {
+                        conn.send({ type: 'NTP_PING', clientSent: Date.now() });
+                        conn.send({ type: 'JOIN_HANDSHAKE', username: this.username });
+                        this.showRoomDashboard();
+                        document.getElementById('navSyncDot').classList.add('online');
+                        document.getElementById('navSyncLabel').innerText = `Room #${code}`;
+                    });
+
+                    conn.on('data', (data) => this.handleRoomMessage(data));
+                    conn.on('close', () => this.leaveRoom());
+                });
+            }
+
+            broadcastZeroDelayState() {
+                if (!this.isAdmin || !this.roomCode) return;
+                this.broadcastToRoom({
+                    type: 'HEARTBEAT_SYNC',
+                    time: this.audio.currentTime || 0,
+                    playing: !this.audio.paused,
+                    hostClock: Date.now()
+                });
+            }
+
+            handleRoomMessage(data) {
+                if (data.type === 'NTP_PONG') {
+                    const now = Date.now();
+                    const rtt = now - data.clientSent;
+                    const oneWayLatency = rtt / 2;
+                    this.clockOffsetMs = (data.hostTime + oneWayLatency) - now;
+                    document.getElementById('syncLatencyBadge').innerText = `NTP Locked • ${Math.round(oneWayLatency)}ms Ping (0ms Gap)`;
+                    return;
+                }
+
+                if (data.type === 'KICKED_BY_ADMIN') {
+                    alert("You have been removed from the room by the Admin.");
+                    this.leaveRoom();
+                    return;
+                }
+
+                if (data.type === 'MEMBER_LIST') {
+                    this.members = data.members;
+                    this.renderRoomMembers();
+                    return;
+                }
+
+                if (data.type === 'PRELOAD_TRACK' && data.track) {
+                    this.currentTrack = data.track;
+                    this.updateTrackUIOnly(data.track);
+                    this.audio.pause();
+                    this.audio.src = data.track.streamUrl;
+                    this.audio.load();
+                    this.fetchRedLrcProvider(data.track.name, data.track.artist);
+                    return;
+                }
+
+                if (data.type === 'SCHEDULED_START') {
+                    const currentHostClock = Date.now() + this.clockOffsetMs;
+                    const waitMs = Math.max(0, data.startAtHostClock - currentHostClock);
+                    this.audio.currentTime = data.time || 0;
+                    setTimeout(() => { this.audio.play().catch(() => {}); }, waitMs);
+                    return;
+                }
+
+                if (data.type === 'IMMEDIATE_JOIN_SYNC' && data.track) {
+                    this.currentTrack = data.track;
+                    this.updateTrackUIOnly(data.track);
+                    this.fetchRedLrcProvider(data.track.name, data.track.artist);
+
+                    if (data.track.streamUrl) {
+                        this.audio.src = data.track.streamUrl;
+                        this.audio.onloadedmetadata = () => {
+                            const currentHostClock = Date.now() + this.clockOffsetMs;
+                            const elapsedSincePacket = Math.max(0, (currentHostClock - data.hostClock) / 1000);
+                            this.audio.currentTime = (data.time || 0) + (data.playing ? elapsedSincePacket : 0);
+                            if (data.playing) this.audio.play().catch(() => {});
+                            this.audio.onloadedmetadata = null;
+                        };
+                    }
+                    return;
+                }
+
+                if (data.type === 'HEARTBEAT_SYNC') {
+                    const currentHostClock = Date.now() + this.clockOffsetMs;
+                    const transitSec = Math.max(0, (currentHostClock - data.hostClock) / 1000);
+                    const exactExpectedTime = (data.time || 0) + (data.playing ? transitSec : 0);
+
+                    const drift = Math.abs((this.audio.currentTime || 0) - exactExpectedTime);
+                    if (drift > 0.075) {
+                        this.audio.currentTime = exactExpectedTime;
+                    }
+
+                    if (data.playing && this.audio.paused) this.audio.play().catch(() => {});
+                    else if (!data.playing && !this.audio.paused) this.audio.pause();
+                }
+            }
+
+            updateTrackUIOnly(track) {
+                document.getElementById('mTitle').innerText = track.name;
+                document.getElementById('mArtist').innerText = track.artist;
+                document.getElementById('fTitle').innerText = track.name;
+                document.getElementById('fArtist').innerText = track.artist;
+                document.getElementById('mCover').src = track.img;
+                document.getElementById('fCover').src = track.img;
+                document.getElementById('pOrb1').style.backgroundImage = `url('${track.img}')`;
+                document.getElementById('miniPlayer').classList.add('active');
+                this.updatePlayerLikeIcon();
+            }
+
+            showRoomDashboard() {
+                document.getElementById('roomSetupPanel').style.display = 'none';
+                document.getElementById('roomDashboardPanel').style.display = 'block';
+                document.getElementById('activeRoomCodeDisplay').innerText = `#${this.roomCode}`;
+                document.getElementById('studioMainTitle').innerText = `Private Room #${this.roomCode} Live`;
+                document.getElementById('activeRoleBadge').innerText = this.isAdmin
+                    ? `Admin: @${this.username} (Full Control)`
+                    : `Listener: @${this.username} (Synced)`;
+                this.renderRoomMembers();
+            }
+
+            renderRoomMembers() {
+                const listEl = document.getElementById('roomMembersList');
+                document.getElementById('roomUserCountBadge').innerText = `${this.members.length} Online`;
+
+                listEl.innerHTML = this.members.map(m => `
+                    <div class="member-row">
+                        <div class="member-name">
+                            <i class="fas fa-user-circle" style="color:${m.isAdmin ? '#ffd60a' : '#30d158'}; font-size:17px;"></i>
+                            <span>@${m.username}</span>
+                            ${m.isAdmin ? '<span class="admin-tag">ADMIN</span>' : ''}
+                        </div>
+                        ${(this.isAdmin && !m.isAdmin) ? `<div class="kick-btn" onclick="app.kickMember('${m.id}')">Remove</div>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            kickMember(peerId) {
+                if (!this.isAdmin) return;
+                const target = this.members.find(m => m.id === peerId);
+                if (target && target.conn) {
+                    target.conn.send({ type: 'KICKED_BY_ADMIN' });
+                    setTimeout(() => target.conn.close(), 150);
+                }
+                this.members = this.members.filter(m => m.id !== peerId);
+                this.renderRoomMembers();
+                this.broadcastMemberList();
+            }
+
+            broadcastMemberList() {
+                const publicList = this.members.map(m => ({ id: m.id, username: m.username, isAdmin: m.isAdmin }));
+                this.broadcastToRoom({ type: 'MEMBER_LIST', members: publicList });
+            }
+
+            broadcastToRoom(payload) {
+                if (!this.isAdmin) return;
+                this.members.forEach(m => {
+                    if (m.conn && m.conn.open) m.conn.send(payload);
+                });
+            }
+
+            forceZeroGapSync() {
+                if (this.isAdmin) {
+                    this.broadcastZeroDelayState();
+                } else if (this.hostConn && this.hostConn.open) {
+                    this.hostConn.send({ type: 'NTP_PING', clientSent: Date.now() });
+                    this.hostConn.send({ type: 'REQUEST_RESYNC' });
+                }
+            }
+
+            leaveRoom() {
+                if (this.syncInterval) clearInterval(this.syncInterval);
+                if (this.peer) this.peer.destroy();
+                this.peer = null;
+                this.roomCode = null;
+                this.isAdmin = false;
+                this.members = [];
+                this.hostConn = null;
+
+                document.getElementById('roomDashboardPanel').style.display = 'none';
+                document.getElementById('roomSetupPanel').style.display = 'block';
+                document.getElementById('studioMainTitle').innerText = 'Spatial Audio Sync Studio';
+                document.getElementById('navSyncDot').classList.remove('online');
+                document.getElementById('navSyncLabel').innerText = 'Listen Together';
+            }
+
+            // =========================================================================
+            // 7. 4-STAGE BULLETPROOF WORD-BY-WORD LYRICS ENGINE ("Lrc by Vishal")
+            // =========================================================================
+            async fetchRedLrcProvider(rawName, rawArtist) {
+                this.lyricsData = [];
+                const box = document.getElementById('lyricsBox');
+                box.innerHTML = `<div style="text-align:center; color:rgba(255,255,255,0.55); margin-top:24vh;"><i class="fas fa-circle-notch fa-spin"></i> Syncing live lyrics...</div>`;
+
+                const { cleanTitle, cleanArtist } = cleanSongMetadata(rawName, rawArtist);
+
+                const endpoints = [
+                    `https://lrclib.net/api/search?track_name=${encodeURIComponent(cleanTitle)}&artist_name=${encodeURIComponent(cleanArtist)}`,
+                    `https://lrclib.net/api/search?q=${encodeURIComponent(cleanTitle + ' ' + cleanArtist)}`,
+                    `https://lrclib.net/api/search?q=${encodeURIComponent(cleanTitle)}`
+                ];
+
+                let syncedLrc = null;
+                let plainLyrics = null;
+
+                for (let url of endpoints) {
+                    try {
+                        const res = await fetch(url);
+                        const data = await res.json();
+                        if (Array.isArray(data) && data.length > 0) {
+                            const foundSync = data.find(d => d.syncedLyrics);
+                            if (foundSync) {
+                                syncedLrc = foundSync.syncedLyrics;
+                                break;
+                            }
+                            if (!plainLyrics) {
+                                const foundPlain = data.find(d => d.plainLyrics);
+                                if (foundPlain) plainLyrics = foundPlain.plainLyrics;
+                            }
+                        }
+                    } catch (e) {}
+                }
+
+                if (syncedLrc) {
+                    this.parseWordByWordLRC(syncedLrc);
+                } else if (plainLyrics) {
+                    const lines = plainLyrics.split('\n').map(l => l.trim()).filter(Boolean);
+                    const totalDur = (this.audio.duration && this.audio.duration > 30) ? this.audio.duration - 10 : lines.length * 3.4;
+                    const secPerLine = Math.max(2.6, Math.min(4.2, totalDur / Math.max(1, lines.length)));
+
+                    const generatedLrc = lines.map((lineText, idx) => {
+                        const tSec = idx * secPerLine + 2.0;
+                        const m = String(Math.floor(tSec / 60)).padStart(2, '0');
+                        const s = String(Math.floor(tSec % 60)).padStart(2, '0');
+                        return `[${m}:${s}.00] ${lineText}`;
+                    }).join('\n');
+
+                    this.parseWordByWordLRC(generatedLrc);
+                } else {
+                    box.innerHTML = `<div style="text-align:center; color:rgba(255,255,255,0.45); margin-top:24vh;">Lyrics not found for "${cleanTitle}"</div>`;
+                }
+            }
+
+            parseWordByWordLRC(lrcText) {
+                this.lyricsData = [];
+                const box = document.getElementById('lyricsBox');
+                box.innerHTML = '';
+
+                const rawLines = [];
+                lrcText.split('\n').forEach(line => {
+                    const m = line.match(/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/);
+                    if (m) {
+                        const time = parseInt(m[1]) * 60 + parseInt(m[2]) + parseInt(m[3]) / (m[3].length === 3 ? 1000 : 100);
+                        const cleanLine = m[4].replace(/<\d{2}:\d{2}\.\d{2,3}>/g, '').trim();
+                        if (cleanLine) rawLines.push({ time, text: cleanLine });
+                    }
+                });
+
+                rawLines.forEach((row, idx) => {
+                    const nextRowTime = rawLines[idx + 1] ? rawLines[idx + 1].time : row.time + 3.5;
+                    const lineSpanDuration = Math.max(0.6, Math.min(5.0, (nextRowTime - row.time) * 0.9));
+
+                    const lineDiv = document.createElement('div');
+                    lineDiv.className = 'lyric-line';
+                    lineDiv.onclick = () => {
+                        if (this.isAdmin || !this.roomCode) {
+                            this.audio.currentTime = row.time;
+                            this.broadcastZeroDelayState();
+                        }
+                    };
+
+                    const words = row.text.split(/\s+/);
+                    const totalWeight = words.reduce((acc, w) => acc + Math.max(2, w.length), 0);
+                    let elapsedWeight = 0;
+
+                    const wordObjs = words.map(w => {
+                        const wWeight = Math.max(2, w.length);
+                        const wStart = row.time + (elapsedWeight / totalWeight) * lineSpanDuration;
+                        const wDur = (wWeight / totalWeight) * lineSpanDuration;
+                        elapsedWeight += wWeight;
+
+                        const span = document.createElement('span');
+                        span.className = 'lyric-word';
+                        span.innerText = w;
+                        lineDiv.appendChild(span);
+
+                        return { span, start: wStart, dur: Math.max(0.12, wDur) };
+                    });
+
+                    box.appendChild(lineDiv);
+                    this.lyricsData.push({ time: row.time, el: lineDiv, words: wordObjs });
+                });
+            }
+
+            paintWordFill(span, pct) {
+                if (pct >= 100) {
+                    span.style.backgroundImage = 'none';
+                    span.style.webkitBackgroundClip = 'initial';
+                    span.style.color = '#ffffff';
+                    span.classList.add('sung');
+                } else if (pct <= 0) {
+                    span.style.backgroundImage = 'none';
+                    span.style.webkitBackgroundClip = 'initial';
+                    span.style.color = 'rgba(255, 255, 255, 0.28)';
+                    span.classList.remove('sung');
+                } else {
+                    span.style.backgroundImage = `linear-gradient(90deg, #ffffff ${pct}%, rgba(255, 255, 255, 0.28) ${pct}%)`;
+                    span.style.webkitBackgroundClip = 'text';
+                    span.style.color = 'transparent';
+                    if (pct > 35) span.classList.add('sung');
+                    else span.classList.remove('sung');
+                }
+            }
+
+            start60FPSLoop() {
+                const fmt = (s) => {
+                    const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+                    return `${m}:${sec < 10 ? '0' + sec : sec}`;
+                };
+
+                const tick = () => {
+                    const curr = this.audio.currentTime || 0;
+                    const dur = this.audio.duration || 0;
+
+                    if (dur > 0) {
+                        document.getElementById('scrubFill').style.width = `${(curr / dur) * 100}%`;
+                        document.getElementById('tCurrent').innerText = fmt(curr);
+                        document.getElementById('tDuration').innerText = fmt(dur);
+
+                        if (this.lyricsData.length > 0 && document.getElementById('lyricsView').classList.contains('active')) {
+                            const idx = this.lyricsData.findIndex((l, i, arr) => curr >= l.time - 0.1 && (!arr[i + 1] || curr < arr[i + 1].time - 0.08));
+
+                            if (idx !== -1) {
+                                const active = this.lyricsData[idx];
+
+                                this.lyricsData.forEach((l, i) => {
+                                    if (i < idx) {
+                                        if (l.el.classList.contains('active') || !l.el.classList.contains('past')) {
+                                            l.el.classList.remove('active');
+                                            l.el.classList.add('past');
+                                            l.words.forEach(w => this.paintWordFill(w.span, 100));
+                                        }
+                                    } else if (i > idx) {
+                                        if (l.el.classList.contains('active') || l.el.classList.contains('past')) {
+                                            l.el.classList.remove('active', 'past');
+                                            l.words.forEach(w => this.paintWordFill(w.span, 0));
+                                        }
+                                    }
+                                });
+
+                                if (!active.el.classList.contains('active')) {
+                                    active.el.classList.remove('past');
+                                    active.el.classList.add('active');
+                                    const box = document.getElementById('lyricsBox');
+                                    box.scrollTo({ top: active.el.offsetTop - (box.clientHeight / 2) + 40, behavior: 'smooth' });
+                                }
+
+                                active.words.forEach(wObj => {
+                                    const rawPct = ((curr - wObj.start) / wObj.dur) * 100;
+                                    this.paintWordFill(wObj.span, Math.max(0, Math.min(100, rawPct)));
+                                });
+                            }
+                        }
+                    }
+                    requestAnimationFrame(tick);
+                };
+                requestAnimationFrame(tick);
+            }
+        }
+
+        window.app = new BoooAllInOneEngine();
+    </script>
+</body>
+</html>
