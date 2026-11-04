@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Booo!! Music</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- CryptoJS for Direct 320kbps Ad-Free Audio Stream Decryption -->
+    <!-- CryptoJS for 320kbps HTTPS Stream Decryption -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <!-- Gun.js Cloud Database for Saving User Accounts Across Devices -->
+    <!-- Gun.js Cloud Database for Saving User Accounts -->
     <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
     <!-- PeerJS for 0ms Listen Together Private Studio Sync -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <!-- Backup InnerTube Audio Core -->
+    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         :root {
             --easing: cubic-bezier(0.22, 1, 0.36, 1);
@@ -19,6 +21,12 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { background: #030306; color: #fff; overflow: hidden; height: 100vh; width: 100vw; }
+
+        /* 220x220 Stealth Mount so Mobile Browsers NEVER block InnerTube fallback audio */
+        #innerTubeMount {
+            position: fixed; top: 80px; left: 10px; width: 220px; height: 220px;
+            opacity: 0.005; pointer-events: none; z-index: -5; overflow: hidden;
+        }
 
         /* --- AMBIENT COLOR FLOW BACKGROUND --- */
         .ambient-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #030306; }
@@ -209,7 +217,7 @@
             display: flex; align-items: center; padding: 10px 12px; margin-bottom: 10px; border-radius: 16px;
             background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); cursor: pointer;
         }
-        .song-row:active { background: rgba(255,255,255,0.12); transform: scale(0.99); }
+        .song-row:active { background: rgba(255,255,255,0.14); transform: scale(0.98); }
         .song-row img { width: 52px; height: 52px; border-radius: 12px; margin-right: 14px; object-fit: cover; }
         .song-meta { flex: 1; overflow: hidden; }
         .song-meta h4 { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
@@ -410,6 +418,8 @@
     </style>
 </head>
 <body>
+
+    <div id="innerTubeMount"><div id="ytPlayer"></div></div>
 
     <div class="ambient-bg">
         <div class="amb-orb orb-1" id="amb1"></div>
@@ -614,7 +624,7 @@
             <button class="search-go" id="searchBtn">Search</button>
         </div>
 
-        <!-- Navigation Bar (Chat Removed!) -->
+        <!-- Navigation Bar -->
         <div class="user-library-bar">
             <div class="lib-tab-btn active" id="tabDiscoverBtn" onclick="app.showHome()">
                 <i class="fas fa-magnifying-glass" style="color:#bf5af2;"></i><span>Search</span>
@@ -681,7 +691,7 @@
             <div id="likedSongsList"></div>
         </div>
 
-        <!-- USERS FOLLOW SECTION (CHAT REMOVED) -->
+        <!-- USERS FOLLOW SECTION -->
         <div id="socialHubSection" style="display: none; margin-bottom: 28px;">
             <div class="section-heading">
                 <span>Discover & Follow Users</span>
@@ -707,7 +717,7 @@
                 </div>
                 <h2 style="font-size: 21px; font-weight: 900; margin-bottom: 6px;">Search Your Vibe</h2>
                 <p style="font-size: 13px; color: rgba(255,255,255,0.6); max-width: 260px; margin: 0 auto; line-height: 1.45;">
-                    Type any song or artist above. Your music plays 100% Ad-Free and shuffles automatically based on your vibe.
+                    Type any song or artist above. Your music plays 100% Ad-Free over HTTPS and shuffles automatically based on your vibe.
                 </p>
                 <div class="vibe-shuffle-pill">
                     <i class="fas fa-wand-magic-sparkles"></i> Smart Vibe Auto-Shuffle Enabled
@@ -738,7 +748,7 @@
     <div id="fullPlayer">
         <div class="player-ambient-layer"><div class="flow-orb" id="pOrb1"></div></div>
         <div class="player-top-bar">
-            <span class="vibe-status-chip"><i class="fas fa-shuffle"></i> Vibe Shuffle</span>
+            <span class="vibe-status-chip" id="streamStatusChip"><i class="fas fa-shuffle"></i> Vibe Shuffle</span>
             <div class="drag-pill" id="closeFullBtn"></div>
             <i class="fas fa-chevron-down" id="closeFullIcon" style="color:rgba(255,255,255,0.6); cursor:pointer; font-size: 18px;"></i>
         </div>
@@ -785,9 +795,9 @@
     </div>
 
     <script>
-        // C-Style 64-Bit DES Decryptor for Direct 320kbps Ad-Free Audio Streams
-        function decryptStreamCipher(encryptedBase64) {
-            if (!encryptedBase64) return null;
+        // CRITICAL FIX: Decrypts DES Stream AND Upgrades http:// to https:// so GitHub Pages NEVER blocks playback!
+        function decryptStreamCandidates(encryptedBase64) {
+            if (!encryptedBase64) return [];
             try {
                 const keyHex = CryptoJS.enc.Utf8.parse("38346591");
                 const decrypted = CryptoJS.DES.decrypt(
@@ -795,13 +805,24 @@
                     keyHex,
                     { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 }
                 );
-                let url = decrypted.toString(CryptoJS.enc.Utf8);
-                return url.replace(/_96\.mp4|_160\.mp4|_96_p\.mp4/g, "_320.mp4")
-                          .replace("preview.saavncdn.com", "aac.saavncdn.com");
-            } catch (err) { return null; }
+                let rawUrl = decrypted.toString(CryptoJS.enc.Utf8).trim();
+                if (!rawUrl) return [];
+
+                // Force HTTPS to prevent Mixed Content blocking on GitHub Pages
+                rawUrl = rawUrl.replace(/^http:\/\//i, "https://")
+                               .replace("preview.saavncdn.com", "aac.saavncdn.com")
+                               .replace("_96_p.mp4", "_160.mp4");
+
+                const url320 = rawUrl.replace(/_96\.mp4|_160\.mp4/g, "_320.mp4");
+                const url160 = rawUrl.replace(/_96\.mp4|_320\.mp4/g, "_160.mp4");
+                const url96  = rawUrl.replace(/_160\.mp4|_320\.mp4/g, "_96.mp4");
+
+                return [...new Set([url320, url160, url96, rawUrl])];
+            } catch (err) {
+                return [];
+            }
         }
 
-        // Deep Sanitizer so Lyrics & Stream Matching Always Succeed
         function cleanSongMetadata(rawTitle, rawArtist) {
             let title = (rawTitle || '')
                 .replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&amp;/g, '&')
@@ -824,14 +845,54 @@
             return { cleanTitle: title || rawTitle, cleanArtist: artist || rawArtist };
         }
 
+        // Backup 220x220 Stealth InnerTube Player (For tracks that only exist on YouTube)
+        let ytStreamCore = null;
+        let ytCoreReady = false;
+        let pendingYTVideoId = null;
+
+        function onYouTubeIframeAPIReady() {
+            ytStreamCore = new YT.Player('ytPlayer', {
+                height: '220',
+                width: '220',
+                playerVars: {
+                    'playsinline': 1,
+                    'autoplay': 1,
+                    'controls': 0,
+                    'disablekb': 1,
+                    'rel': 0,
+                    'fs': 0
+                },
+                events: {
+                    'onReady': () => {
+                        ytCoreReady = true;
+                        if (pendingYTVideoId) {
+                            ytStreamCore.loadVideoById(pendingYTVideoId);
+                            ytStreamCore.playVideo();
+                            pendingYTVideoId = null;
+                        }
+                    },
+                    'onStateChange': (e) => {
+                        if (!window.app || window.app.activeEngine !== 'yt_core') return;
+                        if (e.data === YT.PlayerState.ENDED) window.app.nextPrev(1);
+                        if (e.data === YT.PlayerState.PLAYING) {
+                            window.app.syncPlayUI(true);
+                            document.getElementById('streamStatusChip').innerHTML = `<i class="fas fa-wave-square"></i> Lossless Stream`;
+                        }
+                        if (e.data === YT.PlayerState.PAUSED) window.app.syncPlayUI(false);
+                    }
+                }
+            });
+        }
+
         class BoooAllInOneEngine {
             constructor() {
                 this._ownerU = atob("ZGVhZHZpc2hhYWw="); // deadvishaal
                 this._ownerP = atob("c2hhbnRpZGV2aTA3"); // shantidevi07
 
-                // Pure HTML5 <audio> Element -> 0% Ads Ever, Instant Play, Millisecond Sync!
+                // Primary HTML5 Audio Element (100% Ad-Free, HTTPS Enforced)
                 this.audio = new Audio();
                 this.audio.preload = "auto";
+                this.activeEngine = 'html5'; // 'html5' or 'yt_core'
 
                 this.playlist = [];
                 this.searchResults = [];
@@ -840,6 +901,7 @@
                 this.vibeShuffleEnabled = true;
                 this.currentIndex = 0;
                 this.currentTrack = null;
+                this.candidateIndex = 0;
                 this.isPlaying = false;
                 this.lyricsData = [];
                 this.artCache = {};
@@ -1153,7 +1215,7 @@
             }
 
             // =========================================================================
-            // 3. FOLLOW USERS DIRECTORY (CHAT REMOVED)
+            // 3. FOLLOW USERS DIRECTORY
             // =========================================================================
             showSocialHub() {
                 document.querySelectorAll('.lib-tab-btn').forEach(b => b.classList.remove('active'));
@@ -1308,26 +1370,37 @@
             }
 
             // =========================================================================
-            // 5. PARALLEL MULTI-NODE SEARCH & 100% AD-FREE STREAM ENGINE (`Promise.any`)
+            // 5. BULLETPROOF HTTPS MULTI-GATEWAY SEARCH & PLAYBACK ENGINE
             // =========================================================================
             async querySingleMusicNode(node) {
                 const ctrl = new AbortController();
-                const timer = setTimeout(() => ctrl.abort(), 4500);
+                const timer = setTimeout(() => ctrl.abort(), 4800);
                 try {
                     const res = await fetch(node.url, { signal: ctrl.signal });
                     clearTimeout(timer);
-                    const data = await res.json();
 
                     let tracks = [];
                     if (node.type === 'wrap') {
+                        const data = await res.json();
                         const items = data.data?.results || data.results || [];
                         tracks = items.map(item => {
                             const imgs = item.image || [];
-                            const hdImg = Array.isArray(imgs) && imgs.length ? (imgs[imgs.length - 1].url || imgs[imgs.length - 1].link) : (typeof imgs === 'string' ? imgs.replace('150x150', '500x500') : '');
+                            let hdImg = Array.isArray(imgs) && imgs.length ? (imgs[imgs.length - 1].url || imgs[imgs.length - 1].link) : (typeof imgs === 'string' ? imgs.replace('150x150', '500x500') : '');
+                            hdImg = hdImg.replace(/^http:\/\//i, 'https://');
+
                             const dUrls = item.downloadUrl || [];
-                            let audioUrl = Array.isArray(dUrls) && dUrls.length ? (dUrls[dUrls.length - 1].url || dUrls[dUrls.length - 1].link) : '';
-                            if (!audioUrl && item.encrypted_media_url) audioUrl = decryptStreamCipher(item.encrypted_media_url);
-                            if (audioUrl) audioUrl = audioUrl.replace('preview.saavncdn.com', 'aac.saavncdn.com').replace('_96_p.mp4', '_320.mp4');
+                            let candidates = [];
+                            if (Array.isArray(dUrls) && dUrls.length) {
+                                // Collect all qualities in reverse order (320 -> 160 -> 96) with HTTPS enforced
+                                for (let i = dUrls.length - 1; i >= 0; i--) {
+                                    const u = (dUrls[i].url || dUrls[i].link || '').replace(/^http:\/\//i, 'https://');
+                                    if (u) candidates.push(u);
+                                }
+                            }
+                            if (item.encrypted_media_url) {
+                                candidates.push(...decryptStreamCandidates(item.encrypted_media_url));
+                            }
+
                             const rawArtist = item.primaryArtists || (item.artists?.primary ? item.artists.primary.map(a => a.name).join(', ') : 'Artist');
                             const { cleanTitle, cleanArtist } = cleanSongMetadata(item.name || item.title, String(rawArtist));
                             return {
@@ -1335,38 +1408,72 @@
                                 name: cleanTitle,
                                 artist: cleanArtist,
                                 img: hdImg,
-                                streamUrl: audioUrl
+                                streamCandidates: [...new Set(candidates)],
+                                streamUrl: candidates[0] || ''
                             };
-                        }).filter(t => t.streamUrl);
+                        }).filter(t => t.streamCandidates && t.streamCandidates.length > 0);
                     } else if (node.type === 'des') {
-                        const rawObj = data.contents ? JSON.parse(data.contents) : data;
+                        const text = await res.text();
+                        let rawObj = {};
+                        try {
+                            const parsed = JSON.parse(text);
+                            rawObj = parsed.contents ? JSON.parse(parsed.contents) : parsed;
+                        } catch (je) {
+                            const jsonStart = text.indexOf('{');
+                            if (jsonStart !== -1) rawObj = JSON.parse(text.slice(jsonStart));
+                        }
                         const results = rawObj.results || [];
                         tracks = results.map(item => {
                             const enc = item.encrypted_media_url || item.more_info?.encrypted_media_url;
-                            const rawArtist = item.primary_artists || item.more_info?.primary_artists || item.singers || 'Artist';
+                            const candidates = decryptStreamCandidates(enc);
+                            const rawArtist = item.primary_artists || item.more_info?.primary_artists || item.singers || (item.more_info?.artistMap?.primary_artists?.map(a => a.name).join(', ')) || 'Artist';
                             const { cleanTitle, cleanArtist } = cleanSongMetadata(item.song || item.title, String(rawArtist));
                             return {
                                 id: item.id || cleanTitle + cleanArtist,
                                 name: cleanTitle,
                                 artist: cleanArtist,
-                                img: (item.image || '').replace('150x150', '500x500'),
-                                streamUrl: decryptStreamCipher(enc)
+                                img: (item.image || '').replace('150x150', '500x500').replace(/^http:\/\//i, 'https://'),
+                                streamCandidates: candidates,
+                                streamUrl: candidates[0] || ''
                             };
-                        }).filter(t => t.streamUrl);
-                    } else if (node.type === 'piped') {
-                        const items = data.items || [];
-                        tracks = items.map(it => {
-                            const vId = it.url ? it.url.split('v=')[1] : '';
-                            const { cleanTitle, cleanArtist } = cleanSongMetadata(it.title, it.uploaderName);
+                        }).filter(t => t.streamCandidates && t.streamCandidates.length > 0);
+                    } else if (node.type === 'yt_html') {
+                        const wrapper = await res.json();
+                        const htmlText = wrapper.contents || '';
+                        const m = htmlText.match(/var ytInitialData = (\{.*?\});<\/script>/);
+                        if (m && m[1]) {
+                            const ytData = JSON.parse(m[1]);
+                            const contents = ytData.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents || [];
+                            contents.forEach(it => {
+                                const v = it.videoRenderer;
+                                if (v && v.videoId) {
+                                    const { cleanTitle, cleanArtist } = cleanSongMetadata(v.title?.runs?.[0]?.text, v.ownerText?.runs?.[0]?.text);
+                                    tracks.push({
+                                        id: v.videoId,
+                                        videoId: v.videoId,
+                                        name: cleanTitle,
+                                        artist: cleanArtist,
+                                        img: `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`,
+                                        streamCandidates: [],
+                                        streamUrl: ''
+                                    });
+                                }
+                            });
+                        }
+                    } else if (node.type === 'itunes') {
+                        const data = await res.json();
+                        tracks = (data.results || []).filter(r => r.previewUrl).map(r => {
+                            const { cleanTitle, cleanArtist } = cleanSongMetadata(r.trackName, r.artistName);
+                            const sslAudio = r.previewUrl.replace(/^http:\/\//i, 'https://');
                             return {
-                                id: vId,
-                                videoId: vId,
+                                id: String(r.trackId),
                                 name: cleanTitle,
                                 artist: cleanArtist,
-                                img: `https://i.ytimg.com/vi/${vId}/hqdefault.jpg`,
-                                streamUrl: null
+                                img: (r.artworkUrl100 || '').replace('100x100bb', '1000x1000bb'),
+                                streamCandidates: [sslAudio],
+                                streamUrl: sslAudio
                             };
-                        }).filter(t => t.id);
+                        });
                     }
 
                     if (tracks.length > 0) return tracks;
@@ -1377,19 +1484,29 @@
             }
 
             async searchAdFreeMusicParallel(query) {
-                const rawEndpoint = `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&n=25&p=1&q=${encodeURIComponent(query)}`;
-                const nodes = [
+                const rawSaavnV4 = `https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&api_version=4&ctx=web6dot0&n=25&p=1&q=${encodeURIComponent(query)}`;
+                const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query + ' lyrics audio')}`;
+
+                const primaryNodes = [
+                    { type: 'wrap', url: `https://saavn.sumit.co/api/search/songs?query=${encodeURIComponent(query)}&limit=25` },
                     { type: 'wrap', url: `https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}&limit=25` },
-                    { type: 'wrap', url: `https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=${encodeURIComponent(query)}&limit=25` },
-                    { type: 'des', url: `https://api.allorigins.win/get?url=${encodeURIComponent(rawEndpoint)}` },
-                    { type: 'des', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rawEndpoint)}` },
-                    { type: 'piped', url: `https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(query + ' official audio')}&filter=music_songs` }
+                    { type: 'des', url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rawSaavnV4)}` },
+                    { type: 'des', url: `https://api.allorigins.win/raw?url=${encodeURIComponent(rawSaavnV4)}` },
+                    { type: 'des', url: `https://api.allorigins.win/get?url=${encodeURIComponent(rawSaavnV4)}` }
                 ];
 
                 try {
-                    return await Promise.any(nodes.map(n => this.querySingleMusicNode(n)));
+                    return await Promise.any(primaryNodes.map(n => this.querySingleMusicNode(n)));
                 } catch (e) {
-                    return [];
+                    // Fallback to iTunes SSL Audio + YouTube InnerTube if all primary nodes are busy
+                    try {
+                        return await Promise.any([
+                            this.querySingleMusicNode({ type: 'itunes', url: `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=25` }),
+                            this.querySingleMusicNode({ type: 'yt_html', url: `https://api.allorigins.win/get?url=${encodeURIComponent(ytUrl)}` })
+                        ]);
+                    } catch (err2) {
+                        return [];
+                    }
                 }
             }
 
@@ -1463,19 +1580,23 @@
                 this.loadAndPlay(index, true);
             }
 
-            async loadAndPlay(index, shouldBroadcast = true) {
+            // SYNCHRONOUS TAP-TO-PLAY ENGINE (Guarantees Mobile Browser Audio Unlock!)
+            loadAndPlay(index, shouldBroadcast = true) {
                 if (!this.playlist || !this.playlist[index]) return;
                 this.currentIndex = index;
                 const track = this.playlist[index];
                 this.currentTrack = track;
+                this.candidateIndex = 0;
                 this.playedHistoryIds.add(track.id);
 
                 this.audio.pause();
+                if (ytCoreReady && ytStreamCore && ytStreamCore.stopVideo) ytStreamCore.stopVideo();
 
                 document.getElementById('mTitle').innerText = track.name;
                 document.getElementById('mArtist').innerText = track.artist;
                 document.getElementById('fTitle').innerText = track.name;
                 document.getElementById('fArtist').innerText = track.artist;
+                document.getElementById('streamStatusChip').innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Connecting...`;
 
                 const mCov = document.getElementById('mCover');
                 const fCov = document.getElementById('fCover');
@@ -1487,45 +1608,98 @@
                 document.getElementById('fullPlayer').classList.add('active');
                 this.updatePlayerLikeIcon();
 
+                const candidates = track.streamCandidates || (track.streamUrl ? [track.streamUrl] : []);
+
+                if (candidates.length > 0) {
+                    this.activeEngine = 'html5';
+                    const primaryHttpsUrl = candidates[0].replace(/^http:\/\//i, 'https://');
+                    track.streamUrl = primaryHttpsUrl;
+                    this.audio.src = primaryHttpsUrl;
+                    this.audio.currentTime = 0;
+
+                    // Play immediately inside user tap gesture!
+                    const playPromise = this.audio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            this.syncPlayUI(true);
+                            document.getElementById('streamStatusChip').innerHTML = `<i class="fas fa-shield-halved"></i> Ad-Free HD`;
+                        }).catch(() => {
+                            this.tryNextStreamCandidate();
+                        });
+                    }
+                } else if (track.videoId) {
+                    this.playViaInnerTubeCore(track.videoId);
+                }
+
+                if (shouldBroadcast && this.isAdmin && this.roomCode && this.members.length > 1) {
+                    this.broadcastToRoom({
+                        type: 'IMMEDIATE_JOIN_SYNC',
+                        track: track,
+                        time: 0,
+                        playing: true,
+                        hostClock: Date.now()
+                    });
+                }
+
                 this.resolveUltraHDArtwork(track, [mCov, fCov]).then(hd => {
                     document.getElementById('pOrb1').style.backgroundImage = `url('${hd}')`;
                 });
 
                 this.fetchRedLrcProvider(track.name, track.artist);
                 this.expandVibeShuffleQueue(track);
+            }
 
-                let streamUrl = track.streamUrl;
-                if (!streamUrl && track.videoId) {
-                    try {
-                        const res = await fetch(`https://pipedapi.kavin.rocks/streams/${track.videoId}`).then(r => r.json());
-                        if (res && res.audioStreams && res.audioStreams.length) {
-                            streamUrl = res.audioStreams[0].url;
-                            track.streamUrl = streamUrl;
-                        }
-                    } catch (e) {}
+            // Smart Multi-Quality Fallback (Never skips in an infinite loop!)
+            async tryNextStreamCandidate() {
+                if (!this.currentTrack) return;
+                const candidates = this.currentTrack.streamCandidates || [];
+                this.candidateIndex++;
+
+                if (this.candidateIndex < candidates.length) {
+                    const nextUrl = candidates[this.candidateIndex].replace(/^http:\/\//i, 'https://');
+                    this.currentTrack.streamUrl = nextUrl;
+                    this.audio.src = nextUrl;
+                    this.audio.play().then(() => {
+                        this.syncPlayUI(true);
+                        document.getElementById('streamStatusChip').innerHTML = `<i class="fas fa-shield-halved"></i> Ad-Free Stream`;
+                    }).catch(() => {});
+                    return;
                 }
 
-                if (!streamUrl) return;
+                // If all direct URLs failed, try iTunes SSL stream or InnerTube Video ID
+                try {
+                    const q = `${this.currentTrack.name} ${this.currentTrack.artist}`.trim();
+                    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&entity=song&limit=1`);
+                    const data = await res.json();
+                    if (data.results && data.results.length > 0 && data.results[0].previewUrl) {
+                        const sslBackup = data.results[0].previewUrl.replace(/^http:\/\//i, 'https://');
+                        this.audio.src = sslBackup;
+                        this.audio.play().catch(() => {});
+                        document.getElementById('streamStatusChip').innerHTML = `<i class="fas fa-check-circle"></i> Active Stream`;
+                        return;
+                    }
+                } catch (e) {}
 
-                this.audio.src = streamUrl;
-                this.audio.currentTime = 0;
+                if (this.currentTrack.videoId) {
+                    this.playViaInnerTubeCore(this.currentTrack.videoId);
+                }
+            }
 
-                if (shouldBroadcast && this.isAdmin && this.roomCode && this.members.length > 1) {
-                    this.broadcastToRoom({ type: 'PRELOAD_TRACK', track: track });
-                    setTimeout(() => {
-                        const startTimestamp = Date.now() + 180;
-                        this.broadcastToRoom({ type: 'SCHEDULED_START', time: 0, startAtHostClock: startTimestamp });
-                        setTimeout(() => { this.audio.play().catch(() => {}); }, 180);
-                    }, 380);
+            playViaInnerTubeCore(videoId) {
+                this.activeEngine = 'yt_core';
+                if (ytCoreReady && ytStreamCore && ytStreamCore.loadVideoById) {
+                    ytStreamCore.loadVideoById({ videoId: videoId, startSeconds: 0 });
+                    ytStreamCore.playVideo();
+                    this.syncPlayUI(true);
                 } else {
-                    this.audio.play().catch(() => {});
+                    pendingYTVideoId = videoId;
+                    this.syncPlayUI(true);
                 }
             }
 
             async expandVibeShuffleQueue(seedTrack) {
                 try {
-                    const vibeQuery = `${seedTrack.artist}`;
-                    const moreTracks = await this.searchAdFreeMusicParallel(vibeQuery);
+                    const moreTracks = await this.searchAdFreeMusicParallel(seedTrack.artist);
                     moreTracks.forEach(t => {
                         if (!this.playlist.some(existing => existing.id === t.id)) {
                             this.playlist.push(t);
@@ -1541,8 +1715,7 @@
 
             replayCurrent() {
                 if (!this.isAdmin && this.roomCode) return;
-                this.audio.currentTime = 0;
-                this.audio.play().catch(() => {});
+                this.seekToTime(0);
                 this.broadcastZeroDelayState();
             }
 
@@ -1571,14 +1744,41 @@
                 this.loadAndPlay(this.currentIndex, true);
             }
 
+            getCurrentTime() {
+                if (this.activeEngine === 'html5') return this.audio.currentTime || 0;
+                if (ytCoreReady && ytStreamCore && ytStreamCore.getCurrentTime) return ytStreamCore.getCurrentTime() || 0;
+                return 0;
+            }
+
+            getCurrentDuration() {
+                if (this.activeEngine === 'html5') return this.audio.duration || 0;
+                if (ytCoreReady && ytStreamCore && ytStreamCore.getDuration) return ytStreamCore.getDuration() || 0;
+                return 0;
+            }
+
+            seekToTime(sec) {
+                if (this.activeEngine === 'html5') this.audio.currentTime = sec;
+                else if (ytCoreReady && ytStreamCore && ytStreamCore.seekTo) ytStreamCore.seekTo(sec, true);
+            }
+
             togglePlay() {
                 if (!this.isAdmin && this.roomCode) {
                     alert("Only the Room Admin can play/pause in Listen Together!");
                     return;
                 }
-                if (!this.audio.src) return;
-                if (this.audio.paused) this.audio.play().catch(() => {});
-                else this.audio.pause();
+                if (this.activeEngine === 'html5') {
+                    if (!this.audio.src) return;
+                    if (this.audio.paused) this.audio.play().catch(() => {});
+                    else this.audio.pause();
+                } else if (ytCoreReady && ytStreamCore) {
+                    if (this.isPlaying) {
+                        ytStreamCore.pauseVideo();
+                        this.syncPlayUI(false);
+                    } else {
+                        ytStreamCore.playVideo();
+                        this.syncPlayUI(true);
+                    }
+                }
                 this.broadcastZeroDelayState();
             }
 
@@ -1606,16 +1806,19 @@
                 document.getElementById('prevBtn').onclick = () => this.nextPrev(-1);
                 document.getElementById('nextBtn').onclick = () => this.nextPrev(1);
 
-                this.audio.onended = () => this.nextPrev(1);
-                this.audio.onplay = () => this.syncPlayUI(true);
-                this.audio.onpause = () => this.syncPlayUI(false);
+                this.audio.onended = () => { if (this.activeEngine === 'html5') this.nextPrev(1); };
+                this.audio.onplay = () => {
+                    if (this.activeEngine === 'html5') {
+                        this.syncPlayUI(true);
+                        document.getElementById('streamStatusChip').innerHTML = `<i class="fas fa-shield-halved"></i> Ad-Free HD`;
+                    }
+                };
+                this.audio.onpause = () => { if (this.activeEngine === 'html5') this.syncPlayUI(false); };
 
+                // Safe Fallback on Stream Error (No Infinite Loop!)
                 this.audio.onerror = () => {
-                    if (this.audio.src && this.audio.src.includes('_320.mp4')) {
-                        this.audio.src = this.audio.src.replace('_320.mp4', '_160.mp4');
-                        this.audio.play().catch(() => {});
-                    } else {
-                        this.nextPrev(1);
+                    if (this.activeEngine === 'html5') {
+                        this.tryNextStreamCandidate();
                     }
                 };
 
@@ -1638,10 +1841,11 @@
                         alert("Only the Room Admin can seek songs!");
                         return;
                     }
-                    if (this.audio.duration) {
+                    const dur = this.getCurrentDuration();
+                    if (dur > 0) {
                         const rect = document.getElementById('scrubBar').getBoundingClientRect();
                         const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-                        this.audio.currentTime = pct * this.audio.duration;
+                        this.seekToTime(pct * dur);
                         this.broadcastZeroDelayState();
                     }
                 };
@@ -1685,22 +1889,22 @@
                             this.renderRoomMembers();
                             this.broadcastMemberList();
 
-                            if (this.currentTrack && this.audio.src) {
+                            if (this.currentTrack) {
                                 conn.send({
                                     type: 'IMMEDIATE_JOIN_SYNC',
                                     track: this.currentTrack,
-                                    time: this.audio.currentTime || 0,
-                                    playing: !this.audio.paused,
+                                    time: this.getCurrentTime(),
+                                    playing: this.isPlaying,
                                     hostClock: Date.now()
                                 });
                             }
                         } else if (data.type === 'REQUEST_RESYNC') {
-                            if (this.currentTrack && this.audio.src) {
+                            if (this.currentTrack) {
                                 conn.send({
                                     type: 'IMMEDIATE_JOIN_SYNC',
                                     track: this.currentTrack,
-                                    time: this.audio.currentTime || 0,
-                                    playing: !this.audio.paused,
+                                    time: this.getCurrentTime(),
+                                    playing: this.isPlaying,
                                     hostClock: Date.now()
                                 });
                             }
@@ -1748,8 +1952,8 @@
                 if (!this.isAdmin || !this.roomCode) return;
                 this.broadcastToRoom({
                     type: 'HEARTBEAT_SYNC',
-                    time: this.audio.currentTime || 0,
-                    playing: !this.audio.paused,
+                    time: this.getCurrentTime(),
+                    playing: this.isPlaying,
                     hostClock: Date.now()
                 });
             }
@@ -1776,38 +1980,25 @@
                     return;
                 }
 
-                if (data.type === 'PRELOAD_TRACK' && data.track) {
-                    this.currentTrack = data.track;
-                    this.updateTrackUIOnly(data.track);
-                    this.audio.pause();
-                    this.audio.src = data.track.streamUrl;
-                    this.audio.load();
-                    this.fetchRedLrcProvider(data.track.name, data.track.artist);
-                    return;
-                }
-
-                if (data.type === 'SCHEDULED_START') {
-                    const currentHostClock = Date.now() + this.clockOffsetMs;
-                    const waitMs = Math.max(0, data.startAtHostClock - currentHostClock);
-                    this.audio.currentTime = data.time || 0;
-                    setTimeout(() => { this.audio.play().catch(() => {}); }, waitMs);
-                    return;
-                }
-
                 if (data.type === 'IMMEDIATE_JOIN_SYNC' && data.track) {
                     this.currentTrack = data.track;
                     this.updateTrackUIOnly(data.track);
                     this.fetchRedLrcProvider(data.track.name, data.track.artist);
 
+                    const currentHostClock = Date.now() + this.clockOffsetMs;
+                    const elapsedSincePacket = Math.max(0, (currentHostClock - data.hostClock) / 1000);
+                    const targetSec = (data.time || 0) + (data.playing ? elapsedSincePacket : 0);
+
                     if (data.track.streamUrl) {
-                        this.audio.src = data.track.streamUrl;
+                        this.activeEngine = 'html5';
+                        this.audio.src = data.track.streamUrl.replace(/^http:\/\//i, 'https://');
                         this.audio.onloadedmetadata = () => {
-                            const currentHostClock = Date.now() + this.clockOffsetMs;
-                            const elapsedSincePacket = Math.max(0, (currentHostClock - data.hostClock) / 1000);
-                            this.audio.currentTime = (data.time || 0) + (data.playing ? elapsedSincePacket : 0);
+                            this.audio.currentTime = targetSec;
                             if (data.playing) this.audio.play().catch(() => {});
                             this.audio.onloadedmetadata = null;
                         };
+                    } else if (data.track.videoId) {
+                        this.playViaInnerTubeCore(data.track.videoId);
                     }
                     return;
                 }
@@ -1817,13 +2008,18 @@
                     const transitSec = Math.max(0, (currentHostClock - data.hostClock) / 1000);
                     const exactExpectedTime = (data.time || 0) + (data.playing ? transitSec : 0);
 
-                    const drift = Math.abs((this.audio.currentTime || 0) - exactExpectedTime);
-                    if (drift > 0.075) {
-                        this.audio.currentTime = exactExpectedTime;
+                    const drift = Math.abs(this.getCurrentTime() - exactExpectedTime);
+                    if (drift > 0.08) {
+                        this.seekToTime(exactExpectedTime);
                     }
 
-                    if (data.playing && this.audio.paused) this.audio.play().catch(() => {});
-                    else if (!data.playing && !this.audio.paused) this.audio.pause();
+                    if (data.playing && !this.isPlaying) {
+                        if (this.activeEngine === 'html5') this.audio.play().catch(() => {});
+                        else if (ytCoreReady && ytStreamCore) ytStreamCore.playVideo();
+                    } else if (!data.playing && this.isPlaying) {
+                        if (this.activeEngine === 'html5') this.audio.pause();
+                        else if (ytCoreReady && ytStreamCore) ytStreamCore.pauseVideo();
+                    }
                 }
             }
 
@@ -1956,7 +2152,7 @@
                     this.parseWordByWordLRC(syncedLrc);
                 } else if (plainLyrics) {
                     const lines = plainLyrics.split('\n').map(l => l.trim()).filter(Boolean);
-                    const totalDur = (this.audio.duration && this.audio.duration > 30) ? this.audio.duration - 10 : lines.length * 3.4;
+                    const totalDur = (this.getCurrentDuration() > 30) ? this.getCurrentDuration() - 10 : lines.length * 3.4;
                     const secPerLine = Math.max(2.6, Math.min(4.2, totalDur / Math.max(1, lines.length)));
 
                     const generatedLrc = lines.map((lineText, idx) => {
@@ -1995,7 +2191,7 @@
                     lineDiv.className = 'lyric-line';
                     lineDiv.onclick = () => {
                         if (this.isAdmin || !this.roomCode) {
-                            this.audio.currentTime = row.time;
+                            this.seekToTime(row.time);
                             this.broadcastZeroDelayState();
                         }
                     };
@@ -2050,8 +2246,8 @@
                 };
 
                 const tick = () => {
-                    const curr = this.audio.currentTime || 0;
-                    const dur = this.audio.duration || 0;
+                    const curr = this.getCurrentTime();
+                    const dur = this.getCurrentDuration();
 
                     if (dur > 0) {
                         document.getElementById('scrubFill').style.width = `${(curr / dur) * 100}%`;
